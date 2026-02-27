@@ -1,4 +1,4 @@
 corpus/
 db/
 results/
-__pycache__/
+__pycache__

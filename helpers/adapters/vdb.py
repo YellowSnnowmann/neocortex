@@ -6,6 +6,7 @@ import time
 from typing import Any
 
 from ._base import IndexResult, MethodAdapter, QueryResult
+from ..types import BenchmarkConfig, Chunk
 
 
 class VDBAdapter(MethodAdapter):
@@ -20,12 +21,14 @@ class VDBAdapter(MethodAdapter):
     self._working_dir = None
     self._query_session_open = False
 
-  async def create_index(self, chunks: list[str], working_dir: str, config: dict) -> IndexResult:
+  async def create_index(self, chunks: list[Chunk], working_dir: str, config: BenchmarkConfig) -> IndexResult:
     """Build a simple vector database over the chunks and return indexing metrics."""
     import xxhash
 
     from neocortex._llm._base import token_tracker
     from neocortex._storage._namespace import Workspace
+
+    texts = [c.text for c in chunks]
 
     self._working_dir = working_dir
     os.makedirs(working_dir, exist_ok=True)
@@ -36,8 +39,8 @@ class VDBAdapter(MethodAdapter):
 
     start = time.perf_counter()
     await storage.insert_start()
-    ids = [xxhash.xxh64(c.encode()).intdigest() for c in chunks]
-    data = [(c[:80], c) for c in chunks]
+    ids = [xxhash.xxh64(t.encode()).intdigest() for t in texts]
+    data = [(t[:80], t) for t in texts]
     embeddings = await storage.embedder.encode([f"{t}\n\n{c}" for t, c in data])
     await storage.ikv.upsert([int(i) for i in ids], data)
     await storage.vdb.upsert(ids, embeddings)
@@ -126,18 +129,18 @@ class VDBAdapter(MethodAdapter):
     await self._storage.query_start()
     self._query_session_open = True
 
-  async def load_index(self, working_dir: str, config: dict) -> None:
+  async def load_index(self, working_dir: str, config: BenchmarkConfig) -> None:
     self._working_dir = working_dir
     await self._open_query_session(working_dir)
 
-  async def query(self, question: str, config: dict) -> QueryResult:
+  async def query(self, question: str, config: BenchmarkConfig) -> QueryResult:
     """Retrieve context from the VDB and answer using the Neocortex OpenAI LLM service."""
     from neocortex._llm._base import token_tracker
     from neocortex._llm._llm_openai import OpenAILLMService
     from neocortex._models import TAnswer
 
-    top_k = config.get("top_k", 8)
-    model = config.get("openai_model", "gpt-4o-mini")
+    top_k = config.top_k
+    model = config.openai_model
     token_tracker.reset()
 
     start = time.perf_counter()

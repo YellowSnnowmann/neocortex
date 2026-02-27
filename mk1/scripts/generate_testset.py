@@ -21,11 +21,19 @@ import os
 import random
 import re
 import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Ensure repo root is on sys.path so ``helpers`` is importable.
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent.parent)
+if _REPO_ROOT not in sys.path:
+  sys.path.insert(0, _REPO_ROOT)
+
+from helpers.chunking import chunk_corpus
 
 
 def load_config() -> dict:
@@ -37,14 +45,8 @@ def load_config() -> dict:
 
 
 def chunk_text(text: str, chunk_size: int = 1200, chunk_overlap: int = 200) -> list[str]:
-  """Split text into overlapping chunks."""
-  chunks = []
-  start = 0
-  while start < len(text):
-    end = start + chunk_size
-    chunks.append(text[start:end])
-    start += chunk_size - chunk_overlap
-  return [c.strip() for c in chunks if c.strip()]
+  """Split text into overlapping chunks (delegates to helpers)."""
+  return [c.text for c in chunk_corpus(text, chunk_size, chunk_overlap)]
 
 
 # ---------------------------------------------------------------------------

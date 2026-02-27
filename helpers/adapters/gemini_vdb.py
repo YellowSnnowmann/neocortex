@@ -1,9 +1,10 @@
-"""Gemini VDB adapter — VDB retrieval + Google Gemini answers."""
+"""Gemini VDB adapter -- VDB retrieval + Google Gemini answers."""
 
 import os
 import time
 
 from ._base import IndexResult, MethodAdapter, QueryResult
+from ..types import BenchmarkConfig, Chunk
 from .vdb import VDBAdapter
 
 # Per-million-token pricing (input, output) for known Gemini models.
@@ -40,15 +41,15 @@ class GeminiVDBAdapter(MethodAdapter):
     """Initialize the Gemini VDB adapter."""
     self._vdb_adapter = VDBAdapter()
 
-  async def create_index(self, chunks: list[str], working_dir: str, config: dict) -> IndexResult:
+  async def create_index(self, chunks: list[Chunk], working_dir: str, config: BenchmarkConfig) -> IndexResult:
     """Delegate indexing to the shared VDB adapter."""
     return await self._vdb_adapter.create_index(chunks, working_dir, config)
 
-  async def load_index(self, working_dir: str, config: dict) -> None:
+  async def load_index(self, working_dir: str, config: BenchmarkConfig) -> None:
     """Load an existing VDB index via the shared VDB adapter."""
     await self._vdb_adapter.load_index(working_dir, config)
 
-  async def query(self, question: str, config: dict) -> QueryResult:
+  async def query(self, question: str, config: BenchmarkConfig) -> QueryResult:
     """Retrieve context from VDB and answer using a Gemini model."""
     from google import genai
 
@@ -56,8 +57,8 @@ class GeminiVDBAdapter(MethodAdapter):
     if not api_key:
       raise RuntimeError("GOOGLE_API_KEY or GEMINI_API_KEY environment variable is not set")
 
-    model_name = config.get("gemini_model", "gemini-3.1-pro-preview")
-    top_k = config.get("top_k", 8)
+    model_name = config.gemini_model
+    top_k = config.top_k
 
     # Query session is already open from create_index/load_index
     chunks = await self._vdb_adapter._storage.get_context(question, top_k)

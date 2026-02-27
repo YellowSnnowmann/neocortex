@@ -1,48 +1,34 @@
-"""Method adapters package.
+"""mk1 adapter package.
 
-Each adapter wraps a RAG method, providing a uniform interface for indexing,
-loading, and querying. All adapters receive the shared config dict.
-
-Adapter imports are lazy so that only the dependencies for the requested
-method need to be installed.
+Generic adapters live in ``helpers.adapters``.  This module registers the
+mk1-specific neocortex adapters into the shared registry so that
+``get_adapter("neocortex")`` works when running from mk1.
 """
 
-from ._base import IndexResult, MethodAdapter, QueryResult
+import os
+import sys
+from pathlib import Path
 
-# Maps method name → (module_name, class_name) for lazy importing.
-_ADAPTER_REGISTRY: dict[str, tuple[str, str]] = {
-  "neocortex": (".neocortex", "NeocortexAdapter"),
-  "neocortex_v1": (".neocortex_v1", "NeocortexV1Adapter"),
-  "vdb": (".vdb", "VDBAdapter"),
-  "directfeed": (".directfeed", "DirectFeedAdapter"),
-  "lightrag": (".lightrag_adapter", "LightRAGAdapter"),
-  "fast_graphrag": (".fast_graphrag_adapter", "FastGraphRAGAdapter"),
-  "nano_graphrag": (".nano_graphrag", "NanoGraphRAGAdapter"),
-  "graphrag": (".graphrag", "GraphRAGAdapter"),
-  "cognee": (".cognee", "CogneeAdapter"),
-  "gpt52_vdb": (".gpt52_vdb", "GPT52VDBAdapter"),
-  "gemini_vdb": (".gemini_vdb", "GeminiVDBAdapter"),
-}
+# Ensure repo root is on sys.path so ``helpers`` is importable.
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(_REPO_ROOT))
 
-ADAPTER_NAMES: list[str] = list(_ADAPTER_REGISTRY.keys())
+from helpers.adapters import (  # noqa: E402, F401
+  ADAPTER_NAMES,
+  get_adapter,
+  register_adapter,
+)
+from helpers.adapters._base import IndexResult, MethodAdapter, QueryResult  # noqa: E402, F401
 
-
-def get_adapter(name: str) -> MethodAdapter:
-  """Get an adapter instance by name (lazy-imports the adapter module)."""
-  entry = _ADAPTER_REGISTRY.get(name)
-  if entry is None:
-    raise ValueError(f"Unknown method: {name}. Available: {ADAPTER_NAMES}")
-  module_path, class_name = entry
-  import importlib
-
-  mod = importlib.import_module(module_path, package=__name__)
-  cls = getattr(mod, class_name)
-  return cls()
-
+# Register mk1-specific adapters as legacy (they expect list[str] / dict).
+register_adapter("neocortex", ".neocortex", "NeocortexAdapter", package=__name__, legacy=True)
+register_adapter("neocortex_v1", ".neocortex_v1", "NeocortexV1Adapter", package=__name__, legacy=True)
 
 __all__ = [
   "ADAPTER_NAMES",
   "get_adapter",
+  "register_adapter",
   "IndexResult",
   "MethodAdapter",
   "QueryResult",

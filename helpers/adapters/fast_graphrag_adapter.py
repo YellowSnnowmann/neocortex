@@ -11,6 +11,7 @@ from ._base import (
   QueryResult,
   _get_cost_tracker,
 )
+from ..types import BenchmarkConfig, Chunk
 
 
 class FastGraphRAGAdapter(MethodAdapter):
@@ -32,9 +33,11 @@ class FastGraphRAGAdapter(MethodAdapter):
       entity_types=SHERLOCK_ENTITY_TYPES,
     )
 
-  async def create_index(self, chunks: list[str], working_dir: str, config: dict) -> IndexResult:
+  async def create_index(self, chunks: list[Chunk], working_dir: str, config: BenchmarkConfig) -> IndexResult:
     """Index chunks using fast_graphrag and return timing/cost metrics."""
     from fast_graphrag import GraphRAG
+
+    texts = [c.text for c in chunks]
 
     self._working_dir = working_dir
     self._tracker.install()
@@ -42,7 +45,7 @@ class FastGraphRAGAdapter(MethodAdapter):
     try:
       grag = GraphRAG(working_dir=working_dir, **self._grag_kwargs())
       start = time.perf_counter()
-      await grag.async_insert(chunks)
+      await grag.async_insert(texts)
       elapsed = time.perf_counter() - start
       snap = self._tracker.snapshot()
     finally:
@@ -72,12 +75,12 @@ class FastGraphRAGAdapter(MethodAdapter):
     await self._grag.state_manager.query_start()
     self._query_session_open = True
 
-  async def load_index(self, working_dir: str, config: dict) -> None:
+  async def load_index(self, working_dir: str, config: BenchmarkConfig) -> None:
     """Load an existing fast_graphrag workspace from disk."""
     self._working_dir = working_dir
     await self._open_query_session(working_dir)
 
-  async def query(self, question: str, config: dict) -> QueryResult:
+  async def query(self, question: str, config: BenchmarkConfig) -> QueryResult:
     """Query fast_graphrag and return answer, contexts, and cost/counters."""
     from fast_graphrag import QueryParam
 

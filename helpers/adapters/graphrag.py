@@ -8,6 +8,7 @@ import pandas as pd
 import yaml
 
 from ._base import IndexResult, MethodAdapter, QueryResult
+from ..types import BenchmarkConfig, Chunk
 
 
 class _LiteLLMCostTracker:
@@ -83,7 +84,7 @@ class GraphRAGAdapter(MethodAdapter):
     self._relationships = None
     self._covariates = None
 
-  def _write_settings(self, working_dir: str, config: dict) -> None:
+  def _write_settings(self, working_dir: str, config: BenchmarkConfig) -> None:
     """Write a settings.yaml compatible with GraphRAG v3."""
     api_key = os.environ.get("GRAPHRAG_API_KEY") or os.environ.get("OPENAI_API_KEY", "")
     os.environ.setdefault("GRAPHRAG_API_KEY", api_key)
@@ -93,8 +94,8 @@ class GraphRAGAdapter(MethodAdapter):
     # provider prefix (e.g. "openai") and model must be the bare name
     # (e.g. "gpt-4o-mini").  If the user already passes "openai/gpt-4o-mini"
     # we split it; otherwise we default to the "openai" provider.
-    raw_model = config.get("openai_model", "gpt-4o-mini")
-    raw_embed = config.get("embedding_model", "text-embedding-3-small")
+    raw_model = config.openai_model
+    raw_embed = config.embedding_model
 
     if "/" in raw_model:
       model_provider, model = raw_model.split("/", 1)
@@ -106,7 +107,7 @@ class GraphRAGAdapter(MethodAdapter):
     else:
       embed_provider, embed_model = "openai", raw_embed
 
-    # Embedding dimension lookup — GraphRAG defaults to 3072 which only
+    # Embedding dimension lookup -- GraphRAG defaults to 3072 which only
     # matches text-embedding-3-large.  We must set it explicitly.
     _EMBED_DIMS = {
       "text-embedding-3-small": 1536,
@@ -159,8 +160,8 @@ class GraphRAGAdapter(MethodAdapter):
       },
       "chunking": {
         "type": "tokens",
-        "size": config.get("chunk_size", 1200),
-        "overlap": config.get("chunk_overlap", 200),
+        "size": config.chunk_size,
+        "overlap": config.chunk_overlap,
       },
       "extract_graph": {
         "completion_model_id": "default_completion_model",
@@ -204,7 +205,7 @@ class GraphRAGAdapter(MethodAdapter):
     has_covariates = await table_provider.has("covariates")
     self._covariates = await reader.covariates() if has_covariates else None
 
-  async def create_index(self, chunks: list[str], working_dir: str, config: dict) -> IndexResult:
+  async def create_index(self, chunks: list[Chunk], working_dir: str, config: BenchmarkConfig) -> IndexResult:
     """Write the corpus and run the GraphRAG v3 indexing pipeline.
 
     GraphRAG does its own token-based chunking internally, so we join the
@@ -213,13 +214,15 @@ class GraphRAGAdapter(MethodAdapter):
     from graphrag.api import build_index
     from graphrag.config.load_config import load_config
 
+    texts = [c.text for c in chunks]
+
     self._working_dir = working_dir
 
-    # Write the full corpus as a single input file — GraphRAG does its own chunking
+    # Write the full corpus as a single input file -- GraphRAG does its own chunking
     input_dir = os.path.join(working_dir, "input")
     os.makedirs(input_dir, exist_ok=True)
     with open(os.path.join(input_dir, "corpus.txt"), "w") as f:
-      f.write("\n\n".join(chunks))
+      f.write("\n\n".join(texts))
 
     # Write settings.yaml
     self._write_settings(working_dir, config)
@@ -250,7 +253,7 @@ class GraphRAGAdapter(MethodAdapter):
       tokens_output=snap["output_tokens"],
     )
 
-  async def load_index(self, working_dir: str, config: dict) -> None:
+  async def load_index(self, working_dir: str, config: BenchmarkConfig) -> None:
     """Load an existing GraphRAG workspace from disk."""
     from graphrag.config.load_config import load_config
 
@@ -261,7 +264,7 @@ class GraphRAGAdapter(MethodAdapter):
     self._config = load_config(root_dir=working_dir)
     await self._load_output_tables()
 
-  async def query(self, question: str, config: dict) -> QueryResult:
+  async def query(self, question: str, config: BenchmarkConfig) -> QueryResult:
     """Query using GraphRAG local search."""
     from graphrag.api import local_search
 

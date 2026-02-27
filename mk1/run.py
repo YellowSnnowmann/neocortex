@@ -20,27 +20,36 @@ import os
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
+
+# Ensure repo root is on sys.path so ``helpers`` is importable.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(_REPO_ROOT))
+
+from helpers.chunking import chunk_corpus
+from helpers.logging import (
+  BLUE,
+  BOLD,
+  CYAN,
+  DIM,
+  GREEN,
+  MAGENTA,
+  RED,
+  RESET,
+  YELLOW,
+  method_tag,
+  setup_logging,
+)
+from helpers.types import BenchmarkConfig, Chunk
 
 log = logging.getLogger("benchmark")
 
 # Methods that require a Neo4j connection
 _NEO4J_METHODS = {"neocortex", "neocortex_v1"}
-
-# ---------------------------------------------------------------------------
-# ANSI colours
-# ---------------------------------------------------------------------------
-_BOLD = "\033[1m"
-_DIM = "\033[2m"
-_RESET = "\033[0m"
-_CYAN = "\033[36m"
-_GREEN = "\033[32m"
-_YELLOW = "\033[33m"
-_RED = "\033[31m"
-_MAGENTA = "\033[35m"
-_BLUE = "\033[34m"
 
 
 def check_neo4j() -> bool:
@@ -70,17 +79,6 @@ def load_config() -> dict:
     with open(config_path) as f:
       return json.load(f)
   return {}
-
-
-def chunk_corpus(text: str, chunk_size: int = 1200, chunk_overlap: int = 200) -> list[str]:
-  """Split text into overlapping chunks."""
-  chunks = []
-  start = 0
-  while start < len(text):
-    end = start + chunk_size
-    chunks.append(text[start:end])
-    start += chunk_size - chunk_overlap
-  return [c.strip() for c in chunks if c.strip()]
 
 
 def load_testset(path: str) -> list[dict]:
@@ -188,9 +186,9 @@ def print_summary_table(results: dict) -> None:
 
 async def run_method(
   method_name: str,
-  chunks: list[str],
+  chunks: list[Chunk],
   testset: list[dict],
-  config: dict,
+  config: BenchmarkConfig,
   skip_index: bool = False,
 ) -> dict[str, Any]:
   """Run a single method: index, query, collect results."""
@@ -198,7 +196,7 @@ async def run_method(
 
   adapter = get_adapter(method_name)
   ws_name = method_name
-  suffix = config.get("workspace_suffix")
+  suffix = config.workspace_suffix
   if suffix:
     ws_name = f"{method_name}_{suffix}"
   working_dir = os.path.join(
@@ -207,15 +205,14 @@ async def run_method(
     ws_name,
   )
 
-  tag = f"[{method_name}]"
-  ctag = f"{_CYAN}{tag}{_RESET}"
+  ctag = method_tag(method_name)
 
   # --- Indexing ---
   indexing_result = {"time_seconds": 0, "cost_usd": 0, "tokens_input": 0, "tokens_output": 0}
   if skip_index:
-    log.info("%s %sSkipping indexing%s (--skip-index), loading existing index...", ctag, _YELLOW, _RESET)
+    log.info("%s %sSkipping indexing%s (--skip-index), loading existing index...", ctag, YELLOW, RESET)
     # Preserve indexing data from previous run.
-    result_name = f"{method_name}_{config['workspace_suffix']}" if config.get("workspace_suffix") else method_name
+    result_name = f"{method_name}_{config.workspace_suffix}" if config.workspace_suffix else method_name
     prev_path = _method_result_path(result_name)
     if os.path.exists(prev_path):
       try:
@@ -234,9 +231,9 @@ async def run_method(
         pass
     log.info("%s load_index  dir=%s", ctag, working_dir)
     await adapter.load_index(working_dir, config)
-    log.info("%s %sload_index done%s", ctag, _GREEN, _RESET)
+    log.info("%s %sload_index done%s", ctag, GREEN, RESET)
   else:
-    log.info("%s %sIndexing%s %d chunks  dir=%s", ctag, _YELLOW, _RESET, len(chunks), working_dir)
+    log.info("%s %sIndexing%s %d chunks  dir=%s", ctag, YELLOW, RESET, len(chunks), working_dir)
     os.makedirs(working_dir, exist_ok=True)
     idx = await adapter.create_index(chunks, working_dir, config)
     indexing_result = {
@@ -248,18 +245,18 @@ async def run_method(
     log.info(
       "%s %sIndexed%s in %.1fs  cost=%s$%.4f%s  tokens_in=%d  tokens_out=%d",
       ctag,
-      _GREEN,
-      _RESET,
+      GREEN,
+      RESET,
       idx.time_seconds,
-      _YELLOW,
+      YELLOW,
       idx.cost_usd,
-      _RESET,
+      RESET,
       idx.tokens_input,
       idx.tokens_output,
     )
 
   # --- Querying ---
-  log.info("%s %sQuerying%s %d questions...", ctag, _YELLOW, _RESET, len(testset))
+  log.info("%s %sQuerying%s %d questions...", ctag, YELLOW, RESET, len(testset))
   per_question = []
   total_start = time.perf_counter()
   total_tokens_in = 0
@@ -273,30 +270,30 @@ async def run_method(
     log.info(
       "%s %sQ%d/%d%s  %s%s%s",
       ctag,
-      _BOLD,
+      BOLD,
       i + 1,
       len(testset),
-      _RESET,
-      _CYAN,
+      RESET,
+      CYAN,
       question,
-      _RESET,
+      RESET,
     )
     try:
       result = await adapter.query(question, config)
     except Exception as e:
-      log.info("%s   %sERROR%s: %s", ctag, _RED, _RESET, e)
+      log.info("%s   %sERROR%s: %s", ctag, RED, RESET, e)
       result = None
 
     if result:
       log.info(
         "%s   %s%.2fs%s  %s$%.4f%s  in=%d out=%d  ctx=%d",
         ctag,
-        _GREEN,
+        GREEN,
         result.latency_seconds,
-        _RESET,
-        _YELLOW,
+        RESET,
+        YELLOW,
         result.cost_usd,
-        _RESET,
+        RESET,
         result.tokens_input,
         result.tokens_output,
         len(result.contexts),
@@ -306,16 +303,16 @@ async def run_method(
       log.info(
         "%s   %sanswer%s:  %s",
         ctag,
-        _MAGENTA,
-        _RESET,
+        MAGENTA,
+        RESET,
         answer_lines,
       )
       # Log ground truth for comparison
       log.info(
         "%s   %sexpect%s:  %s",
         ctag,
-        _BLUE,
-        _RESET,
+        BLUE,
+        RESET,
         ground_truth,
       )
       per_question.append(
@@ -334,7 +331,7 @@ async def run_method(
       total_tokens_out += result.tokens_output
       total_cost += result.cost_usd
     else:
-      log.info("%s   %sno result%s", ctag, _RED, _RESET)
+      log.info("%s   %sno result%s", ctag, RED, RESET)
       per_question.append(
         {
           "question": question,
@@ -356,16 +353,16 @@ async def run_method(
   log.info(
     "%s %sDone%s: %d/%d answered, avg latency %s%.2fs%s, total %s$%.4f%s",
     ctag,
-    _GREEN,
-    _RESET,
+    GREEN,
+    RESET,
     num_answered,
     len(testset),
-    _GREEN,
+    GREEN,
     avg_latency,
-    _RESET,
-    _YELLOW,
+    RESET,
+    YELLOW,
     total_cost,
-    _RESET,
+    RESET,
   )
 
   return {
@@ -383,7 +380,7 @@ async def run_method(
   }
 
 
-async def evaluate_single_method(method_name: str, config: dict) -> None:
+async def evaluate_single_method(method_name: str, config: BenchmarkConfig) -> None:
   """Run RAGAS evaluation on a single method's saved result file."""
   from scripts.evaluate import evaluate_method
 
@@ -423,7 +420,7 @@ async def evaluate_single_method(method_name: str, config: dict) -> None:
 async def main():
   """Entry point for the simplified book-based RAG benchmark CLI."""
   load_dotenv()
-  config = load_config()
+  config_dict = load_config()
 
   parser = argparse.ArgumentParser(description="Simplified Book-Based RAG Benchmark")
   parser.add_argument("--methods", default=None, help="Comma-separated method names (default: all from config)")
@@ -459,39 +456,38 @@ async def main():
 
   # --- Logging setup ---
   level = logging.DEBUG if args.debug else logging.INFO
-  logging.basicConfig(
-    level=level,
-    format="%(asctime)s %(name)s %(message)s",
-    datefmt="%H:%M:%S",
-  )
+  setup_logging(level)
 
-  # Apply CLI overrides to config
+  # Apply CLI overrides to config dict (before building BenchmarkConfig)
   if args.methods:
-    config["methods"] = [m.strip() for m in args.methods.split(",")]
+    config_dict["methods"] = [m.strip() for m in args.methods.split(",")]
   if args.max_questions is not None:
-    config["max_questions"] = args.max_questions
+    config_dict["max_questions"] = args.max_questions
   if args.top_k is not None:
-    config["top_k"] = args.top_k
+    config_dict["top_k"] = args.top_k
   if args.chunk_size is not None:
-    config["chunk_size"] = args.chunk_size
+    config_dict["chunk_size"] = args.chunk_size
   if args.chunk_overlap is not None:
-    config["chunk_overlap"] = args.chunk_overlap
+    config_dict["chunk_overlap"] = args.chunk_overlap
   if args.openai_model:
-    config["openai_model"] = args.openai_model
+    config_dict["openai_model"] = args.openai_model
   if args.corpus_path:
-    config["corpus_path"] = args.corpus_path
+    config_dict["corpus_path"] = args.corpus_path
   if args.testset_path:
-    config["testset_path"] = args.testset_path
+    config_dict["testset_path"] = args.testset_path
   if args.compression:
-    config["compression_backend"] = args.compression
+    config_dict["compression_backend"] = args.compression
   if args.workspace_suffix:
-    config["workspace_suffix"] = args.workspace_suffix
+    config_dict["workspace_suffix"] = args.workspace_suffix
   if args.max_corpus_chars is not None:
-    config["max_corpus_chars"] = args.max_corpus_chars
+    config_dict["max_corpus_chars"] = args.max_corpus_chars
 
   script_dir = os.path.dirname(os.path.abspath(__file__))
-  methods = config.get("methods", [])
 
+  # Build typed config
+  config = BenchmarkConfig.from_dict(config_dict)
+
+  methods = config.methods
   if not methods:
     print("No methods configured. Check config.json or use --methods.")
     sys.exit(1)
@@ -507,7 +503,7 @@ async def main():
     return
 
   # --- Load corpus ---
-  corpus_path = config.get("corpus_path", "./corpus/adventures_of_sherlock_holmes.txt")
+  corpus_path = config.corpus_path or "./corpus/adventures_of_sherlock_holmes.txt"
   if not os.path.isabs(corpus_path):
     corpus_path = os.path.join(script_dir, corpus_path)
 
@@ -523,18 +519,19 @@ async def main():
 
   # Pass corpus file extension and full text to adapters for section-aware chunking
   corpus_ext = os.path.splitext(corpus_path)[1]  # e.g. ".txt"
-  if corpus_ext:
-    config.setdefault("corpus_file_ext", corpus_ext)
-  config["_corpus_full_text"] = text
+  if corpus_ext and not config.corpus_file_ext:
+    config.corpus_file_ext = corpus_ext
+  config._corpus_full_text = text
 
-  chunk_size = config.get("chunk_size", 1200)
-  chunk_overlap = config.get("chunk_overlap", 200)
-  chunks = chunk_corpus(text, chunk_size, chunk_overlap)
-  print(f"Corpus: {len(text)} chars -> {len(chunks)} chunks (size={chunk_size}, overlap={chunk_overlap})")
+  chunks = chunk_corpus(text, config.chunk_size, config.chunk_overlap, source=os.path.basename(corpus_path))
+  print(
+    f"Corpus: {len(text)} chars -> {len(chunks)} chunks "
+    f"(size={config.chunk_size}, overlap={config.chunk_overlap})"
+  )
   log.info("Corpus loaded: %d chars, %d chunks", len(text), len(chunks))
 
   # --- Load test set ---
-  testset_path = config.get("testset_path", "./testset/sherlock_holmes.json")
+  testset_path = config.testset_path or "./testset/sherlock_holmes.json"
   if not os.path.isabs(testset_path):
     testset_path = os.path.join(script_dir, testset_path)
 
@@ -551,19 +548,19 @@ async def main():
     testset = [testset[args.question]]
     print(f"Running single question [{args.question}]: {testset[0]['question']}")
   else:
-    max_q = config.get("max_questions", 0)
+    max_q = config.max_questions
     if max_q and max_q > 0:
       testset = testset[:max_q]
   print(f"Test set: {len(testset)} questions")
   log.info("Test set: %d questions from %s", len(testset), testset_path)
 
   run_config = {
-    "corpus": config.get("corpus", "sherlock_holmes"),
+    "corpus": config.corpus,
     "num_questions": len(testset),
-    "top_k": config.get("top_k", 8),
-    "chunk_size": chunk_size,
-    "chunk_overlap": chunk_overlap,
-    "openai_model": config.get("openai_model", "gpt-4o-mini"),
+    "top_k": config.top_k,
+    "chunk_size": config.chunk_size,
+    "chunk_overlap": config.chunk_overlap,
+    "openai_model": config.openai_model,
     "timestamp": datetime.now(timezone.utc).isoformat(),
   }
 
@@ -574,6 +571,7 @@ async def main():
     if not check_neo4j():
       print("\nSkipping Neo4j-dependent methods. Fix the connection or use --skip-index.\n")
       methods = [m for m in methods if m not in _NEO4J_METHODS]
+      config.methods = methods
       if not methods:
         print("No methods left to run.")
         sys.exit(1)
@@ -585,14 +583,14 @@ async def main():
   log.info("Config: %s", {k: v for k, v in config.items() if k not in _skip_keys})
   for method_idx, method_name in enumerate(methods, 1):
     log.info(
-      "%s━━━ %s%s%s (%d/%d) ━━━%s",
-      _BOLD,
-      _CYAN,
+      "%s--- %s%s%s (%d/%d) ---%s",
+      BOLD,
+      CYAN,
       method_name,
-      _RESET + _BOLD,
+      RESET + BOLD,
       method_idx,
       len(methods),
-      _RESET,
+      RESET,
     )
     method_start = time.perf_counter()
     try:
@@ -621,11 +619,11 @@ async def main():
       }
 
     # --- RAGAS evaluation (per method, immediately after querying) ---
-    ctag_main = f"{_CYAN}[{method_name}]{_RESET}"
+    ctag_main = method_tag(method_name)
     if not args.skip_ragas and method_data.get("per_question"):
       from scripts.evaluate import evaluate_method
 
-      log.info("%s %sRunning RAGAS evaluation%s...", ctag_main, _YELLOW, _RESET)
+      log.info("%s %sRunning RAGAS evaluation%s...", ctag_main, YELLOW, RESET)
       ragas_start = time.perf_counter()
       try:
         aggregate, per_q_scores = await evaluate_method(method_data["per_question"], config)
@@ -645,51 +643,51 @@ async def main():
             if "ragas" in pq:
               q_short = pq["question"][:60] + ("..." if len(pq["question"]) > 60 else "")
               scores_str = "  ".join(
-                f"{k}={_GREEN}{v:.2f}{_RESET}"
+                f"{k}={GREEN}{v:.2f}{RESET}"
                 if v >= 0.7
-                else f"{k}={_YELLOW}{v:.2f}{_RESET}"
+                else f"{k}={YELLOW}{v:.2f}{RESET}"
                 if v >= 0.4
-                else f"{k}={_RED}{v:.2f}{_RESET}"
+                else f"{k}={RED}{v:.2f}{RESET}"
                 for k, v in pq["ragas"].items()
               )
               log.info(
                 "%s   %sQ%d%s  %s  %s",
                 ctag_main,
-                _DIM,
+                DIM,
                 j + 1,
-                _RESET,
+                RESET,
                 scores_str,
-                f"{_DIM}{q_short}{_RESET}",
+                f"{DIM}{q_short}{RESET}",
               )
 
         if aggregate:
-          agg_str = "  ".join(f"{k}={_BOLD}{v:.2f}{_RESET}" for k, v in aggregate.items())
+          agg_str = "  ".join(f"{k}={BOLD}{v:.2f}{RESET}" for k, v in aggregate.items())
           log.info(
             "%s %sRAGAS%s (%.1fs):  %s",
             ctag_main,
-            _GREEN,
-            _RESET,
+            GREEN,
+            RESET,
             ragas_elapsed,
             agg_str,
           )
         else:
-          log.info("%s %sRAGAS%s: no valid results for evaluation", ctag_main, _YELLOW, _RESET)
+          log.info("%s %sRAGAS%s: no valid results for evaluation", ctag_main, YELLOW, RESET)
       except Exception as e:
-        log.info("%s %sRAGAS error%s: %s", ctag_main, _RED, _RESET, e, exc_info=True)
+        log.info("%s %sRAGAS error%s: %s", ctag_main, RED, RESET, e, exc_info=True)
 
     # Save this method's result to its own file
-    result_name = f"{method_name}_{config['workspace_suffix']}" if config.get("workspace_suffix") else method_name
+    result_name = f"{method_name}_{config.workspace_suffix}" if config.workspace_suffix else method_name
     path = save_method_result(result_name, run_config, method_data)
     method_elapsed = time.perf_counter() - method_start
     log.info(
       "%s %sSaved%s to %s  |  total time %s%.1fs%s",
       ctag_main,
-      _GREEN,
-      _RESET,
+      GREEN,
+      RESET,
       path,
-      _GREEN,
+      GREEN,
       method_elapsed,
-      _RESET,
+      RESET,
     )
     log.info("")
 
