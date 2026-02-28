@@ -1,6 +1,7 @@
 """Environment setup and configuration loading for notebooks."""
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -8,15 +9,53 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 _REPO_ROOT = PROJECT_ROOT.parent
 
+# API keys that the benchmark suite may need.
+# Each entry: (env_var_name, display_label, required)
+_API_KEYS = [
+    ("OPENAI_API_KEY", "OpenAI API Key", True),
+    ("NEOCORTEX_API_KEY", "Neocortex API Key", False),
+]
+
+
+def _prompt_api_keys():
+    """Prompt for missing API keys interactively.
+
+    Uses ``getpass`` so keys are not echoed in notebook output.
+    Already-set env vars (from ``.env`` or the shell) are left untouched.
+    """
+    import getpass
+
+    for env_var, label, required in _API_KEYS:
+        existing = os.environ.get(env_var)
+        if existing:
+            masked = existing[:4] + "..." + existing[-4:] if len(existing) > 12 else "****"
+            print(f"  {label} ({env_var}): {masked}")
+            continue
+
+        tag = "required" if required else "optional, Enter to skip"
+        value = getpass.getpass(f"  Enter {label} ({tag}): ")
+        if value.strip():
+            os.environ[env_var] = value.strip()
+            print(f"  {label}: set")
+        elif required:
+            print(f"  WARNING: {env_var} is not set — adapters that need it will fail.")
+        else:
+            print(f"  {label}: skipped")
+
 
 def setup_environment():
-    """Load .env, add project root and repo root to sys.path."""
+    """Load .env, prompt for API keys, set up sys.path, and patch the event loop."""
     from dotenv import load_dotenv
 
-    # Load .env from mk1/ directory
+    # Load .env from mk1/ directory (provides defaults)
     env_path = PROJECT_ROOT / ".env"
     if env_path.exists():
         load_dotenv(env_path)
+
+    # Prompt for any missing keys
+    print("API keys:")
+    _prompt_api_keys()
+    print()
 
     # Ensure mk1/ is importable (for `from adapters import ...`)
     if str(PROJECT_ROOT) not in sys.path:

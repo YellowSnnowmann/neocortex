@@ -4,7 +4,6 @@ Legacy adapters (e.g. neocortex .pyc files) import from ``._base``.
 This shim ensures they continue to work after the move to ``helpers/``.
 """
 
-import os
 import sys
 from pathlib import Path
 
