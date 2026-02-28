@@ -7,11 +7,49 @@ inline progress output.
 
 from __future__ import annotations
 
+import json
 import os
 import time
+from datetime import datetime, timezone
 from typing import Any
 
 from .config import PROJECT_ROOT
+
+
+def save_results(
+    all_results: dict[str, dict],
+    benchmark: str,
+    run_config: dict | None = None,
+) -> None:
+    """Save all method results to ``results/notebook_<benchmark>/``.
+
+    Call this between cells so intermediate data is not lost if a later
+    cell fails or the kernel restarts.
+
+    Args:
+        all_results: Dict mapping method_name -> result dict.
+        benchmark: Short name used for the output directory
+            (e.g. ``"ragas"``, ``"hotpotqa"``, ``"twowiki"``, ``"locomo"``).
+        run_config: Optional run-level metadata to embed in each file.
+    """
+    output_dir = PROJECT_ROOT / "results" / f"notebook_{benchmark}"
+    os.makedirs(output_dir, exist_ok=True)
+
+    base_config = run_config or {}
+    if "timestamp" not in base_config:
+        base_config["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+    for method_name, method_data in all_results.items():
+        filepath = output_dir / f"{method_name}.json"
+        payload = {
+            "run_config": base_config,
+            "method": method_name,
+            **method_data,
+        }
+        with open(filepath, "w") as f:
+            json.dump(payload, f, indent=2)
+
+    print(f"Results saved to {output_dir}/ ({len(all_results)} methods)")
 
 
 async def run_single_method(
