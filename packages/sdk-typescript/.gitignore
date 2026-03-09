@@ -1,0 +1,24 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+*.tsbuildinfo
+*.js.map
+
+# Environment
+.env
+.env.*
+
+# Testing
+coverage/
+
+# Editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

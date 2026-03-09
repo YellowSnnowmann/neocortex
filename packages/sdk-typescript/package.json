@@ -1,0 +1,20 @@
+{
+  "name": "@alphahuman/memory-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Alphahuman Memory API - ingest and delete memory",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

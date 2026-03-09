@@ -1,10 +1,9 @@
 # Neocortex GraphRAG (Local)
 
-The Neocortex GraphRAG SDK gives you full control over a local knowledge graph. You manage your own Neo4j instance, extract entities and relations from documents, and query the graph directly.
+The Neocortex GraphRAG SDK gives you full control over a local knowledge graph. Extract entities and relations from documents and query the graph directly.
 
 ## Prerequisites
 
-- **Neo4j** running locally (start with `docker compose up -d` from the repo root)
 - **OpenAI API key** set in a `.env` file
 - Python 3.9+
 

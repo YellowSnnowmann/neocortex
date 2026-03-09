@@ -1,20 +1,26 @@
 # Choosing an SDK
 
-Neocortex offers two SDKs depending on your needs:
+Neocortex offers SDKs and integrations across multiple languages and frameworks.
 
-| | TinyHumans SDK (`tinyhumansai`) | Neocortex GraphRAG (`neocortex`) |
-| --- | --- | --- |
-| **Type** | Cloud API (managed) | Local library (self-hosted) |
-| **Install** | `pip install tinyhumansai` | `pip install neocortex` |
-| **Infrastructure** | None — fully managed | Neo4j + OpenAI API key |
-| **Best for** | Production apps, quick integration | Research, full control, custom pipelines |
-| **Memory model** | Key-value with namespaces | Knowledge graph (entities + relations) |
-| **Query style** | Prompt-based recall, LLM answer | Graph traversal, scored context |
-| **Auth** | TinyHumans API key | OpenAI API key |
+## SDKs
+
+| SDK | Language | Install | Description |
+| --- | --- | --- | --- |
+| **TinyHumans SDK** | Python | `pip install tinyhumansai` | Cloud API — managed memory layer, no infra needed |
+| **Neocortex GraphRAG** | Python | `pip install neocortex` | Local GraphRAG — full control over the knowledge graph |
+| **TinyHumans TypeScript SDK** | TypeScript | `npm install tinyhumansai` | Cloud API for Node.js and browser environments |
+| **TinyHumans Rust SDK** | Rust | `cargo add tinyhumansai` | Cloud API for Rust applications |
+
+## Integrations
+
+| Integration | Description |
+| --- | --- |
+| **LangGraph SDK** | Drop-in memory layer for LangGraph agent workflows |
+| **OpenClaw Plugin** | Plugin for the OpenClaw agent framework |
 
 ## Which should I pick?
 
-**Choose TinyHumans SDK if you want:**
+**Choose TinyHumans SDK (Python / TypeScript / Rust) if you want:**
 - A managed service with no infrastructure to maintain
 - Simple key-value memory storage with namespaces
 - Built-in LLM recall (OpenAI, Anthropic, Gemini)
@@ -26,8 +32,11 @@ Neocortex offers two SDKs depending on your needs:
 - To run everything locally
 - Custom query tuning and retrieval pipelines
 
+**Choose an integration (LangGraph / OpenClaw) if you want:**
+- To add Neocortex memory to an existing agent framework
+- Minimal code changes to your current setup
+
 ## Prerequisites
 
-- **Python 3.9+**
-- **TinyHumans SDK**: A TinyHumans API key ([request access](mailto:founders@tinyhumans.ai))
-- **Neocortex GraphRAG**: A running Neo4j instance and an OpenAI API key
+- A [TinyHumans API key](api-key.md) (for all cloud SDKs and integrations)
+- **Neocortex GraphRAG** additionally requires an OpenAI API key

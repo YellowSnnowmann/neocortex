@@ -5,6 +5,7 @@
 
 ## Getting Started
 
+* [Getting an API Key](getting-started/api-key.md)
 * [Choosing an SDK](getting-started/README.md)
 * [TinyHumans SDK (Cloud)](getting-started/high-level-sdk.md)
 * [Neocortex GraphRAG (Local)](getting-started/low-level-sdk.md)
