@@ -22,11 +22,9 @@ The result? an AI memory system that can chop through over 1 billion tokens, sta
 
 Neocortex ranks extremly high scores on [RAGAS](./benchmarks/01_ragas_sherlock.ipynb), [Babilong](./benchmarks/05_babilong.ipynb), [Vending Bench](./benchmarks/07_vendingbench.ipynb), [LoCoMo](./benchmarks/04_locomo.ipynb) and [HotPotQA](./benchmarks//02_hotpotqa.ipynb)
 
----
+# 🎯 Core Features
 
-### 🎯 Core Features
-
-#### Intelligent Noise Filters
+## Intelligent Noise Filters
 
 Memories that aren't accessed naturally decay over time. Frequently recalled knowledge becomes more durable. No manual cleanup needed — the system stays lean on its own.
 
@@ -34,7 +32,7 @@ Memories that aren't accessed naturally decay over time. Frequently recalled kno
   <img src=".github/images/gif/AppleEmailGraph.gif" alt="Memory Decay Simulation" width="700"/>
 </div>
 
-#### Interaction-Aware
+## Interaction-Aware
 
 Not all memories are equal. Views, reactions, replies, and content creation all signal what matters. Knowledge people engage with rises to the top; ignored information fades away.
 
@@ -42,7 +40,7 @@ Not all memories are equal. Views, reactions, replies, and content creation all 
   <img src=".github/images/gif/BobMemoryDecayVideo.gif" alt="Interaction Graph" width="700"/>
 </div>
 
-#### Low Latency, Low Cost, High Quality
+## Low Latency, Low Cost, High Quality
 
 There's no compromise on speed and quality when processing data with Neocortex. Everything is processed at low costs and low latency, while maintain high benchmarks.
 
