@@ -10,6 +10,14 @@
 * [Neocortex GraphRAG (Local)](getting-started/low-level-sdk.md)
 * [Query Modes](getting-started/query-modes.md)
 
+## Use Cases
+
+* [Overview](use-cases/README.md)
+* [Customer & Community Support](use-cases/customer-support.md)
+* [Realtime Personalized Call Assist](use-cases/realtime-call-assist.md)
+* [Company & Team KB Agent](use-cases/team-kb-agent.md)
+* [Personalized Assistant](use-cases/personalized-assistant.md)
+
 ## Benchmarks
 
 * [Overview](benchmarks/README.md)
