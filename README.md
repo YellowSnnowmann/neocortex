@@ -10,9 +10,10 @@
 [![Docs](https://img.shields.io/badge/Docs-GitBook-0A80FF?logo=gitbook&logoColor=white)](https://tinyhumans.gitbook.io/neocortex/)
 
 <h4>
-  <a href="#-benchmarks">Benchmarks</a>&nbsp; • &nbsp;
+  <a href="./benchmarks/README.md">Benchmarks</a>&nbsp; • &nbsp;
   <a href="#-getting-started">Getting Started</a>&nbsp; • &nbsp;
-  <a href="BENCHMARKS.md">Full Results</a>&nbsp;
+  <a href="https://tinyhumans.gitbook.io/neocortex/">Documentation</a>&nbsp; • &nbsp;
+  <a href="https://tinyhumans.ai">Get your API key</a>&nbsp;
 </h4>
 
 </div>
