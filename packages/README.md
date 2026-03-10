@@ -15,7 +15,7 @@ This folder contains all 3rd-party SDKs and integrations for the Neocortex memor
 
 ## Plugins
 
-- [LangGraph Plugin](./sdk-lang-graph/README.md) - LangGraph integration exposing Neocortex memory tools as LangGraph nodes / LLM tools.
+- [LangGraph Plugin](./plugin-langgraph/README.md) - LangGraph integration exposing Neocortex memory tools as LangGraph nodes / LLM tools.
 - [OpenClaw Plugin](./plugin-openclaw) - OpenClaw plugin for using Neocortex memory inside OpenClaw workflows.
 - [Vercel AI Plugin](./plugin-vercelai) - Vercel AI plugin for wiring Neocortex memory into AI routes.
 - [LlamaIndex Plugin](./plugin-llamaindex) - LlamaIndex plugin for using Neocortex as a memory backend.
