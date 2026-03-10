@@ -10,10 +10,17 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
 dependencies = [
-    "alphahuman-memory>=0.1.0",
+    "httpx>=0.25",
     "langgraph>=0.2",
     "langchain-core>=0.3",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio"]
+
+[tool.setuptools.packages.find]
+include = ["alphahuman_langgraph*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
