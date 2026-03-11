@@ -1,7 +1,6 @@
-![Neocortex](.github/images/art.png)
-
 <div align="center">
-# Neocortex AI Memory 🧠 - Your Second Brain
+<img src=".github/images/art.png" style="max-width: 400px"/>
+<h1>Neocortex AI Memory 🧠 - Your Second Brain</h1>
 
 **Human-like AI Memory  ◦  10Mn+ Token Processing  ◦  Upto 4000 tok/s  ◦  0.1$/Mn tokens**
 
