@@ -32,6 +32,10 @@ The result? an AI memory system that can chop through over 10 million tokens acc
 
 Neocortex ranks extremely high scores on [RAGAS](https://www.ragas.io/), [Babilong](https://github.com/booydar/babilong/), [Vending Bench](https://andonlabs.com/evals/vending-bench-2), [LoCoMo](https://github.com/snap-research/locomo) and [HotPotQA](https://hotpotqa.github.io/)
 
+[![Star History Chart](https://api.star-history.com/image?repos=tinyhumansai/neocortex&type=date&legend=top-left)](https://www.star-history.com/?repos=tinyhumansai%2Fneocortex&type=date&legend=top-left)
+
+<div align="center"><i>Like contributing towards AGI 🧠? Give this repo a star and spread the love ❤️</i></div>
+
 # 🎯 Core Features
 
 ## Intelligent Noise Filters
