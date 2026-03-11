@@ -39,7 +39,7 @@ pub struct InsertMemoryResponse {
     pub data: InsertMemoryData,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InsertMemoryData {
     pub status: String,
     pub stats: serde_json::Value,
@@ -52,10 +52,15 @@ pub struct InsertMemoryData {
 #[serde(rename_all = "camelCase")]
 pub struct QueryMemoryParams {
     pub query: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub include_references: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_chunks: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub llm_query: Option<String>,
 }
 
@@ -65,7 +70,7 @@ pub struct QueryMemoryResponse {
     pub data: QueryMemoryData,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct QueryMemoryData {
     pub context: Option<QueryContextOut>,
@@ -75,14 +80,14 @@ pub struct QueryMemoryData {
     pub response: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct QueryContextOut {
     pub entities: Vec<serde_json::Value>,
     pub relations: Vec<serde_json::Value>,
     pub chunks: Vec<serde_json::Value>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Usage {
     pub llm_input_tokens: u64,
     pub llm_output_tokens: u64,
@@ -94,6 +99,7 @@ pub struct Usage {
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct DeleteMemoryParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
 }
 
@@ -103,7 +109,7 @@ pub struct DeleteMemoryResponse {
     pub data: DeleteMemoryData,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DeleteMemoryData {
     pub status: String,
@@ -118,7 +124,9 @@ pub struct DeleteMemoryData {
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RecallMemoryParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_chunks: Option<u32>,
 }
 
@@ -128,7 +136,7 @@ pub struct RecallMemoryResponse {
     pub data: RecallMemoryData,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RecallMemoryData {
     pub context: Option<QueryContextOut>,
@@ -140,7 +148,7 @@ pub struct RecallMemoryData {
     pub counts: Option<RecallCounts>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RecallCounts {
     pub num_entities: u64,
@@ -153,9 +161,13 @@ pub struct RecallCounts {
 #[derive(Debug, Clone, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct RecallMemoriesParams {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub namespace: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub top_k: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub min_retention: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub as_of: Option<f64>,
 }
 
@@ -165,12 +177,12 @@ pub struct RecallMemoriesResponse {
     pub data: RecallMemoriesData,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RecallMemoriesData {
     pub memories: Vec<MemoryItemRecalled>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct MemoryItemRecalled {
     #[serde(rename = "type")]
