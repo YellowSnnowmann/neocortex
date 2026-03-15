@@ -1,9 +1,11 @@
 name: Publish Rust SDK
 
 on:
-  workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/sdk-rust/**"
 
 jobs:
   publish:
