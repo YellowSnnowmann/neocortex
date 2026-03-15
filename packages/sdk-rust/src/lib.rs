@@ -84,13 +84,19 @@ impl TinyHumanMemoryClient {
         params: InsertMemoryParams,
     ) -> Result<InsertMemoryResponse, TinyHumanError> {
         if params.title.is_empty() {
-            return Err(TinyHumanError::Validation("title is required and must be a string".into()));
+            return Err(TinyHumanError::Validation(
+                "title is required and must be a string".into(),
+            ));
         }
         if params.content.is_empty() {
-            return Err(TinyHumanError::Validation("content is required and must be a string".into()));
+            return Err(TinyHumanError::Validation(
+                "content is required and must be a string".into(),
+            ));
         }
         if params.namespace.is_empty() {
-            return Err(TinyHumanError::Validation("namespace is required and must be a string".into()));
+            return Err(TinyHumanError::Validation(
+                "namespace is required and must be a string".into(),
+            ));
         }
         let body = InsertMemoryBody {
             title: params.title,
@@ -112,11 +118,15 @@ impl TinyHumanMemoryClient {
         params: QueryMemoryParams,
     ) -> Result<QueryMemoryResponse, TinyHumanError> {
         if params.query.is_empty() {
-            return Err(TinyHumanError::Validation("query is required and must be a string".into()));
+            return Err(TinyHumanError::Validation(
+                "query is required and must be a string".into(),
+            ));
         }
         if let Some(mc) = params.max_chunks {
             if !(1..=200).contains(&mc) {
-                return Err(TinyHumanError::Validation("maxChunks must be between 1 and 200".into()));
+                return Err(TinyHumanError::Validation(
+                    "maxChunks must be between 1 and 200".into(),
+                ));
             }
         }
         self.post("/v1/memory/query", &params).await
@@ -137,7 +147,9 @@ impl TinyHumanMemoryClient {
     ) -> Result<RecallMemoryResponse, TinyHumanError> {
         if let Some(mc) = params.max_chunks {
             if mc <= 0 {
-                return Err(TinyHumanError::Validation("maxChunks must be a positive integer".into()));
+                return Err(TinyHumanError::Validation(
+                    "maxChunks must be a positive integer".into(),
+                ));
             }
         }
         self.post("/v1/memory/recall", &params).await
@@ -150,12 +162,16 @@ impl TinyHumanMemoryClient {
     ) -> Result<RecallMemoriesResponse, TinyHumanError> {
         if let Some(tk) = params.top_k {
             if tk <= 0.0 {
-                return Err(TinyHumanError::Validation("topK must be a positive number".into()));
+                return Err(TinyHumanError::Validation(
+                    "topK must be a positive number".into(),
+                ));
             }
         }
         if let Some(mr) = params.min_retention {
             if mr < 0.0 {
-                return Err(TinyHumanError::Validation("minRetention must be a non-negative number".into()));
+                return Err(TinyHumanError::Validation(
+                    "minRetention must be a non-negative number".into(),
+                ));
             }
         }
         self.post("/v1/memory/memories/recall", &params).await
