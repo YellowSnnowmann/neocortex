@@ -146,7 +146,7 @@ impl TinyHumanMemoryClient {
         params: RecallMemoryParams,
     ) -> Result<RecallMemoryResponse, TinyHumanError> {
         if let Some(mc) = params.max_chunks {
-            if mc <= 0 {
+            if mc == 0 {
                 return Err(TinyHumanError::Validation(
                     "maxChunks must be a positive integer".into(),
                 ));
