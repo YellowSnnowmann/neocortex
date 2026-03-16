@@ -2,7 +2,7 @@
 <img src=".github/images/graph.png" style="max-width: 400px"/>
 <h1>Neocortex AI Memory 🧠 - Your Second Brain</h1>
 
-**Human-like AI Memory  ◦  10Mn+ Token Processing  ◦  Upto 4000 tok/s  ◦  0.1$/Mn tokens**
+**Human-like AI Memory  ◦  10Mn+ Token Context ◦ 0.2$/Mn tokens** ◦ **Conscious Recall**
 
 [Discord](https://discord.com/invite/k23Kn8nK)
 [Reddit](https://www.reddit.com/r/tinyhumansai/)
@@ -23,8 +23,6 @@ The result? an AI memory system that can chop through over 10 million tokens acc
 
 Neocortex ranks extremely high scores on [RAGAS](https://www.ragas.io/), [Babilong](https://github.com/booydar/babilong/), [Vending Bench](https://andonlabs.com/evals/vending-bench-2), [LoCoMo](https://github.com/snap-research/locomo) and [HotPotQA](https://hotpotqa.github.io/)
 
-<!-- ![graph](.github/images/graph.png) -->
-
 # 🎯 Core Features
 
 ## Intelligent Noise Filters
@@ -39,11 +37,19 @@ Not all memories are equal. Views, reactions, replies, and content creation all 
 
 There's no compromise on speed and quality when processing data with Neocortex. Everything is processed at low costs and low latency, while maintain high benchmarks.
 
+## Conscious Recall
+
+Conscious recall is a Neocortex feature that proactively surfaces the most relevant memories for a given moment, instead of waiting for an explicit query.
+
+It continuously tracks what a user has done recently which includes conversations, actions, and signals; and combines that with time-based decay to decide which memories should stay “top of mind.”
+
+When your agent needs context, conscious recall pulls forward the memories that are both recent and repeatedly interacted with, giving the LLM a focused slice of long-term history rather than a noisy dump of everything you’ve ever stored.
+
 # ⚡ Getting Started
 
 Neocortex ships with SDKs for [Python](./packages/sdk-python), [TypeScript/JavaScript](./packages/sdk-typescript), [Go](./packages/sdk-golang), [Rust](./packages/sdk-rust), [Dart](./packages/sdk-dart), [C++](./packages/sdk-cpp), [C#](./packages/sdk-csharp), and [Java](./packages/sdk-java), plus plugins for [LangGraph](./packages/plugin-langgraph), [OpenClaw](./packages/plugin-openclaw), [ElevenLabs](./packages/plugin-elevenlabs), [CrewAI](./packages/plugin-crewai), [Raycast](./packages/plugin-raycast), [Agno](./packages/plugin-agno) [Pipecat](./packages/plugin-pipecat), [Mastra](./packages/plugin-mastra), [Autogen](./packages/plugin-autogen) and more.
 
-See `[packages/README.md](./packages/README.md)` for details about all the SDKs/Plugins available to use along with documentation and examples.
+See [packages/README.md](./packages/README.md) for details about all the SDKs/Plugins available to use along with documentation and examples.
 
 Below is a simple quickstart example on getting started with Python.
 
