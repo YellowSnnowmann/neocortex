@@ -13,6 +13,8 @@
 
 _NOTE: That this model is currently in closed alpha. To get access [reach out to us](mailto:founders@tinyhumans.ai)_
 
+[Read the paper](./paper/out/main.pdf)
+
 </div>
 
 The human brain is a master at compression. It doesn't try to remember every passing detail; instead, it aggressively prunes noise to maintain a sharp, focused, and easily accessible recall of what truly matters. In contrast, traditional AI memory systems try to remember everything. They retrieve whatever is _similar_—but similar doesn't mean important. The result? Your AI drowns in stale, irrelevant context that degrades every response.
