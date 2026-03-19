@@ -8,6 +8,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: Production
+    defaults:
+      run:
+        working-directory: packages/sdk-typescript
     permissions:
       contents: read
       id-token: write
@@ -19,12 +23,14 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
+      - run: npm install -g yarn
 
-      - run: npm run build
+      - run: yarn install --frozen-lockfile
 
-      - run: npm test
+      - run: yarn build
 
-      - run: npm publish --provenance --access public
+      - run: yarn test
+
+      - run: yarn publish --non-interactive --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
