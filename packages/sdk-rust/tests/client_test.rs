@@ -60,7 +60,7 @@ async fn insert_memory_posts_correctly() {
     };
     let res = client.insert_memory(params).await.unwrap();
     assert!(res.success);
-    assert_eq!(res.data.status, "ok");
+    assert_eq!(res.data.status.as_deref(), Some("ok"));
     mock.assert_async().await;
 }
 

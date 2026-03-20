@@ -298,23 +298,36 @@ impl TinyHumanMemoryClient {
     pub async fn get_document(
         &self,
         document_id: &str,
+        namespace: Option<&str>,
     ) -> Result<GetDocumentResponse, TinyHumanError> {
         if document_id.trim().is_empty() {
             return Err(TinyHumanError::Validation("document_id is required".into()));
         }
-        self.get(&format!("/memory/documents/{document_id}")).await
+        let mut path = format!("/memory/documents/{document_id}");
+        if let Some(ns) = namespace {
+            if !ns.trim().is_empty() {
+                path = format!("{path}?namespace={ns}");
+            }
+        }
+        self.get(&path).await
     }
 
     /// Delete a memory document. DELETE /memory/documents/{documentId}
     pub async fn delete_document(
         &self,
         document_id: &str,
+        namespace: &str,
     ) -> Result<DeleteDocumentResponse, TinyHumanError> {
         if document_id.trim().is_empty() {
             return Err(TinyHumanError::Validation("document_id is required".into()));
         }
-        self.delete(&format!("/memory/documents/{document_id}"))
-            .await
+        if namespace.trim().is_empty() {
+            return Err(TinyHumanError::Validation("namespace is required".into()));
+        }
+        self.delete(&format!(
+            "/memory/documents/{document_id}?namespace={namespace}"
+        ))
+        .await
     }
 
     /// Sync OpenClaw memory files to backend. POST /memory/sync

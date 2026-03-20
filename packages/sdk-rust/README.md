@@ -32,6 +32,14 @@ TINYHUMANS_API_KEY=your_key cargo test e2e_live_insert_query_delete -- --ignored
 
 Set `ALPHAHUMAN_BASE_URL` (or legacy `TINYHUMANS_BASE_URL`) if your backend URL differs from the default (`https://staging-api.alphahuman.xyz`).
 
+Route smoke test (hits live backend and exercises SDK routes):
+
+```bash
+cargo run --example test_routes
+# optional: point to a different env file
+ENV_FILE=../sdk-python/.env cargo run --example test_routes
+```
+
 ## Quick start
 
 ```rust

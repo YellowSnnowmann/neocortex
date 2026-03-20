@@ -72,9 +72,12 @@ pub struct InsertMemoryResponse {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InsertMemoryData {
-    pub status: String,
-    pub stats: serde_json::Value,
+    pub status: Option<String>,
+    pub stats: Option<serde_json::Value>,
     pub usage: Option<Usage>,
+    #[serde(rename = "jobId")]
+    pub job_id: Option<String>,
+    pub state: Option<String>,
 }
 
 // ---------- Query ----------
