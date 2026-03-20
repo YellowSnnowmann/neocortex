@@ -2,7 +2,7 @@
 
 A persistent memory layer for AI applications. Neocortex lets your AI agents store, retrieve, and use context across conversations -- so they remember what matters.
 
-Built on the [TinyHumans API](https://tinyhumans.ai).
+Built on the AlphaHuman memory API.
 
 ## Install
 
@@ -30,7 +30,7 @@ Unit and integration tests use mocked HTTP. For **end-to-end tests** (hits a rea
 TINYHUMANS_API_KEY=your_key cargo test e2e_live_insert_query_delete -- --ignored
 ```
 
-Set `TINYHUMANS_BASE_URL` if your backend URL differs from the default (`https://staging-api.tinyhumans.ai`).
+Set `ALPHAHUMAN_BASE_URL` (or legacy `TINYHUMANS_BASE_URL`) if your backend URL differs from the default (`https://staging-api.alphahuman.xyz`).
 
 ## Quick start
 
@@ -91,11 +91,11 @@ let client = TinyHumanMemoryClient::new(
 )?;
 ```
 
-Configuration: `TinyHumanConfig::new(token)`. Optionally set base URL with `.with_base_url(url)` or the `TINYHUMANS_BASE_URL` environment variable.
+Configuration: `TinyHumanConfig::new(token)`. Optionally set base URL with `.with_base_url(url)` or the `ALPHAHUMAN_BASE_URL` environment variable (legacy `TINYHUMANS_BASE_URL` is also supported).
 
 ### `insert_memory`
 
-Insert (ingest) a document into memory. POST `/v1/memory/insert`.
+Insert (ingest) a document into memory. POST `/memory/insert`.
 
 ```rust
 client.insert_memory(InsertMemoryParams {
@@ -108,7 +108,7 @@ client.insert_memory(InsertMemoryParams {
 
 ### `query_memory`
 
-Query memory via RAG. POST `/v1/memory/query`.
+Query memory via RAG. POST `/memory/query`.
 
 ```rust
 let res = client.query_memory(QueryMemoryParams {
@@ -121,15 +121,15 @@ let res = client.query_memory(QueryMemoryParams {
 
 ### `delete_memory`
 
-Delete memory (admin). POST `/v1/memory/admin/delete`. Optional `namespace` to scope deletion.
+Delete memory (admin). POST `/memory/admin/delete`. Optional `namespace` to scope deletion.
 
 ### `recall_memory`
 
-Recall context from Master node. POST `/v1/memory/recall`.
+Recall context from Master node. POST `/memory/recall`.
 
 ### `recall_memories`
 
-Recall memories from Ebbinghaus bank. POST `/v1/memory/memories/recall`.
+Recall memories from Ebbinghaus bank. POST `/memory/memories/recall`.
 
 ## Error handling
 
