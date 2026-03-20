@@ -275,4 +275,38 @@ describe('AlphahumanMemoryClient', () => {
       );
     });
   });
+
+  describe('chatMemory', () => {
+    it('POSTs to /v1/memory/chat', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: { content: 'hello' } })),
+      });
+      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      await client.chatMemory({ messages: [{ role: 'user', content: 'hi' }] });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${baseUrl}/v1/memory/chat`,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }),
+        })
+      );
+    });
+  });
+
+  describe('listDocuments', () => {
+    it('GETs from /v1/memory/documents with query params', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: {} })),
+      });
+      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      await client.listDocuments({ namespace: 'ns', limit: 10 });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${baseUrl}/v1/memory/documents?namespace=ns&limit=10`,
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+  });
 });
+
