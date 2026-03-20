@@ -1,6 +1,6 @@
 # plugin-crewai
 
-Neocortex (Alphahuman) memory tools for CrewAI.
+Neocortex (TinyHuman) memory tools for CrewAI.
 
 ## Features
 
@@ -19,7 +19,7 @@ pip install neocortex-crewai
 
 Set your API key:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 ```
 
 ### Passing Tools to Agents
@@ -32,7 +32,7 @@ from crewai import Agent
 from tinyhumansai import TinyHumanMemoryClient
 from neocortex_crewai import NeocortexSaveMemoryTool, NeocortexRecallMemoryTool
 
-client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 
 save_tool = NeocortexSaveMemoryTool(client=client, default_namespace="my_crew")
 recall_tool = NeocortexRecallMemoryTool(client=client, default_namespace="my_crew")

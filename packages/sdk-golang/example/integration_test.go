@@ -12,9 +12,9 @@ import (
 )
 
 func TestIntegration_InsertRecallDelete(t *testing.T) {
-	token := os.Getenv("ALPHAHUMAN_TOKEN")
+	token := os.Getenv("TINYHUMANS_TOKEN")
 	if token == "" {
-		t.Fatal("ALPHAHUMAN_TOKEN must be set for integration tests")
+		t.Fatal("TINYHUMANS_TOKEN must be set for integration tests")
 	}
 
 	client, err := tinyhumans.NewClient(token)

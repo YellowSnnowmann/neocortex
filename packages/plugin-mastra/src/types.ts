@@ -7,7 +7,7 @@ export interface NeocortexLogger {
 export interface NeocortexConfig {
   /** Bearer token (API key or JWT) for authentication */
   token: string;
-  /** Base URL of the Alphahuman/Neocortex backend. */
+  /** Base URL of the TinyHuman/Neocortex backend. */
   baseUrl?: string;
   /** Optional logger */
   logger?: NeocortexLogger;

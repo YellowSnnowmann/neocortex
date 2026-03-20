@@ -17,11 +17,11 @@ class DeleteMemoryTool(Tool):
         """
         namespace = tool_parameters.get('namespace')
 
-        token = self.runtime.credentials.get('alphahuman_api_key')
+        token = self.runtime.credentials.get('tinyhuman_api_key')
         default_namespace = self.runtime.credentials.get('default_namespace') or "agent_memory"
         
         if not token:
-            return self.create_text_message("Error: missing alphahuman_api_key credential.")
+            return self.create_text_message("Error: missing tinyhuman_api_key credential.")
 
         client = TinyHumanMemoryClient(token=token)
         ns = namespace or default_namespace

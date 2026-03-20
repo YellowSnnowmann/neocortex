@@ -1,6 +1,6 @@
 # plugin-camelai
 
-Neocortex (Alphahuman) memory tools for CAMEL AI.
+Neocortex (TinyHuman) memory tools for CAMEL AI.
 
 ## Features
 
@@ -17,7 +17,7 @@ pip install neocortex-camelai
 
 Set your API key:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 ```
 
 ### Passing Tools to Agents
@@ -31,7 +31,7 @@ from camel.messages import BaseMessage
 from tinyhumansai import TinyHumanMemoryClient
 from neocortex_camelai import NeocortexToolkit
 
-client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 toolkit = NeocortexToolkit(client=client, default_namespace="camel_memory")
 tools = toolkit.get_tools()
 

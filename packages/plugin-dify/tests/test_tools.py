@@ -9,7 +9,7 @@ from tinyhumansai import TinyHumanMemoryClient
 
 class MockRuntime:
     def __init__(self, token):
-        self.credentials = {"alphahuman_api_key": token, "default_namespace": "test_space"}
+        self.credentials = {"tinyhuman_api_key": token, "default_namespace": "test_space"}
 
 @patch("neocortex_dify.tools.save_memory.TinyHumanMemoryClient")
 def test_save_memory_tool(mock_client_class):

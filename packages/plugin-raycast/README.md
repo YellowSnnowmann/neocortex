@@ -56,8 +56,8 @@ npm run build
 ```
 
 - **Environment variables**:
-  - `ALPHAHUMAN_API_KEY` (required): Neocortex/Alphahuman API key or JWT.
-  - `ALPHAHUMAN_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
+  - `TINYHUMANS_API_KEY` (required): Neocortex/TinyHuman API key or JWT.
+  - `TINYHUMANS_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
 
 After saving, Raycast will:
 
@@ -91,8 +91,8 @@ You can also use the adapter directly from TypeScript/Node without Raycast:
 import { RaycastNeocortexMemory } from "@neocortex/plugin-raycast";
 
 const memory = new RaycastNeocortexMemory({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   defaultNamespace: "my-raycast-workspace",
 });
 

@@ -7,7 +7,7 @@ test:
 	./gradlew test
 
 integration-test:
-	ALPHAHUMAN_TOKEN=$(ALPHAHUMAN_TOKEN) ./gradlew test
+	TINYHUMANS_TOKEN=$(TINYHUMANS_TOKEN) ./gradlew test
 
 clean:
 	./gradlew clean

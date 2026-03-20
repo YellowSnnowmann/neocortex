@@ -22,13 +22,13 @@ meta:
 tool:
   provider:
     credentials:
-      - name: alphahuman_api_key
+      - name: tinyhuman_api_key
         type: secret-input
         required: true
         label:
-          en_US: Alphahuman API Key
+          en_US: TinyHuman API Key
         placeholder:
-          en_US: Ensure you have an Alphahuman API key.
+          en_US: Ensure you have an TinyHuman API key.
       - name: default_namespace
         type: text-input
         required: false

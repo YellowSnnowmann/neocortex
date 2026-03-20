@@ -29,15 +29,15 @@ function loadEnvFile(filePath) {
 const envFile = process.env.ENV_FILE || path.join(pkgRoot, ".env");
 loadEnvFile(envFile);
 
-const token = process.env.ALPHAHUMAN_TOKEN || process.env.TINYHUMANS_TOKEN;
+const token = process.env.TINYHUMANS_TOKEN || process.env.TINYHUMANS_TOKEN;
 if (!token) {
-  console.error("Missing token. Set ALPHAHUMAN_TOKEN or TINYHUMANS_TOKEN.");
+  console.error("Missing token. Set TINYHUMANS_TOKEN or TINYHUMANS_TOKEN.");
   process.exit(2);
 }
 
-const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.ALPHAHUMAN_BASE_URL;
-const { AlphahumanMemoryClient } = await import(path.join(pkgRoot, "dist", "index.js"));
-const client = new AlphahumanMemoryClient({ token, baseUrl });
+const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.TINYHUMANS_BASE_URL;
+const { TinyHumanMemoryClient } = await import(path.join(pkgRoot, "dist", "index.js"));
+const client = new TinyHumanMemoryClient({ token, baseUrl });
 
 const ts = Date.now();
 const namespace = `sdk-ts-routes-${ts}`;

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace alphahuman {
+namespace tinyhuman {
 
 using json = nlohmann::json;
 
@@ -252,4 +252,4 @@ struct RecallMemoriesResponse {
     }
 };
 
-} // namespace alphahuman
+} // namespace tinyhuman

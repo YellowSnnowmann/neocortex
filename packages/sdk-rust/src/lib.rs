@@ -1,5 +1,5 @@
-//! AlphaHuman Neocortex SDK for Rust.
-//! Aligned with AlphaHuman memory API routes.
+//! TinyHuman Neocortex SDK for Rust.
+//! Aligned with TinyHuman memory API routes.
 
 pub mod error;
 pub mod types;
@@ -11,18 +11,18 @@ use reqwest::{Client, Method};
 use serde::de::DeserializeOwned;
 
 /// Default base URL when none is provided and env is unset.
-pub const DEFAULT_BASE_URL: &str = "https://staging-api.alphahuman.xyz";
+pub const DEFAULT_BASE_URL: &str = "https://api.tinyhumans.ai";
 /// Preferred environment variable for base URL override.
-pub const ALPHAHUMAN_BASE_URL: &str = "ALPHAHUMAN_BASE_URL";
+pub const TINYHUMANS_BASE_URL: &str = "TINYHUMANS_BASE_URL";
 /// Backward-compatible environment variable for base URL override.
 pub const TINYHUMANS_BASE_URL: &str = "TINYHUMANS_BASE_URL";
 
-/// Configuration for the AlphaHuman client.
+/// Configuration for the TinyHuman client.
 #[derive(Clone, Debug)]
 pub struct TinyHumanConfig {
     /// Bearer token (API key or JWT).
     pub token: String,
-    /// Base URL of the AlphaHuman backend. If None, uses ALPHAHUMAN_BASE_URL, then TINYHUMANS_BASE_URL, then default.
+    /// Base URL of the TinyHuman backend. If None, uses TINYHUMANS_BASE_URL, then TINYHUMANS_BASE_URL, then default.
     pub base_url: Option<String>,
 }
 
@@ -42,7 +42,7 @@ impl TinyHumanConfig {
     fn resolve_base_url(&self) -> String {
         self.base_url
             .clone()
-            .or_else(|| std::env::var(ALPHAHUMAN_BASE_URL).ok())
+            .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
             .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
             .unwrap_or_else(|| DEFAULT_BASE_URL.to_string())
             .trim_end_matches('/')
@@ -50,7 +50,7 @@ impl TinyHumanConfig {
     }
 }
 
-/// Async client for the AlphaHuman memory API.
+/// Async client for the TinyHuman memory API.
 #[derive(Clone)]
 pub struct TinyHumanMemoryClient {
     client: Client,

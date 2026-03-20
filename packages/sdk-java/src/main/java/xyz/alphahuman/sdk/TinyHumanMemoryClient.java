@@ -1,6 +1,6 @@
-package xyz.alphahuman.sdk;
+package xyz.tinyhuman.sdk;
 
-import xyz.alphahuman.sdk.internal.Json;
+import xyz.tinyhuman.sdk.internal.Json;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,24 +10,24 @@ import java.time.Duration;
 import java.util.Map;
 
 /**
- * Client for the Alphahuman Memory API.
+ * Client for the TinyHuman Memory API.
  * <p>
  * Requires Java 11+. Zero runtime dependencies.
  */
-public class AlphahumanMemoryClient implements AutoCloseable {
+public class TinyHumanMemoryClient implements AutoCloseable {
 
-    private static final String DEFAULT_BASE_URL = "https://staging-api.alphahuman.xyz";
-    private static final String TINYHUMANS_BASE_URL = "ALPHAHUMAN_BASE_URL";
+    private static final String DEFAULT_BASE_URL = "https://api.tinyhumans.ai";
+    private static final String TINYHUMANS_BASE_URL = "TINYHUMANS_BASE_URL";
 
     private final String baseUrl;
     private final String token;
     private final HttpClient httpClient;
 
-    public AlphahumanMemoryClient(String token) {
+    public TinyHumanMemoryClient(String token) {
         this(token, null);
     }
 
-    public AlphahumanMemoryClient(String token, String baseUrl) {
+    public TinyHumanMemoryClient(String token, String baseUrl) {
         if (token == null || token.trim().isEmpty()) {
             throw new IllegalArgumentException("token is required");
         }
@@ -115,7 +115,7 @@ public class AlphahumanMemoryClient implements AutoCloseable {
         try {
             json = (text != null && !text.isEmpty()) ? Json.parse(text) : Map.of();
         } catch (Exception e) {
-            throw new AlphahumanError(
+            throw new TinyHumanError(
                     "HTTP " + response.statusCode() + ": non-JSON response",
                     response.statusCode(),
                     text
@@ -128,7 +128,7 @@ public class AlphahumanMemoryClient implements AutoCloseable {
             if (error instanceof String) {
                 message = (String) error;
             }
-            throw new AlphahumanError(message, response.statusCode(), json);
+            throw new TinyHumanError(message, response.statusCode(), json);
         }
 
         return json;

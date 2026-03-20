@@ -3,24 +3,24 @@ import 'dart:io' show Platform;
 
 import 'package:http/http.dart' as http;
 
-import 'alphahuman_error.dart';
+import 'tinyhuman_error.dart';
 import 'types.dart';
 
-class AlphahumanMemoryClient {
-  static const _defaultBaseUrl = 'https://staging-api.alphahuman.xyz';
+class TinyHumanMemoryClient {
+  static const _defaultBaseUrl = 'https://api.tinyhumans.ai';
 
   final String _token;
   final String _baseUrl;
   final http.Client _httpClient;
   final bool _ownsClient;
 
-  AlphahumanMemoryClient(
+  TinyHumanMemoryClient(
     String token, {
     String? baseUrl,
     http.Client? httpClient,
   })  : _token = token,
         _baseUrl = (baseUrl ??
-                Platform.environment['ALPHAHUMAN_BASE_URL'] ??
+                Platform.environment['TINYHUMANS_BASE_URL'] ??
                 _defaultBaseUrl)
             .replaceAll(RegExp(r'/+$'), ''),
         _httpClient = httpClient ?? http.Client(),
@@ -85,7 +85,7 @@ class AlphahumanMemoryClient {
           ? jsonDecode(response.body) as Map<String, dynamic>
           : <String, dynamic>{};
     } catch (_) {
-      throw AlphahumanError(
+      throw TinyHumanError(
         'HTTP ${response.statusCode}: non-JSON response',
         response.statusCode,
         response.body,
@@ -95,7 +95,7 @@ class AlphahumanMemoryClient {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final message =
           json['error'] as String? ?? 'HTTP ${response.statusCode}';
-      throw AlphahumanError(message, response.statusCode, response.body);
+      throw TinyHumanError(message, response.statusCode, response.body);
     }
 
     return json;

@@ -1,156 +1,112 @@
-# TinyHuman Neocortex SDK (Rust)
+# tinyhumansai (Rust SDK)
 
-A persistent memory layer for AI applications. Neocortex lets your AI agents store, retrieve, and use context across conversations -- so they remember what matters.
+Rust SDK for TinyHumans Neocortex memory APIs.
 
-Built on the AlphaHuman memory API.
+## Requirements
+
+- Rust 1.70+
+- Tokio runtime for async usage
 
 ## Install
 
-Add to your `Cargo.toml`:
+Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
 tinyhumansai = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 ```
 
-Requires Rust 1.70+ and Tokio (async runtime).
+## Get an API key
 
-## Running locally
-
-From the package directory (`packages/sdk-rust`):
-
-```bash
-cargo build
-cargo test
-```
-
-Unit and integration tests use mocked HTTP. For **end-to-end tests** (hits a real backend; skipped by default):
+1. Sign in to your TinyHumans account.
+2. Create a server API key in the TinyHumans dashboard.
+3. Export it before running examples:
 
 ```bash
-TINYHUMANS_API_KEY=your_key cargo test e2e_live_insert_query_delete -- --ignored
-```
-
-Set `ALPHAHUMAN_BASE_URL` (or legacy `TINYHUMANS_BASE_URL`) if your backend URL differs from the default (`https://staging-api.alphahuman.xyz`).
-
-Route smoke test (hits live backend and exercises SDK routes):
-
-```bash
-cargo run --example test_routes
-# optional: point to a different env file
-ENV_FILE=../sdk-python/.env cargo run --example test_routes
+export TINYHUMANS_TOKEN="your_api_key"
+# optional custom API URL
+export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
 ```
 
 ## Quick start
 
 ```rust
 use tinyhumansai::{
-    TinyHumanConfig, TinyHumanMemoryClient, InsertMemoryParams, QueryMemoryParams, DeleteMemoryParams,
+    InsertMemoryParams, QueryMemoryParams, TinyHumanConfig, TinyHumanMemoryClient,
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = TinyHumanMemoryClient::new(
-        TinyHumanConfig::new("your-api-key")
-    )?;
+    let token = std::env::var("TINYHUMANS_TOKEN")?;
+    let client = TinyHumanMemoryClient::new(TinyHumanConfig::new(token))?;
 
-    // Insert a document
-    let res = client.insert_memory(InsertMemoryParams {
+    client.insert_memory(InsertMemoryParams {
         title: "User preference".into(),
         content: "User prefers dark mode".into(),
         namespace: "preferences".into(),
         ..Default::default()
     }).await?;
-    println!("{:?}", res.data);
 
-    // Query memory
     let query = client.query_memory(QueryMemoryParams {
         query: "What does the user prefer?".into(),
         namespace: Some("preferences".into()),
-        max_chunks: Some(10),
+        max_chunks: Some(10.0),
         ..Default::default()
     }).await?;
+
     println!("{:?}", query.data.response);
-
-    // Delete memory
-    client.delete_memory(DeleteMemoryParams {
-        namespace: Some("preferences".into()),
-    }).await?;
-
     Ok(())
 }
 ```
 
-## Core concepts
+## Full route example
 
-**Memory items** are the basic unit of storage. Each item has `title`, `content`, `namespace`, and optional `metadata`, `priority`, and timestamps. The API supports insert, query (RAG), delete, recall (Master node), and memories/recall (Ebbinghaus bank).
+`examples/test_routes.rs` is the comprehensive example and exercises all currently implemented methods.
 
-**Namespaces** let you organize memories by category (e.g. `"preferences"`, `"conversation-history"`, `"user-facts"`).
-
-**Context** is retrieved via `query_memory` or `recall_memory` and can be injected into LLM prompts as system context.
-
-## API reference
-
-### `TinyHumanMemoryClient`
-
-```rust
-let client = TinyHumanMemoryClient::new(
-    TinyHumanConfig::new("your-api-key")
-        .with_base_url("https://..."),  // optional
-)?;
+```bash
+cd packages/sdk-rust
+cargo run --example test_routes
+# optional env file override:
+ENV_FILE=../sdk-python/.env cargo run --example test_routes
 ```
 
-Configuration: `TinyHumanConfig::new(token)`. Optionally set base URL with `.with_base_url(url)` or the `ALPHAHUMAN_BASE_URL` environment variable (legacy `TINYHUMANS_BASE_URL` is also supported).
+## Client configuration
 
-### `insert_memory`
+`TinyHumanConfig::new(token)` supports optional `.with_base_url(url)`.
 
-Insert (ingest) a document into memory. POST `/memory/insert`.
+Base URL resolution: explicit config -> `TINYHUMANS_BASE_URL` -> `TINYHUMANS_BASE_URL` -> `https://api.tinyhumans.ai`.
 
-```rust
-client.insert_memory(InsertMemoryParams {
-    title: "Doc title".into(),
-    content: "Content".into(),
-    namespace: "preferences".into(),
-    ..Default::default()
-}).await?;
-```
+## Implemented methods
 
-### `query_memory`
+Core memory routes:
+- `insert_memory`
+- `query_memory`
+- `delete_memory`
+- `recall_memory`
+- `recall_memories`
 
-Query memory via RAG. POST `/memory/query`.
+Memories/context/chat routes:
+- `recall_memories_context`
+- `memory_thoughts`
+- `interact_memory`
+- `record_interactions`
+- `query_memories`
+- `memory_conversation`
+- `memory_chat`
 
-```rust
-let res = client.query_memory(QueryMemoryParams {
-    query: "What is the user's preference?".into(),
-    namespace: Some("preferences".into()),
-    max_chunks: Some(10),
-    ..Default::default()
-}).await?;
-```
-
-### `delete_memory`
-
-Delete memory (admin). POST `/memory/admin/delete`. Optional `namespace` to scope deletion.
-
-### `recall_memory`
-
-Recall context from Master node. POST `/memory/recall`.
-
-### `recall_memories`
-
-Recall memories from Ebbinghaus bank. POST `/memory/memories/recall`.
-
-## Error handling
-
-Errors are returned as `TinyHumanError`: `Validation`, `Http`, `Api { message, status, body }`, or `Decode`. Use `thiserror` / `#[error]` for display and matching.
+Documents and admin routes:
+- `ingest_document`
+- `ingest_documents_batch`
+- `list_documents`
+- `get_document`
+- `delete_document`
+- `ingestion_job_status`
+- `memory_health`
+- `sync_memory`
 
 ## Tests
 
 ```bash
 cargo test
-```
-
-End-to-end (real backend):
-
-```bash
-TINYHUMANS_API_KEY=your_key cargo test e2e_live_insert_query_delete -- --ignored
 ```

@@ -1,11 +1,11 @@
-namespace Alphahuman.Sdk;
+namespace TinyHuman.Sdk;
 
-public class AlphahumanError : Exception
+public class TinyHumanError : Exception
 {
     public int Status { get; }
     public string Body { get; }
 
-    public AlphahumanError(string message, int status, string body)
+    public TinyHumanError(string message, int status, string body)
         : base(message)
     {
         Status = status;

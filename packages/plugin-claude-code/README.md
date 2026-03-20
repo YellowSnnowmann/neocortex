@@ -36,16 +36,16 @@ npm install @neocortex/plugin-claude-code
       "command": "node",
       "args": ["./node_modules/@neocortex/plugin-claude-code/dist/index.js"],
       "env": {
-        "ALPHAHUMAN_API_KEY": "your_token",
-        "ALPHAHUMAN_BASE_URL": "https://api.your-backend.com"
+        "TINYHUMANS_API_KEY": "your_token",
+        "TINYHUMANS_BASE_URL": "https://api.your-backend.com"
       }
     }
   }
 }
 ```
 
-- `ALPHAHUMAN_API_KEY` (required): Neocortex/Alphahuman API key or JWT.
-- `ALPHAHUMAN_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
+- `TINYHUMANS_API_KEY` (required): Neocortex/TinyHuman API key or JWT.
+- `TINYHUMANS_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
 
 3. When Claude Code starts, it will:
 
@@ -64,8 +64,8 @@ You can also use the adapter directly from TypeScript without MCP:
 import { ClaudeCodeNeocortexMemory } from "@neocortex/plugin-claude-code";
 
 const memory = new ClaudeCodeNeocortexMemory({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   defaultNamespace: "my-project",
 });
 

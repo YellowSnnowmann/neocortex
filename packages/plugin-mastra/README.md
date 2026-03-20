@@ -1,10 +1,10 @@
 # Neocortex Mastra Plugin
 
-TypeScript plugin for using **Neocortex (Alphahuman) memory** inside Mastra workflows/agents.
+TypeScript plugin for using **Neocortex (TinyHuman) memory** inside Mastra workflows/agents.
 
 This package is a small adapter that:
 
-- Calls the Alphahuman memory API directly (same contract as `sdk-typescript`)
+- Calls the TinyHuman memory API directly (same contract as `sdk-typescript`)
 - Exposes **tools** for saving, recalling, deleting, plus newer endpoints like documents, mirrored query/chat, interactions, sync, recall/thoughts, ingestion jobs, and graph snapshots
 
 ## Install
@@ -27,8 +27,8 @@ npm install @neocortex/plugin-mastra
 import { MastraNeocortexMemory, createNeocortexMastraTools } from "@neocortex/plugin-mastra";
 
 const memory = new MastraNeocortexMemory({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   defaultNamespace: "my-app", // optional
 });
 
@@ -43,8 +43,8 @@ import { Agent } from "@mastra/core/agent";
 import { createNeocortexMastraTools } from "@neocortex/plugin-mastra";
 
 const { neocortexSaveMemory, neocortexRecallMemory, neocortexDeleteMemory } = createNeocortexMastraTools({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL,
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL,
   defaultNamespace: "my-app",
 });
 
@@ -70,6 +70,6 @@ const agent = new Agent({
 
 ## Environment variables
 
-- `ALPHAHUMAN_API_KEY` (required): Bearer token for the Alphahuman backend
-- `ALPHAHUMAN_BASE_URL` (optional): Defaults to `https://staging-api.alphahuman.xyz`
+- `TINYHUMANS_API_KEY` (required): Bearer token for the TinyHuman backend
+- `TINYHUMANS_BASE_URL` (optional): Defaults to `https://api.tinyhumans.ai`
 

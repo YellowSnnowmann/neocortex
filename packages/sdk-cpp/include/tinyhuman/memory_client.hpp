@@ -3,20 +3,20 @@
 #include "types.hpp"
 #include <string>
 
-namespace alphahuman {
+namespace tinyhuman {
 
-class AlphahumanMemoryClient {
+class TinyHumanMemoryClient {
 public:
-    explicit AlphahumanMemoryClient(const std::string& token, const std::string& base_url = "");
-    ~AlphahumanMemoryClient();
+    explicit TinyHumanMemoryClient(const std::string& token, const std::string& base_url = "");
+    ~TinyHumanMemoryClient();
 
     // Non-copyable
-    AlphahumanMemoryClient(const AlphahumanMemoryClient&) = delete;
-    AlphahumanMemoryClient& operator=(const AlphahumanMemoryClient&) = delete;
+    TinyHumanMemoryClient(const TinyHumanMemoryClient&) = delete;
+    TinyHumanMemoryClient& operator=(const TinyHumanMemoryClient&) = delete;
 
     // Movable
-    AlphahumanMemoryClient(AlphahumanMemoryClient&& other) noexcept;
-    AlphahumanMemoryClient& operator=(AlphahumanMemoryClient&& other) noexcept;
+    TinyHumanMemoryClient(TinyHumanMemoryClient&& other) noexcept;
+    TinyHumanMemoryClient& operator=(TinyHumanMemoryClient&& other) noexcept;
 
     InsertMemoryResponse insert_memory(const InsertMemoryParams& params);
     RecallMemoryResponse recall_memory(const RecallMemoryParams& params = {});
@@ -34,4 +34,4 @@ private:
     void* curl_ = nullptr;
 };
 
-} // namespace alphahuman
+} // namespace tinyhuman

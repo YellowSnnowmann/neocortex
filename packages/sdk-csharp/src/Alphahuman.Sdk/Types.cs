@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Alphahuman.Sdk;
+namespace TinyHuman.Sdk;
 
 // ── Insert ──
 

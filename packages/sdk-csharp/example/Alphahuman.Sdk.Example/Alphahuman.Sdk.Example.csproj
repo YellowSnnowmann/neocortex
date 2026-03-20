@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Alphahuman.Sdk\Alphahuman.Sdk.csproj" />
+    <ProjectReference Include="..\..\src\TinyHuman.Sdk\TinyHuman.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

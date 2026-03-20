@@ -1,31 +1,31 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Alphahuman.Sdk;
+namespace TinyHuman.Sdk;
 
-public sealed class AlphahumanMemoryClient : IDisposable
+public sealed class TinyHumanMemoryClient : IDisposable
 {
-    private const string DefaultBaseUrl = "https://staging-api.alphahuman.xyz";
+    private const string DefaultBaseUrl = "https://api.tinyhumans.ai";
 
     private readonly string _token;
     private readonly string _baseUrl;
     private readonly HttpClient _httpClient;
     private bool _disposed;
 
-    public AlphahumanMemoryClient(string token, string? baseUrl = null)
+    public TinyHumanMemoryClient(string token, string? baseUrl = null)
     {
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("token is required");
 
         _token = token;
         _baseUrl = (baseUrl
-            ?? Environment.GetEnvironmentVariable("ALPHAHUMAN_BASE_URL")
+            ?? Environment.GetEnvironmentVariable("TINYHUMANS_BASE_URL")
             ?? DefaultBaseUrl).TrimEnd('/');
 
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     }
 
-    internal AlphahumanMemoryClient(string token, string baseUrl, HttpClient httpClient)
+    internal TinyHumanMemoryClient(string token, string baseUrl, HttpClient httpClient)
     {
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("token is required");
@@ -102,7 +102,7 @@ public sealed class AlphahumanMemoryClient : IDisposable
         }
         catch (JsonException)
         {
-            throw new AlphahumanError($"HTTP {statusCode}: non-JSON response", statusCode, body);
+            throw new TinyHumanError($"HTTP {statusCode}: non-JSON response", statusCode, body);
         }
 
         if (statusCode < 200 || statusCode >= 300)
@@ -110,7 +110,7 @@ public sealed class AlphahumanMemoryClient : IDisposable
             var message = root.TryGetProperty("error", out var err)
                 ? err.GetString() ?? $"HTTP {statusCode}"
                 : $"HTTP {statusCode}";
-            throw new AlphahumanError(message, statusCode, body);
+            throw new TinyHumanError(message, statusCode, body);
         }
 
         return root;

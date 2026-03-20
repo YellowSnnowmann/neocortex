@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Alphahuman.Sdk.Tests;
+namespace TinyHuman.Sdk.Tests;
 
 [Trait("Category", "Integration")]
 public class IntegrationTest
@@ -8,15 +8,15 @@ public class IntegrationTest
     [Fact]
     public async Task InsertRecallQueryDeleteLifecycle()
     {
-        var token = Environment.GetEnvironmentVariable("ALPHAHUMAN_TOKEN");
+        var token = Environment.GetEnvironmentVariable("TINYHUMANS_TOKEN");
         if (string.IsNullOrEmpty(token))
         {
-            // Skip: ALPHAHUMAN_TOKEN not set
+            // Skip: TINYHUMANS_TOKEN not set
             return;
         }
 
         var ns = $"integration-test-csharp-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
-        using var client = new AlphahumanMemoryClient(token);
+        using var client = new TinyHumanMemoryClient(token);
 
         // ── Insert ──
         var nowSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

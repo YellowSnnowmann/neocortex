@@ -4,11 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Alphahuman.Sdk</RootNamespace>
+    <RootNamespace>TinyHuman.Sdk</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Alphahuman.Sdk.Tests" />
+    <InternalsVisibleTo Include="TinyHuman.Sdk.Tests" />
   </ItemGroup>
 
 </Project>

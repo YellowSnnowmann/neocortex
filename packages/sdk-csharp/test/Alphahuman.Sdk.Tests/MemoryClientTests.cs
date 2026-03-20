@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Xunit;
 
-namespace Alphahuman.Sdk.Tests;
+namespace TinyHuman.Sdk.Tests;
 
 public class MemoryClientTests
 {
@@ -14,13 +14,13 @@ public class MemoryClientTests
     [InlineData("   ")]
     public void Constructor_RejectsInvalidToken(string? token)
     {
-        Assert.Throws<ArgumentException>(() => new AlphahumanMemoryClient(token!));
+        Assert.Throws<ArgumentException>(() => new TinyHumanMemoryClient(token!));
     }
 
     [Fact]
     public void Constructor_AcceptsValidToken()
     {
-        using var client = new AlphahumanMemoryClient("valid-token");
+        using var client = new TinyHumanMemoryClient("valid-token");
         Assert.NotNull(client);
     }
 
@@ -211,49 +211,49 @@ public class MemoryClientTests
     // ── Error handling ──
 
     [Fact]
-    public async Task ThrowsAlphahumanError_On401()
+    public async Task ThrowsTinyHumanError_On401()
     {
         var handler = new MockHttpMessageHandler(HttpStatusCode.Unauthorized,
             @"{""error"":""Unauthorized""}");
         using var client = CreateClient(handler);
 
-        var ex = await Assert.ThrowsAsync<AlphahumanError>(() =>
+        var ex = await Assert.ThrowsAsync<TinyHumanError>(() =>
             client.RecallMemoryAsync());
         Assert.Equal(401, ex.Status);
         Assert.Equal("Unauthorized", ex.Message);
     }
 
     [Fact]
-    public async Task ThrowsAlphahumanError_OnNonJsonResponse()
+    public async Task ThrowsTinyHumanError_OnNonJsonResponse()
     {
         var handler = new MockHttpMessageHandler(HttpStatusCode.BadGateway, "not json");
         using var client = CreateClient(handler);
 
-        var ex = await Assert.ThrowsAsync<AlphahumanError>(() =>
+        var ex = await Assert.ThrowsAsync<TinyHumanError>(() =>
             client.RecallMemoryAsync());
         Assert.Equal(502, ex.Status);
         Assert.Contains("non-JSON", ex.Message);
     }
 
     [Fact]
-    public async Task ThrowsAlphahumanError_On500()
+    public async Task ThrowsTinyHumanError_On500()
     {
         var handler = new MockHttpMessageHandler(HttpStatusCode.InternalServerError,
             @"{""error"":""Internal Server Error""}");
         using var client = CreateClient(handler);
 
-        var ex = await Assert.ThrowsAsync<AlphahumanError>(() =>
+        var ex = await Assert.ThrowsAsync<TinyHumanError>(() =>
             client.RecallMemoryAsync());
         Assert.Equal(500, ex.Status);
     }
 
     // ── Helpers ──
 
-    private static AlphahumanMemoryClient CreateClient(MockHttpMessageHandler? handler = null)
+    private static TinyHumanMemoryClient CreateClient(MockHttpMessageHandler? handler = null)
     {
         handler ??= new MockHttpMessageHandler(HttpStatusCode.OK,
             @"{""success"":true,""data"":{}}");
         var httpClient = new HttpClient(handler);
-        return new AlphahumanMemoryClient("test-token", "https://test.example.com", httpClient);
+        return new TinyHumanMemoryClient("test-token", "https://test.example.com", httpClient);
     }
 }

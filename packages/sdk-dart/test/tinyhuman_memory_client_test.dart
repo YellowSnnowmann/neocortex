@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
-import 'package:alphahuman_sdk/alphahuman_sdk.dart';
+import 'package:tinyhuman_sdk/tinyhuman_sdk.dart';
 
 MockClient mockClient(
   int statusCode,
@@ -18,12 +18,12 @@ MockClient mockClient(
   });
 }
 
-AlphahumanMemoryClient createClient({
+TinyHumanMemoryClient createClient({
   int statusCode = 200,
   String body = '{"success":true,"data":{}}',
   void Function(http.Request)? onRequest,
 }) {
-  return AlphahumanMemoryClient(
+  return TinyHumanMemoryClient(
     'test-token',
     baseUrl: 'https://test.example.com',
     httpClient: mockClient(statusCode, body, onRequest: onRequest),
@@ -36,7 +36,7 @@ void main() {
   group('Constructor', () {
     test('rejects empty token', () {
       expect(
-        () => AlphahumanMemoryClient('',
+        () => TinyHumanMemoryClient('',
             baseUrl: 'https://test.example.com',
             httpClient: mockClient(200, '{}')),
         throwsA(isA<ArgumentError>()),
@@ -45,7 +45,7 @@ void main() {
 
     test('rejects whitespace token', () {
       expect(
-        () => AlphahumanMemoryClient('   ',
+        () => TinyHumanMemoryClient('   ',
             baseUrl: 'https://test.example.com',
             httpClient: mockClient(200, '{}')),
         throwsA(isA<ArgumentError>()),
@@ -282,7 +282,7 @@ void main() {
   // ── Error handling ──
 
   group('error handling', () {
-    test('throws AlphahumanError on 401', () async {
+    test('throws TinyHumanError on 401', () async {
       final client = createClient(
         statusCode: 401,
         body: '{"error":"Unauthorized"}',
@@ -291,13 +291,13 @@ void main() {
       try {
         await client.recallMemory();
         fail('should have thrown');
-      } on AlphahumanError catch (e) {
+      } on TinyHumanError catch (e) {
         expect(e.status, equals(401));
         expect(e.message, equals('Unauthorized'));
       }
     });
 
-    test('throws AlphahumanError on non-JSON response', () async {
+    test('throws TinyHumanError on non-JSON response', () async {
       final client = createClient(
         statusCode: 502,
         body: 'not json',
@@ -306,13 +306,13 @@ void main() {
       try {
         await client.recallMemory();
         fail('should have thrown');
-      } on AlphahumanError catch (e) {
+      } on TinyHumanError catch (e) {
         expect(e.status, equals(502));
         expect(e.message, contains('non-JSON'));
       }
     });
 
-    test('throws AlphahumanError on 500', () async {
+    test('throws TinyHumanError on 500', () async {
       final client = createClient(
         statusCode: 500,
         body: '{"error":"Internal Server Error"}',
@@ -321,7 +321,7 @@ void main() {
       try {
         await client.recallMemory();
         fail('should have thrown');
-      } on AlphahumanError catch (e) {
+      } on TinyHumanError catch (e) {
         expect(e.status, equals(500));
       }
     });

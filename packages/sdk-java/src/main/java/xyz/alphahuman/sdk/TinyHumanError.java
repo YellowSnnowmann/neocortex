@@ -1,20 +1,20 @@
-package xyz.alphahuman.sdk;
+package xyz.tinyhuman.sdk;
 
 /**
- * Thrown when the Alphahuman API returns a non-2xx response or a non-JSON body.
+ * Thrown when the TinyHuman API returns a non-2xx response or a non-JSON body.
  */
-public class AlphahumanError extends RuntimeException {
+public class TinyHumanError extends RuntimeException {
 
     private final int status;
     private final Object body;
 
-    public AlphahumanError(String message, int status, Object body) {
+    public TinyHumanError(String message, int status, Object body) {
         super(message);
         this.status = status;
         this.body = body;
     }
 
-    public AlphahumanError(String message, int status) {
+    public TinyHumanError(String message, int status) {
         this(message, status, null);
     }
 

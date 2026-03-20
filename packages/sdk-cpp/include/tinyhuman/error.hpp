@@ -3,11 +3,11 @@
 #include <stdexcept>
 #include <string>
 
-namespace alphahuman {
+namespace tinyhuman {
 
-class AlphahumanError : public std::runtime_error {
+class TinyHumanError : public std::runtime_error {
 public:
-    AlphahumanError(const std::string& message, int status, const std::string& body = "")
+    TinyHumanError(const std::string& message, int status, const std::string& body = "")
         : std::runtime_error(message), status_(status), body_(body) {}
 
     int status() const noexcept { return status_; }
@@ -18,4 +18,4 @@ private:
     std::string body_;
 };
 
-} // namespace alphahuman
+} // namespace tinyhuman

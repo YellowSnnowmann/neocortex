@@ -17,8 +17,8 @@ export class NeocortexMemoryClient {
     this.token = config.token;
     this.logger = config.logger;
 
-    const envBase = typeof process !== "undefined" ? process.env.ALPHAHUMAN_BASE_URL : undefined;
-    const baseUrl = config.baseUrl ?? envBase ?? "https://staging-api.alphahuman.xyz";
+    const envBase = typeof process !== "undefined" ? process.env.TINYHUMANS_BASE_URL : undefined;
+    const baseUrl = config.baseUrl ?? envBase ?? "https://api.tinyhumans.ai";
     this.baseUrl = baseUrl.replace(/\/+$/, "");
   }
 

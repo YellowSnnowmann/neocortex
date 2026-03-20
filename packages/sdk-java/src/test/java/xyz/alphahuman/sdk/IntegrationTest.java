@@ -1,4 +1,4 @@
-package xyz.alphahuman.sdk;
+package xyz.tinyhuman.sdk;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -7,15 +7,15 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@EnabledIfEnvironmentVariable(named = "ALPHAHUMAN_TOKEN", matches = ".+")
+@EnabledIfEnvironmentVariable(named = "TINYHUMANS_TOKEN", matches = ".+")
 class IntegrationTest {
 
     @Test
     void insertRecallQueryDeleteLifecycle() throws InterruptedException {
-        String token = System.getenv("ALPHAHUMAN_TOKEN");
+        String token = System.getenv("TINYHUMANS_TOKEN");
         String namespace = "integration-test-java-" + System.nanoTime();
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient(token)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient(token)) {
 
             // --- Insert ---
             long now = System.currentTimeMillis() / 1000;

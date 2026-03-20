@@ -10,11 +10,11 @@ from neocortex_keywordsai import NeocortexMemoryTools
 
 def main():
     load_dotenv()
-    alpha_token = os.getenv("ALPHAHUMAN_API_KEY")
+    alpha_token = os.getenv("TINYHUMANS_API_KEY")
     kw_token = os.getenv("KEYWORDSAI_API_KEY")
 
     if not alpha_token or not kw_token:
-        print("Please set ALPHAHUMAN_API_KEY and KEYWORDSAI_API_KEY")
+        print("Please set TINYHUMANS_API_KEY and KEYWORDSAI_API_KEY")
         return
 
     # Initialize Memory Client

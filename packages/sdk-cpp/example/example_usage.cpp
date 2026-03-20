@@ -1,4 +1,4 @@
-#include "alphahuman/alphahuman.hpp"
+#include "tinyhuman/tinyhuman.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -6,15 +6,15 @@
 #include <thread>
 
 int main() {
-    const char* token = std::getenv("ALPHAHUMAN_TOKEN");
+    const char* token = std::getenv("TINYHUMANS_TOKEN");
     if (!token) {
-        std::cerr << "Set ALPHAHUMAN_TOKEN environment variable" << std::endl;
+        std::cerr << "Set TINYHUMANS_TOKEN environment variable" << std::endl;
         return 1;
     }
 
-    using namespace alphahuman;
+    using namespace tinyhuman;
 
-    AlphahumanMemoryClient client(token);
+    TinyHumanMemoryClient client(token);
     std::string ns = "example-cpp";
 
     // Insert a memory

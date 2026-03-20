@@ -13,11 +13,11 @@ from neocortex_vercelai import NeocortexMemoryTools
 
 async def main():
     load_dotenv()
-    token = os.getenv("ALPHAHUMAN_API_KEY")
+    token = os.getenv("TINYHUMANS_API_KEY")
     openai_key = os.getenv("OPENAI_API_KEY")
     
     if not token or not openai_key:
-        print("Please set ALPHAHUMAN_API_KEY and OPENAI_API_KEY")
+        print("Please set TINYHUMANS_API_KEY and OPENAI_API_KEY")
         return
 
     # Initialize Memory Client

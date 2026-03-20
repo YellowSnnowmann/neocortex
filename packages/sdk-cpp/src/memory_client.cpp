@@ -1,14 +1,14 @@
-#include "alphahuman/memory_client.hpp"
-#include "alphahuman/error.hpp"
+#include "tinyhuman/memory_client.hpp"
+#include "tinyhuman/error.hpp"
 
 #include <curl/curl.h>
 #include <cstdlib>
 #include <mutex>
 
-namespace alphahuman {
+namespace tinyhuman {
 
-static const char* DEFAULT_BASE_URL = "https://staging-api.alphahuman.xyz";
-static const char* TINYHUMANS_BASE_URL = "ALPHAHUMAN_BASE_URL";
+static const char* DEFAULT_BASE_URL = "https://api.tinyhumans.ai";
+static const char* TINYHUMANS_BASE_URL = "TINYHUMANS_BASE_URL";
 
 static void global_curl_init() {
     static std::once_flag flag;
@@ -20,7 +20,7 @@ static void global_curl_init() {
 
 // ---- Write callback ----
 
-size_t AlphahumanMemoryClient::write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
+size_t TinyHumanMemoryClient::write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
     auto* buf = static_cast<std::string*>(userdata);
     buf->append(ptr, size * nmemb);
     return size * nmemb;
@@ -28,7 +28,7 @@ size_t AlphahumanMemoryClient::write_callback(char* ptr, size_t size, size_t nme
 
 // ---- Constructor / Destructor ----
 
-AlphahumanMemoryClient::AlphahumanMemoryClient(const std::string& token, const std::string& base_url)
+TinyHumanMemoryClient::TinyHumanMemoryClient(const std::string& token, const std::string& base_url)
     : token_(token) {
     if (token.empty() || token.find_first_not_of(" \t\n\r") == std::string::npos) {
         throw std::invalid_argument("token is required");
@@ -58,21 +58,21 @@ AlphahumanMemoryClient::AlphahumanMemoryClient(const std::string& token, const s
     }
 }
 
-AlphahumanMemoryClient::~AlphahumanMemoryClient() {
+TinyHumanMemoryClient::~TinyHumanMemoryClient() {
     if (curl_) {
         curl_easy_cleanup(static_cast<CURL*>(curl_));
         curl_ = nullptr;
     }
 }
 
-AlphahumanMemoryClient::AlphahumanMemoryClient(AlphahumanMemoryClient&& other) noexcept
+TinyHumanMemoryClient::TinyHumanMemoryClient(TinyHumanMemoryClient&& other) noexcept
     : base_url_(std::move(other.base_url_)),
       token_(std::move(other.token_)),
       curl_(other.curl_) {
     other.curl_ = nullptr;
 }
 
-AlphahumanMemoryClient& AlphahumanMemoryClient::operator=(AlphahumanMemoryClient&& other) noexcept {
+TinyHumanMemoryClient& TinyHumanMemoryClient::operator=(TinyHumanMemoryClient&& other) noexcept {
     if (this != &other) {
         if (curl_) {
             curl_easy_cleanup(static_cast<CURL*>(curl_));
@@ -87,7 +87,7 @@ AlphahumanMemoryClient& AlphahumanMemoryClient::operator=(AlphahumanMemoryClient
 
 // ---- HTTP ----
 
-json AlphahumanMemoryClient::post(const std::string& path, const json& body) {
+json TinyHumanMemoryClient::post(const std::string& path, const json& body) {
     auto* handle = static_cast<CURL*>(curl_);
     std::string url = base_url_ + path;
     std::string request_body = body.dump();
@@ -122,12 +122,12 @@ json AlphahumanMemoryClient::post(const std::string& path, const json& body) {
     return handle_response(http_code, response_body);
 }
 
-json AlphahumanMemoryClient::handle_response(long http_code, const std::string& response_body) {
+json TinyHumanMemoryClient::handle_response(long http_code, const std::string& response_body) {
     json parsed;
     try {
         parsed = response_body.empty() ? json::object() : json::parse(response_body);
     } catch (const json::parse_error&) {
-        throw AlphahumanError(
+        throw TinyHumanError(
             "HTTP " + std::to_string(http_code) + ": non-JSON response",
             static_cast<int>(http_code),
             response_body
@@ -139,7 +139,7 @@ json AlphahumanMemoryClient::handle_response(long http_code, const std::string& 
         if (parsed.contains("error") && parsed["error"].is_string()) {
             message = parsed["error"].get<std::string>();
         }
-        throw AlphahumanError(message, static_cast<int>(http_code), response_body);
+        throw TinyHumanError(message, static_cast<int>(http_code), response_body);
     }
 
     return parsed;
@@ -147,34 +147,34 @@ json AlphahumanMemoryClient::handle_response(long http_code, const std::string& 
 
 // ---- API methods ----
 
-InsertMemoryResponse AlphahumanMemoryClient::insert_memory(const InsertMemoryParams& params) {
+InsertMemoryResponse TinyHumanMemoryClient::insert_memory(const InsertMemoryParams& params) {
     json body = params.to_json();
     json resp = post("/v1/memory/insert", body);
     return InsertMemoryResponse::from_json(resp);
 }
 
-RecallMemoryResponse AlphahumanMemoryClient::recall_memory(const RecallMemoryParams& params) {
+RecallMemoryResponse TinyHumanMemoryClient::recall_memory(const RecallMemoryParams& params) {
     json body = params.to_json();
     json resp = post("/v1/memory/recall", body);
     return RecallMemoryResponse::from_json(resp);
 }
 
-DeleteMemoryResponse AlphahumanMemoryClient::delete_memory(const DeleteMemoryParams& params) {
+DeleteMemoryResponse TinyHumanMemoryClient::delete_memory(const DeleteMemoryParams& params) {
     json body = params.to_json();
     json resp = post("/v1/memory/admin/delete", body);
     return DeleteMemoryResponse::from_json(resp);
 }
 
-QueryMemoryResponse AlphahumanMemoryClient::query_memory(const QueryMemoryParams& params) {
+QueryMemoryResponse TinyHumanMemoryClient::query_memory(const QueryMemoryParams& params) {
     json body = params.to_json();
     json resp = post("/v1/memory/query", body);
     return QueryMemoryResponse::from_json(resp);
 }
 
-RecallMemoriesResponse AlphahumanMemoryClient::recall_memories(const RecallMemoriesParams& params) {
+RecallMemoriesResponse TinyHumanMemoryClient::recall_memories(const RecallMemoriesParams& params) {
     json body = params.to_json();
     json resp = post("/v1/memory/memories/recall", body);
     return RecallMemoriesResponse::from_json(resp);
 }
 
-} // namespace alphahuman
+} // namespace tinyhuman

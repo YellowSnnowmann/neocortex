@@ -1,9 +1,9 @@
-using Alphahuman.Sdk;
+using TinyHuman.Sdk;
 
-var token = Environment.GetEnvironmentVariable("ALPHAHUMAN_TOKEN")
-    ?? throw new InvalidOperationException("Set ALPHAHUMAN_TOKEN environment variable");
+var token = Environment.GetEnvironmentVariable("TINYHUMANS_TOKEN")
+    ?? throw new InvalidOperationException("Set TINYHUMANS_TOKEN environment variable");
 
-using var client = new AlphahumanMemoryClient(token);
+using var client = new TinyHumanMemoryClient(token);
 var ns = $"example-csharp-{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
 
 // Insert a memory

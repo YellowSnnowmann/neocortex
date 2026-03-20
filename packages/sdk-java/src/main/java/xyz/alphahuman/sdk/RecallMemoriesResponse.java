@@ -1,4 +1,4 @@
-package xyz.alphahuman.sdk;
+package xyz.tinyhuman.sdk;
 
 import java.util.Collections;
 import java.util.List;

@@ -2,7 +2,7 @@ plugins {
     `java-library`
 }
 
-group = "xyz.alphahuman"
+group = "xyz.tinyhuman"
 version = "0.1.0"
 
 java {

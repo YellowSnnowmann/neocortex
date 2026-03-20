@@ -10,9 +10,13 @@ import logging
 import os
 import time
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
 
-load_dotenv()
+    load_dotenv()
+except Exception:
+    # Optional dependency: run with plain environment variables if python-dotenv is not installed.
+    pass
 if os.environ.get("TINYHUMANSAI_LOG_LEVEL") and not logging.getLogger().handlers:
     logging.basicConfig(level=logging.INFO)
 
@@ -240,10 +244,16 @@ try:
     if job_id:
         ingestion_job = client.get_ingestion_job(job_id=job_id)
         print("get_ingestion_job:", ingestion_job)
+        waited_job = client.wait_for_ingestion_job(
+            job_id=job_id,
+            timeout_seconds=30,
+            poll_interval_seconds=1,
+        )
+        print("wait_for_ingestion_job:", waited_job)
     else:
-        print("get_ingestion_job skipped (no jobId returned).")
+        print("get_ingestion_job/wait_for_ingestion_job skipped (no jobId returned).")
 except Exception as e:
-    print("get_ingestion_job failed (optional):", e)
+    print("get_ingestion_job/wait_for_ingestion_job failed (optional):", e)
 
 try:
     client.delete_document(document_id=document_id_single, namespace=docs_ns)

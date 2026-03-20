@@ -1,6 +1,6 @@
 # plugin-keywords-ai
 
-Neocortex (Alphahuman) memory integrations for the Keywords AI platform, providing standard OpenAI-compatible JSON tool schemas.
+Neocortex (TinyHuman) memory integrations for the Keywords AI platform, providing standard OpenAI-compatible JSON tool schemas.
 
 ## Features
 
@@ -19,7 +19,7 @@ pip install neocortex-keywordsai
 
 Set your API keys:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 export KEYWORDSAI_API_KEY="your_keywords_token"
 ```
 
@@ -36,7 +36,7 @@ from neocortex_keywordsai import NeocortexMemoryTools
 
 # Initialize
 kw_client = KeywordsAI(api_key=os.getenv("KEYWORDSAI_API_KEY"))
-memory_client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+memory_client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 memory_wrapper = NeocortexMemoryTools(client=memory_client, default_namespace="my_session")
 
 # Get definitions and caller dictionary

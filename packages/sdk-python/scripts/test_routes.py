@@ -92,12 +92,12 @@ def main() -> int:
     env_file = Path(env("ENV_FILE") or pkg_root / ".env")
     load_env_file(env_file)
 
-    token = env("TINYHUMANS_TOKEN", "ALPHAHUMAN_TOKEN")
+    token = env("TINYHUMANS_TOKEN", "TINYHUMANS_TOKEN")
     if not token:
-        print("Missing token. Set TINYHUMANS_TOKEN (or ALPHAHUMAN_TOKEN).", file=sys.stderr)
+        print("Missing token. Set TINYHUMANS_TOKEN (or TINYHUMANS_TOKEN).", file=sys.stderr)
         return 2
 
-    base_url = env("TINYHUMANS_BASE_URL", "ALPHAHUMAN_BASE_URL")
+    base_url = env("TINYHUMANS_BASE_URL", "TINYHUMANS_BASE_URL")
     model_id = env("TINYHUMANS_MODEL_ID") or "neocortex-mk1"
 
     ts = int(time.time())

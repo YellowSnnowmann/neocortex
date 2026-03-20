@@ -1,5 +1,5 @@
-name: alphahuman_sdk
-description: Dart SDK for the Alphahuman Memory API.
+name: tinyhuman_sdk
+description: Dart SDK for the TinyHuman Memory API.
 version: 0.1.0
 
 environment:

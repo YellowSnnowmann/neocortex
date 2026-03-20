@@ -1,4 +1,4 @@
-package xyz.alphahuman.sdk;
+package xyz.tinyhuman.sdk;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.*;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AlphahumanMemoryClientTest {
+class TinyHumanMemoryClientTest {
 
     private HttpServer server;
     private String baseUrl;
@@ -32,22 +32,22 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void constructorRejectsNullToken() {
-        assertThrows(IllegalArgumentException.class, () -> new AlphahumanMemoryClient(null));
+        assertThrows(IllegalArgumentException.class, () -> new TinyHumanMemoryClient(null));
     }
 
     @Test
     void constructorRejectsEmptyToken() {
-        assertThrows(IllegalArgumentException.class, () -> new AlphahumanMemoryClient(""));
+        assertThrows(IllegalArgumentException.class, () -> new TinyHumanMemoryClient(""));
     }
 
     @Test
     void constructorRejectsWhitespaceToken() {
-        assertThrows(IllegalArgumentException.class, () -> new AlphahumanMemoryClient("   "));
+        assertThrows(IllegalArgumentException.class, () -> new TinyHumanMemoryClient("   "));
     }
 
     @Test
     void constructorAcceptsValidToken() {
-        AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl);
+        TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl);
         assertNotNull(client);
         client.close();
     }
@@ -74,7 +74,7 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             InsertMemoryResponse resp = client.insertMemory(
                     new InsertMemoryParams("title", "content", "ns"));
             assertTrue(resp.isSuccess());
@@ -84,7 +84,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void insertMemoryValidatesMissingTitle() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.insertMemory(new InsertMemoryParams(null, "content", "ns")));
         }
@@ -92,7 +92,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void insertMemoryValidatesMissingContent() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.insertMemory(new InsertMemoryParams("title", null, "ns")));
         }
@@ -100,7 +100,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void insertMemoryValidatesMissingNamespace() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.insertMemory(new InsertMemoryParams("title", "content", null)));
         }
@@ -118,7 +118,7 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             RecallMemoryResponse resp = client.recallMemory(new RecallMemoryParams());
             assertTrue(resp.isSuccess());
             assertFalse(resp.isCached());
@@ -128,7 +128,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void recallMemoryValidatesMaxChunks() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             RecallMemoryParams params = new RecallMemoryParams().setMaxChunks(0);
             assertThrows(IllegalArgumentException.class, () -> client.recallMemory(params));
 
@@ -149,7 +149,7 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             DeleteMemoryResponse resp = client.deleteMemory(new DeleteMemoryParams().setNamespace("test"));
             assertTrue(resp.isSuccess());
             assertEquals(5, resp.getNodesDeleted());
@@ -173,7 +173,7 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             QueryMemoryResponse resp = client.queryMemory(new QueryMemoryParams("what?"));
             assertTrue(resp.isSuccess());
             assertTrue(resp.isCached());
@@ -183,7 +183,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void queryMemoryValidatesMissingQuery() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.queryMemory(new QueryMemoryParams()));
         }
@@ -191,7 +191,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void queryMemoryValidatesMaxChunksRange() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.queryMemory(new QueryMemoryParams("q").setMaxChunks(0)));
             assertThrows(IllegalArgumentException.class, () ->
@@ -211,7 +211,7 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             RecallMemoriesResponse resp = client.recallMemories(new RecallMemoriesParams());
             assertTrue(resp.isSuccess());
             assertEquals(1, resp.getMemories().size());
@@ -221,7 +221,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void recallMemoriesValidatesTopK() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.recallMemories(new RecallMemoriesParams().setTopK(0)));
             assertThrows(IllegalArgumentException.class, () ->
@@ -231,7 +231,7 @@ class AlphahumanMemoryClientTest {
 
     @Test
     void recallMemoriesValidatesMinRetention() {
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
             assertThrows(IllegalArgumentException.class, () ->
                     client.recallMemories(new RecallMemoriesParams().setMinRetention(-0.1)));
         }
@@ -240,7 +240,7 @@ class AlphahumanMemoryClientTest {
     // ---- Error handling ----
 
     @Test
-    void nonOkStatusThrowsAlphahumanError() {
+    void nonOkStatusThrowsTinyHumanError() {
         server.createContext("/v1/memory/recall", exchange -> {
             String response = "{\"error\":\"unauthorized\"}";
             exchange.sendResponseHeaders(401, response.length());
@@ -249,8 +249,8 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
-            AlphahumanError err = assertThrows(AlphahumanError.class, () ->
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
+            TinyHumanError err = assertThrows(TinyHumanError.class, () ->
                     client.recallMemory(new RecallMemoryParams()));
             assertEquals(401, err.getStatus());
             assertEquals("unauthorized", err.getMessage());
@@ -258,7 +258,7 @@ class AlphahumanMemoryClientTest {
     }
 
     @Test
-    void nonJsonResponseThrowsAlphahumanError() {
+    void nonJsonResponseThrowsTinyHumanError() {
         server.createContext("/v1/memory/recall", exchange -> {
             String response = "not json";
             exchange.sendResponseHeaders(200, response.length());
@@ -267,8 +267,8 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
-            AlphahumanError err = assertThrows(AlphahumanError.class, () ->
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
+            TinyHumanError err = assertThrows(TinyHumanError.class, () ->
                     client.recallMemory(new RecallMemoryParams()));
             assertEquals(200, err.getStatus());
             assertTrue(err.getMessage().contains("non-JSON"));
@@ -285,8 +285,8 @@ class AlphahumanMemoryClientTest {
             }
         });
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient("test-token", baseUrl)) {
-            AlphahumanError err = assertThrows(AlphahumanError.class, () ->
+        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient("test-token", baseUrl)) {
+            TinyHumanError err = assertThrows(TinyHumanError.class, () ->
                     client.insertMemory(new InsertMemoryParams("t", "c", "n")));
             assertEquals(500, err.getStatus());
             assertTrue(err.getMessage().contains("500"));

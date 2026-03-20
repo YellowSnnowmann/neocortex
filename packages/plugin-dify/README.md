@@ -1,6 +1,6 @@
 # plugin-dify
 
-Neocortex (Alphahuman) memory tool extension for Dify AI.
+Neocortex (TinyHuman) memory tool extension for Dify AI.
 
 ## Features
 
@@ -19,7 +19,7 @@ This package is structured as a Dify Tool Plugin.
    dify plugin package neocortex_dify
    ```
 3. Upload the resulting `.difypkg` file to your Dify instance via the "Plugins" page in the dashboard.
-4. When configuring the plugin in Dify, provide your `alphahuman_api_key` and an optional `default_namespace`.
+4. When configuring the plugin in Dify, provide your `tinyhuman_api_key` and an optional `default_namespace`.
 
 ## Local Testing
 

@@ -1,5 +1,5 @@
-// Alphahuman Memory SDK for TypeScript
-// Aligned with AlphaHuman backend API: insert, query, admin/delete, recall, memories/recall, chat, thought, interact, etc.
+// TinyHuman Memory SDK for TypeScript
+// Aligned with TinyHuman backend API: insert, query, admin/delete, recall, memories/recall, chat, thought, interact, etc.
 
 const DEFAULT_BASE_URL = "https://api.tinyhumans.ai";
 
@@ -13,7 +13,7 @@ function getEnvBaseUrl(): string | undefined {
     const env = (
       g as { process?: { env?: Record<string, string | undefined> } }
     )?.process?.env;
-    return env?.TINYHUMANS_BASE_URL ?? env?.ALPHAHUMAN_BASE_URL;
+    return env?.TINYHUMANS_BASE_URL ?? env?.TINYHUMANS_BASE_URL;
   } catch {
     return undefined;
   }
@@ -21,10 +21,10 @@ function getEnvBaseUrl(): string | undefined {
 
 // ---------- Config ----------
 
-export interface AlphahumanConfig {
+export interface TinyHumanConfig {
   /** Bearer token (API key or JWT) for authentication */
   token: string;
-  /** Base URL of the Alphahuman backend. If omitted, uses TINYHUMANS_BASE_URL env or default API URL */
+  /** Base URL of the TinyHuman backend. If omitted, uses TINYHUMANS_BASE_URL env or default API URL */
   baseUrl?: string;
 }
 
@@ -357,13 +357,13 @@ export interface ErrorResponse {
   error: string;
 }
 
-export class AlphahumanError extends Error {
+export class TinyHumanError extends Error {
   public readonly status: number;
   public readonly body: unknown;
 
   constructor(message: string, status: number, body?: unknown) {
     super(message);
-    this.name = "AlphahumanError";
+    this.name = "TinyHumanError";
     this.status = status;
     this.body = body;
   }
@@ -371,11 +371,11 @@ export class AlphahumanError extends Error {
 
 // ---------- Client ----------
 
-export class AlphahumanMemoryClient {
+export class TinyHumanMemoryClient {
   private readonly baseUrl: string;
   private readonly token: string;
 
-  constructor(config: AlphahumanConfig) {
+  constructor(config: TinyHumanConfig) {
     if (!config.token || !config.token.trim())
       throw new Error("token is required");
     const baseUrl = config.baseUrl ?? getEnvBaseUrl() ?? DEFAULT_BASE_URL;
@@ -712,7 +712,7 @@ export class AlphahumanMemoryClient {
     try {
       json = text ? JSON.parse(text) : {};
     } catch {
-      throw new AlphahumanError(
+      throw new TinyHumanError(
         `HTTP ${res.status}: non-JSON response`,
         res.status,
         text || undefined,
@@ -720,7 +720,7 @@ export class AlphahumanMemoryClient {
     }
     if (!res.ok) {
       const message = (json as ErrorResponse).error ?? `HTTP ${res.status}`;
-      throw new AlphahumanError(message, res.status, json);
+      throw new TinyHumanError(message, res.status, json);
     }
     return json as T;
   }
@@ -730,4 +730,4 @@ export class AlphahumanMemoryClient {
   }
 }
 
-export default AlphahumanMemoryClient;
+export default TinyHumanMemoryClient;

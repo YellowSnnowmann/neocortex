@@ -3,10 +3,10 @@ package tinyhumans
 
 const (
 	// DefaultBaseURL is the default API endpoint.
-	DefaultBaseURL = "https://staging-api.alphahuman.xyz"
+	DefaultBaseURL = "https://api.tinyhumans.ai"
 
 	// BaseURLEnv is the environment variable name for overriding the base URL.
-	BaseURLEnv = "ALPHAHUMAN_BASE_URL"
+	BaseURLEnv = "TINYHUMANS_BASE_URL"
 )
 
 // MemoryItem represents a single memory item to ingest.

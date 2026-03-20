@@ -54,17 +54,17 @@ type OpenClawPluginApi = {
 };
 
 const DEFAULTS = {
-    providerId: 'alphahuman',
-    providerLabel: 'Alphahuman',
-    providerAlias: 'being-alphahuman',
+    providerId: 'tinyhuman',
+    providerLabel: 'TinyHuman',
+    providerAlias: 'being-tinyhuman',
     docsPath: '/providers/models',
     baseUrl: 'http://localhost:3000/openai/v1',
-    apiKeyEnvVar: 'ALPHAHUMAN_API_KEY',
+    apiKeyEnvVar: 'TINYHUMANS_API_KEY',
     modelId: 'neocortex-mk1',
     modelName: 'Neocortex MK1',
     memorySyncEnabled: true,
     memorySyncPath: '/memory/sync',
-    memorySyncApiKeyEnvVar: 'ALPHAHUMAN_API_KEY',
+    memorySyncApiKeyEnvVar: 'TINYHUMANS_API_KEY',
     memorySyncTimeoutMs: 15000,
 } as const;
 
@@ -180,8 +180,8 @@ const saveState = async (filePath: string, state: SyncState): Promise<void> => {
 
 const plugin = {
     id: 'openclaw-model-provider',
-    name: 'Alphahuman Model Provider',
-    description: 'Registers Alphahuman model provider and syncs OpenClaw memory to backend',
+    name: 'TinyHuman Model Provider',
+    description: 'Registers TinyHuman model provider and syncs OpenClaw memory to backend',
     configSchema: { parse: readConfig } as const,
     register(api: OpenClawPluginApi) {
         const cfg = readConfig(api.pluginConfig);
@@ -313,12 +313,12 @@ const plugin = {
                 {
                     id: 'api-key',
                     label: 'API Key / JWT',
-                    hint: 'Get your token from the Alphahuman backend (see README)',
+                    hint: 'Get your token from the TinyHuman backend (see README)',
                     kind: 'api_key',
                     run: async (ctx: ProviderAuthContext): Promise<ProviderAuthResult> => {
                         const rawUrl = await ctx.prompter.text({
                             message:
-                                'Alphahuman backend URL (e.g. https://api.yourapp.com or http://localhost:5000)',
+                                'TinyHuman backend URL (e.g. https://api.yourapp.com or http://localhost:5000)',
                             validate: v => {
                                 const s = v.trim();
                                 if (!s) return 'Backend URL is required';
@@ -351,7 +351,7 @@ const plugin = {
                             defaultModel: modelRef,
                             notes: [
                                 `Backend: ${backendOrigin}`,
-                                `Token stored. Also add to ~/.openclaw/.env: ALPHAHUMAN_API_KEY=<token>`,
+                                `Token stored. Also add to ~/.openclaw/.env: TINYHUMANS_API_KEY=<token>`,
                             ],
                             configPatch: {
                                 models: {
@@ -375,7 +375,7 @@ const plugin = {
         });
 
         api.registerService({
-            id: 'alphahuman-memory-sync',
+            id: 'tinyhuman-memory-sync',
             start: async ctx => {
                 workspaceDir = ctx.workspaceDir ?? '';
                 statePath = path.join(ctx.stateDir, stateFileName);

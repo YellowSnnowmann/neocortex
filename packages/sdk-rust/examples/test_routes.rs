@@ -132,16 +132,16 @@ async fn main() {
     let env_file = std::env::var("ENV_FILE").unwrap_or_else(|_| ".env".to_string());
     load_env_file(Path::new(&env_file));
 
-    let token = match env_any(&["TINYHUMANS_TOKEN", "ALPHAHUMAN_TOKEN"]) {
+    let token = match env_any(&["TINYHUMANS_TOKEN", "TINYHUMANS_TOKEN"]) {
         Some(v) => v,
         None => {
-            eprintln!("Missing token. Set TINYHUMANS_TOKEN or ALPHAHUMAN_TOKEN.");
+            eprintln!("Missing token. Set TINYHUMANS_TOKEN or TINYHUMANS_TOKEN.");
             std::process::exit(2);
         }
     };
 
     let mut cfg = TinyHumanConfig::new(token);
-    if let Some(base_url) = env_any(&["TINYHUMANS_BASE_URL", "ALPHAHUMAN_BASE_URL"]) {
+    if let Some(base_url) = env_any(&["TINYHUMANS_BASE_URL", "TINYHUMANS_BASE_URL"]) {
         cfg = cfg.with_base_url(base_url);
     }
 

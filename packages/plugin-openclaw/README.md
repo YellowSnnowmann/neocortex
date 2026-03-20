@@ -1,10 +1,10 @@
-# OpenClaw Alphahuman Model + Memory Sync Plugin
+# OpenClaw TinyHuman Model + Memory Sync Plugin
 
-Connect any Alphahuman backend — hosted or local — to OpenClaw as a model provider. Any user with a backend URL and a valid token can install and use this plugin without touching any code.
+Connect any TinyHuman backend — hosted or local — to OpenClaw as a model provider. Any user with a backend URL and a valid token can install and use this plugin without touching any code.
 
 The plugin:
 
-- Registers `alphahuman/neocortex-mk1` as a model in OpenClaw
+- Registers `tinyhuman/neocortex-mk1` as a model in OpenClaw
 - Syncs workspace memory (MEMORY.md, memory/\*.md) to your backend after every agent run
 
 ---
@@ -22,7 +22,7 @@ Requires OpenClaw `>= 2026.2.0`.
 ### 2. Install and enable the plugin
 
 ```bash
-openclaw plugins install -l ./openclaw-plugin-alphahuman-model
+openclaw plugins install -l ./openclaw-plugin-tinyhuman-model
 openclaw plugins enable openclaw-model-provider
 ```
 
@@ -31,14 +31,14 @@ openclaw plugins enable openclaw-model-provider
 This is the easiest way to set up — it asks for your backend URL and token, then writes the config automatically:
 
 ```bash
-openclaw models auth login --provider alphahuman
+openclaw models auth login --provider tinyhuman
 ```
 
 You will be prompted for:
 
-1. **Backend URL** — the root URL of your Alphahuman backend:
+1. **Backend URL** — the root URL of your TinyHuman backend:
 
-   - Hosted/production: `https://staging-api.alphahuman.xyz`
+   - Hosted/production: `https://api.tinyhumans.ai`
    - Local: `http://localhost:5000`
 
 2. **JWT or API key** — your auth token.
@@ -48,7 +48,7 @@ The command updates `~/.openclaw/openclaw.json` with the correct `baseUrl` and `
 Then save the token to `~/.openclaw/.env` so OpenClaw can load it on every run:
 
 ```bash
-echo 'ALPHAHUMAN_API_KEY=<your-token>' >> ~/.openclaw/.env
+echo 'TINYHUMANS_API_KEY=<your-token>' >> ~/.openclaw/.env
 ```
 
 ### 4. Start and run
@@ -61,7 +61,7 @@ openclaw gateway &
 openclaw agent --agent main --message "Hello"
 ```
 
-You should see `alphahuman/neocortex-mk1` in `openclaw models list` and get a reply.
+You should see `tinyhuman/neocortex-mk1` in `openclaw models list` and get a reply.
 
 ---
 
@@ -74,7 +74,7 @@ The backend accepts a **JWT** (expires in 30 days) or a **permanent API key** as
 From the backend repo root, run the token generator. It looks up or creates a user by Telegram ID and prints a 30-day JWT:
 
 ```bash
-cd /path/to/backend-alphahuman
+cd /path/to/backend-tinyhuman
 yarn run:dev src/scripts/generateUserToken.ts YOUR_TELEGRAM_ID
 ```
 
@@ -87,7 +87,7 @@ yarn run:dev src/scripts/generateUserToken.ts
 Copy the token and add it to `~/.openclaw/.env`:
 
 ```bash
-echo 'ALPHAHUMAN_API_KEY=eyJhbGc...' >> ~/.openclaw/.env
+echo 'TINYHUMANS_API_KEY=eyJhbGc...' >> ~/.openclaw/.env
 ```
 
 ### Option B: Create a permanent API key
@@ -95,7 +95,7 @@ echo 'ALPHAHUMAN_API_KEY=eyJhbGc...' >> ~/.openclaw/.env
 API keys do not expire. First get a JWT (Option A), then:
 
 ```bash
-curl -X POST https://staging-api.alphahuman.xyz/api-keys \
+curl -X POST https://api.tinyhumans.ai/api-keys \
   -H "Authorization: Bearer <your-jwt>" \
   -H "Content-Type: application/json"
 ```
@@ -103,14 +103,14 @@ curl -X POST https://staging-api.alphahuman.xyz/api-keys \
 Save the returned key:
 
 ```bash
-echo 'ALPHAHUMAN_API_KEY=alphahuman_user__...' >> ~/.openclaw/.env
+echo 'TINYHUMANS_API_KEY=tinyhuman_user__...' >> ~/.openclaw/.env
 ```
 
 ### Verify the token
 
 ```bash
-BACKEND=https://staging-api.alphahuman.xyz   # or http://localhost:5000
-TOKEN=$(grep ALPHAHUMAN_API_KEY ~/.openclaw/.env | cut -d= -f2-)
+BACKEND=https://api.tinyhumans.ai   # or http://localhost:5000
+TOKEN=$(grep TINYHUMANS_API_KEY ~/.openclaw/.env | cut -d= -f2-)
 
 curl -s -o /dev/null -w "%{http_code}" \
   -X POST "$BACKEND/memory/sync" \
@@ -133,7 +133,7 @@ If you prefer to configure manually, create or edit `~/.openclaw/openclaw.json`:
   "gateway": { "mode": "local" },
   "agents": {
     "defaults": {
-      "model": { "primary": "alphahuman/neocortex-mk1" },
+      "model": { "primary": "tinyhuman/neocortex-mk1" },
       "workspace": "~/.openclaw/workspace",
       "compaction": {
         "mode": "safeguard",
@@ -149,9 +149,9 @@ If you prefer to configure manually, create or edit `~/.openclaw/openclaw.json`:
   "models": {
     "mode": "merge",
     "providers": {
-      "alphahuman": {
-        "baseUrl": "https://staging-api.alphahuman.xyz/openai/v1",
-        "apiKey": "${ALPHAHUMAN_API_KEY}",
+      "tinyhuman": {
+        "baseUrl": "https://api.tinyhumans.ai/openai/v1",
+        "apiKey": "${TINYHUMANS_API_KEY}",
         "api": "openai-completions",
         "authHeader": true,
         "models": [
@@ -174,25 +174,25 @@ If you prefer to configure manually, create or edit `~/.openclaw/openclaw.json`:
       "openclaw-model-provider": {
         "enabled": true,
         "config": {
-          "baseUrl": "https://staging-api.alphahuman.xyz/openai/v1",
+          "baseUrl": "https://api.tinyhumans.ai/openai/v1",
           "modelId": "neocortex-mk1",
           "modelName": "Neocortex MK1",
-          "apiKeyEnvVar": "ALPHAHUMAN_API_KEY",
+          "apiKeyEnvVar": "TINYHUMANS_API_KEY",
           "memorySyncEnabled": true,
-          "memorySyncUrl": "https://staging-api.alphahuman.xyz/memory/sync",
-          "memorySyncApiKeyEnvVar": "ALPHAHUMAN_API_KEY"
+          "memorySyncUrl": "https://api.tinyhumans.ai/memory/sync",
+          "memorySyncApiKeyEnvVar": "TINYHUMANS_API_KEY"
         }
       }
     }
   },
   "tools": {
     "profile": "coding",
-    "byProvider": { "alphahuman": { "profile": "coding", "allow": ["group:fs", "group:memory"] } }
+    "byProvider": { "tinyhuman": { "profile": "coding", "allow": ["group:fs", "group:memory"] } }
   }
 }
 ```
 
-Replace `https://staging-api.alphahuman.xyz` with your actual backend URL.
+Replace `https://api.tinyhumans.ai` with your actual backend URL.
 
 ---
 
@@ -201,14 +201,14 @@ Replace `https://staging-api.alphahuman.xyz` with your actual backend URL.
 | Issue                                       | Fix                                                                                                                         |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `command not found: openclaw`               | Run `npm install -g openclaw`                                                                                               |
-| `Missing env var "ALPHAHUMAN_API_KEY"`      | Add `ALPHAHUMAN_API_KEY=<token>` to `~/.openclaw/.env`                                                                      |
+| `Missing env var "TINYHUMANS_API_KEY"`      | Add `TINYHUMANS_API_KEY=<token>` to `~/.openclaw/.env`                                                                      |
 | `HTTP 401: "Invalid token"`                 | Token is wrong or user not in DB — generate a new one with `yarn run:dev src/scripts/generateUserToken.ts`                  |
-| Token works in curl but not in OpenClaw     | Also run `export ALPHAHUMAN_API_KEY=<token>` in the same shell — OpenClaw may not load `~/.openclaw/.env` in all cases      |
-| `Unknown model: alphahuman/neocortex-mk1`   | Run `openclaw models auth login --provider alphahuman` or add `models.providers.alphahuman` to config, then restart gateway |
+| Token works in curl but not in OpenClaw     | Also run `export TINYHUMANS_API_KEY=<token>` in the same shell — OpenClaw may not load `~/.openclaw/.env` in all cases      |
+| `Unknown model: tinyhuman/neocortex-mk1`   | Run `openclaw models auth login --provider tinyhuman` or add `models.providers.tinyhuman` to config, then restart gateway |
 | `openclaw models list` shows only anthropic | Start the gateway: `openclaw gateway`                                                                                       |
 | `Gateway service not loaded` on restart     | Use `openclaw gateway` (foreground) or run `openclaw gateway install` first                                                 |
-| MEMORY.md not syncing                       | Ensure `tools.byProvider.alphahuman` includes `group:fs` and `group:memory`                                                 |
-| Backend not receiving requests              | Check gateway is running, `ALPHAHUMAN_API_KEY` is set, and `models.providers.alphahuman` points to the right URL            |
+| MEMORY.md not syncing                       | Ensure `tools.byProvider.tinyhuman` includes `group:fs` and `group:memory`                                                 |
+| Backend not receiving requests              | Check gateway is running, `TINYHUMANS_API_KEY` is set, and `models.providers.tinyhuman` points to the right URL            |
 
 ### Verify backend is receiving requests
 
@@ -241,7 +241,7 @@ mongosh <your-db-name> --eval 'db.openclawmemories.find({ userId: ObjectId("<use
 
 ## What this plugin does
 
-- Registers provider `alphahuman` and model `alphahuman/neocortex-mk1` in OpenClaw
+- Registers provider `tinyhuman` and model `tinyhuman/neocortex-mk1` in OpenClaw
 - Uses OpenAI-compatible transport (`openai-completions`)
 - Syncs `MEMORY.md` and `memory/**/*.md` to your backend on startup and after each agent run
 - Uses hash-based idempotency — only changed files are uploaded
@@ -254,12 +254,12 @@ mongosh <your-db-name> --eval 'db.openclawmemories.find({ userId: ObjectId("<use
 
 | Field                    | Description                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------- |
-| `baseUrl`                | OpenAI-compatible base URL (e.g. `https://staging-api.alphahuman.xyz/openai/v1`)  |
+| `baseUrl`                | OpenAI-compatible base URL (e.g. `https://api.tinyhumans.ai/openai/v1`)  |
 | `modelId`                | Model identifier (default `neocortex-mk1`)                                        |
 | `modelName`              | Display name in model list                                                        |
-| `apiKeyEnvVar`           | Env var name for API key (default `ALPHAHUMAN_API_KEY`)                           |
+| `apiKeyEnvVar`           | Env var name for API key (default `TINYHUMANS_API_KEY`)                           |
 | `memorySyncEnabled`      | Enable memory sync (default `true`)                                               |
-| `memorySyncUrl`          | Backend endpoint for sync (e.g. `https://staging-api.alphahuman.xyz/memory/sync`) |
+| `memorySyncUrl`          | Backend endpoint for sync (e.g. `https://api.tinyhumans.ai/memory/sync`) |
 | `memorySyncApiKeyEnvVar` | Env var name for sync Bearer token                                                |
 
 ---

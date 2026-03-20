@@ -19,11 +19,11 @@ class RecallMemoryTool(Tool):
         namespace = tool_parameters.get('namespace')
         num_chunks = tool_parameters.get('num_chunks') or 10
 
-        token = self.runtime.credentials.get('alphahuman_api_key')
+        token = self.runtime.credentials.get('tinyhuman_api_key')
         default_namespace = self.runtime.credentials.get('default_namespace') or "agent_memory"
         
         if not token:
-            return self.create_text_message("Error: missing alphahuman_api_key credential.")
+            return self.create_text_message("Error: missing tinyhuman_api_key credential.")
         if not prompt:
             return self.create_text_message("Error: prompt is required.")
 

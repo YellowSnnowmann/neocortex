@@ -6,7 +6,7 @@ Agno plugin for **Neocortex-powered memories** in Agno agents. Gives your agents
 
 - Python 3.9+
 - [Agno](https://pypi.org/project/agno/) ≥ 2.0
-- [httpx](https://www.python-httpx.org/) (brought in as a dependency) for talking to the Alphahuman backend.
+- [httpx](https://www.python-httpx.org/) (brought in as a dependency) for talking to the TinyHuman backend.
 
 ## Install
 
@@ -29,7 +29,7 @@ from neocortex_agno import NeocortexTools
 
 agent = Agent(
     model=OpenAIResponses(id="gpt-4o-mini"),
-    tools=[NeocortexTools(token="YOUR_ALPHAHUMAN_API_KEY")],
+    tools=[NeocortexTools(token="YOUR_TINYHUMANS_API_KEY")],
     instructions="Use the memory tools to remember and recall user preferences and context.",
     markdown=True,
 )
@@ -70,25 +70,25 @@ Credentials (`token`, `model_id`, `base_url`) are set when constructing `Neocort
 
 ## Configuration
 
-- **token** (required): Alphahuman / Neocortex memory API token (e.g. `ALPHAHUMAN_API_KEY`).
-- **base_url** (optional): Alphahuman API base URL. If omitted, uses the `ALPHAHUMAN_BASE_URL` env var or the default `https://staging-api.alphahuman.xyz`.
+- **token** (required): TinyHuman / Neocortex memory API token (e.g. `TINYHUMANS_API_KEY`).
+- **base_url** (optional): TinyHuman API base URL. If omitted, uses the `TINYHUMANS_BASE_URL` env var or the default `https://api.tinyhumans.ai`.
 
 ## Error handling
 
-On API failures, the underlying client raises `AlphahumanError`. You can catch it for logging or user-facing messages:
+On API failures, the underlying client raises `TinyHumanError`. You can catch it for logging or user-facing messages:
 
 ```python
-from neocortex_agno import NeocortexTools, AlphahumanError
+from neocortex_agno import NeocortexTools, TinyHumanError
 
 try:
     agent.print_response("Remember that I like Python.", stream=True)
-except AlphahumanError as e:
+except TinyHumanError as e:
     print(f"Memory API error: {e} (status={e.status})")
 ```
 
 ## Example
 
-An example script is included. Set `ALPHAHUMAN_API_KEY`, `ALPHAHUMAN_BASE_URL`, and `OPENAI_API_KEY`, then:
+An example script is included. Set `TINYHUMANS_API_KEY`, `TINYHUMANS_BASE_URL`, and `OPENAI_API_KEY`, then:
 
 ```bash
 python example.py

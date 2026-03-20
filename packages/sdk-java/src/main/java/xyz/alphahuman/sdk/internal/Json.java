@@ -1,4 +1,4 @@
-package xyz.alphahuman.sdk.internal;
+package xyz.tinyhuman.sdk.internal;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

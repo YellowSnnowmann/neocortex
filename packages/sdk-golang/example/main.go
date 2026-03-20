@@ -1,6 +1,6 @@
 // Example usage of the TinyHumans Go SDK.
 //
-// Set environment variables: ALPHAHUMAN_TOKEN, OPENAI_API_KEY
+// Set environment variables: TINYHUMANS_TOKEN, OPENAI_API_KEY
 package main
 
 import (
@@ -14,7 +14,7 @@ import (
 
 func main() {
 	client, err := tinyhumans.NewClient(
-		os.Getenv("ALPHAHUMAN_TOKEN"),
+		os.Getenv("TINYHUMANS_TOKEN"),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -35,6 +35,25 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Ingested: %d, Updated: %d, Errors: %d\n", result.Ingested, result.Updated, result.Errors)
+
+	// Ingest multiple memories
+	batch, err := client.IngestMemories([]tinyhumans.MemoryItem{
+		{
+			Key:       "go-sdk-example-1",
+			Content:   "Go SDK can ingest multiple memories.",
+			Namespace: "preferences",
+			Metadata:  map[string]interface{}{"source": "go-example"},
+		},
+		{
+			Key:       "go-sdk-example-2",
+			Content:   "This is a second memory from the Go example.",
+			Namespace: "preferences",
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Batch Ingested: %d, Updated: %d, Errors: %d\n", batch.Ingested, batch.Updated, batch.Errors)
 
 	// Get LLM context
 	ctx, err := client.RecallMemory("preferences", "What is the user's preference for theme?", nil)
@@ -62,7 +81,9 @@ func main() {
 	}
 
 	// Delete by namespace
-	_, err = client.DeleteMemory("preferences", nil)
+	_, err = client.DeleteMemory("preferences", &tinyhumans.DeleteMemoryOptions{
+		DeleteAll: true,
+	})
 	if err != nil {
 		log.Fatal(err)
 	}

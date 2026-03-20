@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "alphahuman/alphahuman.hpp"
+#include "tinyhuman/tinyhuman.hpp"
 
 #include <chrono>
 #include <cstdlib>
@@ -7,12 +7,12 @@
 #include <string>
 #include <thread>
 
-using namespace alphahuman;
+using namespace tinyhuman;
 
 TEST(IntegrationTest, InsertRecallQueryDeleteLifecycle) {
-    const char* token_env = std::getenv("ALPHAHUMAN_TOKEN");
+    const char* token_env = std::getenv("TINYHUMANS_TOKEN");
     if (!token_env || token_env[0] == '\0') {
-        GTEST_SKIP() << "ALPHAHUMAN_TOKEN not set, skipping integration test";
+        GTEST_SKIP() << "TINYHUMANS_TOKEN not set, skipping integration test";
     }
     std::string token = token_env;
 
@@ -20,7 +20,7 @@ TEST(IntegrationTest, InsertRecallQueryDeleteLifecycle) {
         std::chrono::system_clock::now().time_since_epoch()).count();
     std::string ns = "integration-test-cpp-" + std::to_string(now_ms);
 
-    AlphahumanMemoryClient client(token);
+    TinyHumanMemoryClient client(token);
 
     // --- Insert ---
     long now_s = static_cast<long>(now_ms / 1000);

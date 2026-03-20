@@ -11,6 +11,6 @@ integration-test:
 
 clean:
 	dotnet clean
-	rm -rf src/Alphahuman.Sdk/bin src/Alphahuman.Sdk/obj
-	rm -rf test/Alphahuman.Sdk.Tests/bin test/Alphahuman.Sdk.Tests/obj
-	rm -rf example/Alphahuman.Sdk.Example/bin example/Alphahuman.Sdk.Example/obj
+	rm -rf src/TinyHuman.Sdk/bin src/TinyHuman.Sdk/obj
+	rm -rf test/TinyHuman.Sdk.Tests/bin test/TinyHuman.Sdk.Tests/obj
+	rm -rf example/TinyHuman.Sdk.Example/bin example/TinyHuman.Sdk.Example/obj

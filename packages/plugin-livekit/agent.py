@@ -85,16 +85,16 @@ server = AgentServer()
 @server.rtc_session(agent_name=os.getenv("LIVEKIT_AGENT_NAME", DEFAULT_AGENT_NAME))
 async def memory_agent(ctx: agents.JobContext) -> None:
     print(f"[session] joined room={ctx.room.name}")
-    token = os.getenv("ALPHAHUMAN_API_KEY")
+    token = os.getenv("TINYHUMANS_API_KEY")
     if not token:
-        raise ValueError("ALPHAHUMAN_API_KEY is required")
+        raise ValueError("TINYHUMANS_API_KEY is required")
 
     # Use a stable namespace so memory survives room changes between sessions.
     namespace = os.getenv("LIVEKIT_MEMORY_NAMESPACE", DEFAULT_MEMORY_NAMESPACE)
     print(f"[memory] namespace={namespace!r}")
     memory = NeocortexLiveKitTools(
         token=token,
-        base_url=os.getenv("ALPHAHUMAN_BASE_URL"),
+        base_url=os.getenv("TINYHUMANS_BASE_URL"),
         namespace=namespace,
     )
 

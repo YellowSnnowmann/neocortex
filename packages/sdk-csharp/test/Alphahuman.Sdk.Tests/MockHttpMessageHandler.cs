@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Alphahuman.Sdk.Tests;
+namespace TinyHuman.Sdk.Tests;
 
 public class MockHttpMessageHandler : HttpMessageHandler
 {

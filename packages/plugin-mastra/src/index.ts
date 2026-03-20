@@ -335,7 +335,7 @@ export function createNeocortexMastraTools(config: MastraNeocortexConfig) {
 /**
  * MastraNeocortexMemory
  *
- * A lightweight adapter that exposes Neocortex (Alphahuman) memory as tools in a
+ * A lightweight adapter that exposes Neocortex (TinyHuman) memory as tools in a
  * Mastra-friendly shape: `{ name, description, parameters, execute }`.
  *
  * If Mastra expects a different tool signature, you can still use the provided

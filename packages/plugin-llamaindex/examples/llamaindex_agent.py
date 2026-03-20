@@ -18,9 +18,9 @@ def get_current_time() -> str:
 
 def main():
     load_dotenv()
-    token = os.getenv("ALPHAHUMAN_API_KEY")
+    token = os.getenv("TINYHUMANS_API_KEY")
     if not token:
-        print("Please set ALPHAHUMAN_API_KEY")
+        print("Please set TINYHUMANS_API_KEY")
         return
 
     # Initialize Memory Client
