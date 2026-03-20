@@ -5,7 +5,7 @@ TypeScript plugin for using **Neocortex (Alphahuman) memory** inside Mastra work
 This package is a small adapter that:
 
 - Calls the Alphahuman memory API directly (same contract as `sdk-typescript`)
-- Exposes **tools** for saving, recalling, and deleting memory
+- Exposes **tools** for saving, recalling, deleting, plus newer endpoints like documents, mirrored query/chat, interactions, sync, recall/thoughts, ingestion jobs, and graph snapshots
 
 ## Install
 
@@ -42,7 +42,7 @@ Mastra-native tools (recommended):
 import { Agent } from "@mastra/core/agent";
 import { createNeocortexMastraTools } from "@neocortex/plugin-mastra";
 
-const { neocortexSaveMemory, neocortexRecallMemory } = createNeocortexMastraTools({
+const { neocortexSaveMemory, neocortexRecallMemory, neocortexDeleteMemory } = createNeocortexMastraTools({
   token: process.env.ALPHAHUMAN_API_KEY!,
   baseUrl: process.env.ALPHAHUMAN_BASE_URL,
   defaultNamespace: "my-app",
@@ -59,6 +59,14 @@ const agent = new Agent({
   },
 });
 ```
+
+## Available tools
+
+`createNeocortexMastraTools()` returns both the original tools (`neocortexSaveMemory`, `neocortexRecallMemory`, `neocortexDeleteMemory`) and additional tools that map to the newer `sdk-typescript` endpoints, including:
+- `neocortexInsertDocument`, `neocortexInsertDocumentsBatch`, `neocortexListDocuments`, `neocortexGetDocument`, `neocortexDeleteDocument`
+- `neocortexQueryMemoryContext`, `neocortexChatMemoryContext`, `neocortexRecordInteractions`, `neocortexRecallThoughts`
+- `neocortexSyncMemory`, `neocortexChatMemory`, `neocortexInteractMemory`, `neocortexRecallMemoryMaster`, `neocortexRecallMemories`
+- `neocortexGetIngestionJob`, `neocortexGetGraphSnapshot`
 
 ## Environment variables
 
