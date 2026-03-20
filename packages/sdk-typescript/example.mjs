@@ -8,18 +8,18 @@ Usage:
   TINYHUMANS_TOKEN=... node example.mjs
 
 Optional env vars:
-  TINYHUMANS_BASE_URL / TINYHUMANS_BASE_URL
+  TINYHUMANS_BASE_URL / NEOCORTEX_BASE_URL
 */
 
 import { TinyHumanMemoryClient } from './dist/index.js';
 
-const token = process.env.TINYHUMANS_TOKEN ?? process.env.TINYHUMANS_TOKEN;
+const token = process.env.TINYHUMANS_TOKEN ?? process.env.NEOCORTEX_TOKEN;
 if (!token) {
-  console.error('Set TINYHUMANS_TOKEN (or TINYHUMANS_TOKEN) to run this example.');
+  console.error('Set TINYHUMANS_TOKEN (or NEOCORTEX_TOKEN) to run this example.');
   process.exit(1);
 }
 
-const baseUrl = process.env.TINYHUMANS_BASE_URL ?? process.env.TINYHUMANS_BASE_URL;
+const baseUrl = process.env.TINYHUMANS_BASE_URL ?? process.env.NEOCORTEX_BASE_URL;
 const client = new TinyHumanMemoryClient({ token, baseUrl });
 
 const ts = Date.now();

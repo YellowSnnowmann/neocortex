@@ -75,7 +75,7 @@ ENV_FILE=../sdk-python/.env cargo run --example test_routes
 
 `TinyHumanConfig::new(token)` supports optional `.with_base_url(url)`.
 
-Base URL resolution: explicit config -> `TINYHUMANS_BASE_URL` -> `TINYHUMANS_BASE_URL` -> `https://api.tinyhumans.ai`.
+Base URL resolution: explicit config -> `TINYHUMANS_BASE_URL` -> `NEOCORTEX_BASE_URL` -> `https://api.tinyhumans.ai`.
 
 ## Implemented methods
 

@@ -13,7 +13,7 @@ function getEnvBaseUrl(): string | undefined {
     const env = (
       g as { process?: { env?: Record<string, string | undefined> } }
     )?.process?.env;
-    return env?.TINYHUMANS_BASE_URL ?? env?.TINYHUMANS_BASE_URL;
+    return env?.TINYHUMANS_BASE_URL ?? env?.NEOCORTEX_BASE_URL;
   } catch {
     return undefined;
   }

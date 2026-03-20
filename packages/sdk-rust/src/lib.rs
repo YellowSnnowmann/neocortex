@@ -14,15 +14,15 @@ use serde::de::DeserializeOwned;
 pub const DEFAULT_BASE_URL: &str = "https://api.tinyhumans.ai";
 /// Preferred environment variable for base URL override.
 pub const TINYHUMANS_BASE_URL: &str = "TINYHUMANS_BASE_URL";
-/// Backward-compatible environment variable for base URL override.
-pub const TINYHUMANS_BASE_URL: &str = "TINYHUMANS_BASE_URL";
+/// Alias environment variable for base URL override.
+pub const NEOCORTEX_BASE_URL: &str = "NEOCORTEX_BASE_URL";
 
 /// Configuration for the TinyHuman client.
 #[derive(Clone, Debug)]
 pub struct TinyHumanConfig {
     /// Bearer token (API key or JWT).
     pub token: String,
-    /// Base URL of the TinyHuman backend. If None, uses TINYHUMANS_BASE_URL, then TINYHUMANS_BASE_URL, then default.
+    /// Base URL of the TinyHuman backend. If None, uses TINYHUMANS_BASE_URL, then NEOCORTEX_BASE_URL, then default.
     pub base_url: Option<String>,
 }
 
@@ -43,6 +43,7 @@ impl TinyHumanConfig {
         self.base_url
             .clone()
             .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
+            .or_else(|| std::env::var(NEOCORTEX_BASE_URL).ok())
             .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
             .unwrap_or_else(|| DEFAULT_BASE_URL.to_string())
             .trim_end_matches('/')

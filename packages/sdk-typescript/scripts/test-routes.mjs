@@ -29,13 +29,13 @@ function loadEnvFile(filePath) {
 const envFile = process.env.ENV_FILE || path.join(pkgRoot, ".env");
 loadEnvFile(envFile);
 
-const token = process.env.TINYHUMANS_TOKEN || process.env.TINYHUMANS_TOKEN;
+const token = process.env.TINYHUMANS_TOKEN || process.env.NEOCORTEX_TOKEN;
 if (!token) {
-  console.error("Missing token. Set TINYHUMANS_TOKEN or TINYHUMANS_TOKEN.");
+  console.error("Missing token. Set TINYHUMANS_TOKEN or NEOCORTEX_TOKEN.");
   process.exit(2);
 }
 
-const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.TINYHUMANS_BASE_URL;
+const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.NEOCORTEX_BASE_URL;
 const { TinyHumanMemoryClient } = await import(path.join(pkgRoot, "dist", "index.js"));
 const client = new TinyHumanMemoryClient({ token, baseUrl });
 

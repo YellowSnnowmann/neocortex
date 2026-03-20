@@ -71,7 +71,7 @@ new TinyHumanMemoryClient({
 });
 ```
 
-`baseUrl` resolution order: explicit config -> `TINYHUMANS_BASE_URL`/`TINYHUMANS_BASE_URL` env -> `https://api.tinyhumans.ai`.
+`baseUrl` resolution order: explicit config -> `TINYHUMANS_BASE_URL`/`NEOCORTEX_BASE_URL` env -> `https://api.tinyhumans.ai`.
 
 ## Methods
 
