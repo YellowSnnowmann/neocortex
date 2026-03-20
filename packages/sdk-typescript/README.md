@@ -1,7 +1,6 @@
 # @alphahuman/memory-sdk
 
-TypeScript / JavaScript SDK for the [Alphahuman Memory API](https://alphahuman.xyz), aligned with the backend API: insert, query, admin/delete, recall, and memories/recall.
-
+TypeScript / JavaScript SDK for the [Alphahuman Memory API](https://alphahuman.xyz), aligned with the backend API: insert, query, chat, documents, admin/delete, recall, thoughts, interact, and more.
 ## Requirements
 
 - Node.js ≥ 18 (uses native `fetch`)
@@ -120,6 +119,155 @@ Recall memories from Ebbinghaus bank. **POST /v1/memory/memories/recall**
 | `asOf` | `number` | Timestamp |
 
 Returns `RecallMemoriesResponse` with `data: { memories }`.
+
+### `client.chatMemory(params)`
+
+Chat with DeltaNet memory cache. **POST /v1/memory/chat**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `messages` | `ChatMessage[]` | ✓ | List of messages `[{role, content}]` |
+| `temperature` | `number` | | Optional temperature |
+| `maxTokens` | `number` | | Optional max completion tokens |
+
+Returns `ChatMemoryResponse`.
+
+### `client.recallThoughts(params?)`
+
+Generate reflective thoughts. **POST /v1/memory/memories/thoughts**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `namespace` | `string` | Optional namespace |
+| `thoughtPrompt` | `string` | Optional custom LLM prompt |
+| `maxChunks` | `number` | Number of chunks to recall |
+
+Returns `RecallThoughtsResponse`.
+
+### `client.syncMemory(params)`
+
+Sync OpenClaw memory files. **POST /v1/memory/sync**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `workspaceId` | `string` | ✓ | Workspace identifier |
+| `agentId` | `string` | ✓ | Agent identifier |
+| `source` | `'startup' \| 'agent_end'` | | Optional source |
+| `files` | `{ filePath: string; content: string; timestamp: string; hash: string }[]` | ✓ | Files to sync |
+
+Returns `SyncMemoryResponse`.
+
+### `client.insertDocument(params)`
+
+Ingest a single memory document. **POST /v1/memory/documents**
+
+Supports the same fields as `insertMemory` (`title`, `content`, `namespace`, optional `sourceType`, `metadata`, `priority`, `createdAt`, `updatedAt`, `documentId`).
+
+### `client.insertDocumentsBatch(params)`
+
+Ingest multiple memory documents in batch. **POST /v1/memory/documents/batch**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `items` | `{ title: string; content: string; namespace: string; ... }[]` | ✓ | Document items |
+
+Returns `InsertDocumentsBatchResponse`.
+
+### `client.listDocuments(params?)`
+
+List ingested memory documents. **GET /v1/memory/documents**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `namespace` | `string` | Optional namespace |
+| `limit` | `number` | Optional page size |
+| `offset` | `number` | Optional page offset |
+
+Returns `ListDocumentsResponse`.
+
+### `client.getDocument(params)`
+
+Get details for a memory document. **GET /v1/memory/documents/:documentId**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `documentId` | `string` | Required |
+| `namespace` | `string` | Optional namespace |
+
+Returns `GetDocumentResponse`.
+
+### `client.deleteDocument(params)`
+
+Delete a memory document. **DELETE /v1/memory/documents/:documentId**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `documentId` | `string` | Required |
+| `namespace` | `string` | Required |
+
+Returns `DeleteMemoryResponse`.
+
+### `client.queryMemoryContext(params)`
+
+Query memory context. **POST /v1/memory/queries**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | ✓ Query string |
+| `includeReferences` | `boolean` | Include references in response |
+| `namespace` | `string` | Optional namespace |
+| `maxChunks` | `number` | Optional chunk limit |
+| `documentIds` | `string[]` | Optional document filters |
+| `recallOnly` | `boolean` | Recall-only mode |
+| `llmQuery` | `string` | Optional LLM query override |
+
+Returns `QueryMemoryResponse`.
+
+### `client.chatMemoryContext(params)`
+
+Chat with memory context. **POST /v1/memory/conversations**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `messages` | `[{ role: string; content: string }]` | ✓ | Conversation messages |
+| `temperature` | `number` | | Optional temperature |
+| `maxTokens` | `number` | | Optional token limit |
+
+Returns `ChatMemoryResponse`.
+
+### `client.recordInteractions(params)`
+
+Record interaction signals. **POST /v1/memory/interactions**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `namespace` | `string` | ✓ | Namespace |
+| `entityNames` | `string[]` | ✓ | Entity names |
+| `description` | `string` | | Optional description |
+| `interactionLevel` | `'view' \| 'read' \| 'react' \| 'engage' \| 'create'` | | Optional interaction level |
+| `interactionLevels` | same union array | | Optional multiple interaction levels |
+
+Returns `InteractMemoryResponse`.
+
+### `client.getIngestionJob(jobId)`
+
+Get memory ingestion job status. **GET /v1/memory/ingestion/jobs/:jobId**
+
+Returns `GetIngestionJobResponse`.
+
+### `client.getGraphSnapshot(params?)`
+
+Get admin graph snapshot. **GET /v1/memory/admin/graph-snapshot**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `namespace` | `string` | Optional namespace |
+| `mode` | `'master' \| 'latest_chunks'` | Optional graph mode |
+| `limit` | `number` | Optional limit |
+| `seed_limit` | `number` | Optional seed limit |
+
+Returns `GetGraphSnapshotResponse`.
+
 
 ## Error handling
 
