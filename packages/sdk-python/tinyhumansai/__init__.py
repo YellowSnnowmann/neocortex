@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 import os
 
-from .client import TinyHumanMemoryClient
+from .client import TinyHumansMemoryClient
 from .llm import SUPPORTED_LLM_PROVIDERS
 from .types import (
-    TinyHumanError,
+    TinyHumansError,
     DeleteMemoryResponse,
     GetContextResponse,
     IngestMemoryResponse,
@@ -27,8 +27,8 @@ if _level:
     logger.setLevel(_level.upper())
 
 __all__ = [
-    "TinyHumanMemoryClient",
-    "TinyHumanError",
+    "TinyHumansMemoryClient",
+    "TinyHumansError",
     "DeleteMemoryResponse",
     "IngestMemoryResponse",
     "LLMQueryResponse",

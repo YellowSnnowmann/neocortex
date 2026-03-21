@@ -84,7 +84,7 @@ class DeleteMemoryResponse:
     deleted: int
 
 
-class TinyHumanError(Exception):
+class TinyHumansError(Exception):
     """Error raised by the TinyHumans API."""
 
     def __init__(self, message: str, status: int, body: Any = None) -> None:

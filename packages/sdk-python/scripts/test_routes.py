@@ -106,7 +106,7 @@ def main() -> int:
     doc_batch_1 = f"py-doc-batch-1-{ts}"
     doc_batch_2 = f"py-doc-batch-2-{ts}"
 
-    client = api.TinyHumanMemoryClient(token=token, model_id=model_id, base_url=base_url)
+    client = api.TinyHumansMemoryClient(token=token, model_id=model_id, base_url=base_url)
 
     results: list[tuple[str, bool, str]] = []
     maybe_job_id: str | None = None

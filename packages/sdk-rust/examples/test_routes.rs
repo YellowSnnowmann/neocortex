@@ -7,7 +7,7 @@ use tinyhumansai::{
     IngestDocumentParams, InsertMemoryParams, InteractionLevel, MemoryChatParams,
     MemoryConversationParams, MemoryInteractionsParams, MemoryThoughtsParams, QueryMemoriesParams,
     QueryMemoryParams, RecallMemoriesContextParams, RecallMemoriesParams, RecallMemoryParams,
-    SourceType, TinyHumanConfig, TinyHumanError, TinyHumanMemoryClient,
+    SourceType, TinyHumanConfig, TinyHumansError, TinyHumansMemoryClient,
 };
 
 type CheckResults = Vec<(String, bool, String)>;
@@ -46,7 +46,7 @@ fn env_any(keys: &[&str]) -> Option<String> {
 fn push_result<T>(
     results: &mut CheckResults,
     name: &str,
-    res: Result<T, TinyHumanError>,
+    res: Result<T, TinyHumansError>,
     optional: bool,
 ) -> Option<T> {
     match res {
@@ -89,10 +89,10 @@ fn extract_job_id(payload: &serde_json::Value) -> Option<String> {
 }
 
 async fn wait_for_job(
-    client: &TinyHumanMemoryClient,
+    client: &TinyHumansMemoryClient,
     job_id: &str,
     timeout_secs: u64,
-) -> Result<(), TinyHumanError> {
+) -> Result<(), TinyHumansError> {
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(timeout_secs);
     loop {
         let job = client.ingestion_job_status(job_id).await?;
@@ -107,7 +107,7 @@ async fn wait_for_job(
         match state.as_str() {
             "completed" | "done" | "succeeded" | "success" => return Ok(()),
             "failed" | "error" | "cancelled" | "canceled" => {
-                return Err(TinyHumanError::Api {
+                return Err(TinyHumansError::Api {
                     message: format!("ingestion job {job_id} failed (state={state})"),
                     status: 500,
                     body: None,
@@ -117,7 +117,7 @@ async fn wait_for_job(
         }
 
         if std::time::Instant::now() >= deadline {
-            return Err(TinyHumanError::Api {
+            return Err(TinyHumansError::Api {
                 message: format!("ingestion job {job_id} timed out"),
                 status: 408,
                 body: None,
@@ -145,7 +145,7 @@ async fn main() {
         cfg = cfg.with_base_url(base_url);
     }
 
-    let client = match TinyHumanMemoryClient::new(cfg) {
+    let client = match TinyHumansMemoryClient::new(cfg) {
         Ok(c) => c,
         Err(e) => {
             eprintln!("Failed to initialize client: {e}");
@@ -196,7 +196,7 @@ async fn main() {
             let _ = push_result::<()>(
                 &mut results,
                 "insert_memory_job_poll",
-                Err(TinyHumanError::Api {
+                Err(TinyHumansError::Api {
                     message: "insert_memory did not return jobId".to_string(),
                     status: 500,
                     body: None,
@@ -304,7 +304,7 @@ async fn main() {
                 get_ok = Some(v);
                 break;
             }
-            Err(TinyHumanError::Api { message, .. })
+            Err(TinyHumansError::Api { message, .. })
                 if message.to_lowercase().contains("not found") =>
             {
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;
@@ -324,7 +324,7 @@ async fn main() {
         let _ = push_result::<serde_json::Value>(
             &mut results,
             "get_document",
-            Err(TinyHumanError::Api {
+            Err(TinyHumansError::Api {
                 message: "document not found after retries".to_string(),
                 status: 404,
                 body: None,

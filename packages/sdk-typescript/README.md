@@ -30,9 +30,9 @@ export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
 ## Quick start
 
 ```ts
-import { TinyHumanMemoryClient } from '@tinyhumansai/neocortex';
+import { TinyHumansMemoryClient } from '@tinyhumansai/neocortex';
 
-const client = new TinyHumanMemoryClient({
+const client = new TinyHumansMemoryClient({
   token: process.env.TINYHUMANS_TOKEN!,
 });
 
@@ -65,7 +65,7 @@ TINYHUMANS_TOKEN=your_api_key node example.mjs
 ## Client config
 
 ```ts
-new TinyHumanMemoryClient({
+new TinyHumansMemoryClient({
   token: 'required',
   baseUrl: 'optional',
 });
@@ -102,15 +102,15 @@ Documents and mirrored routes:
 
 ## Error handling
 
-Non-2xx responses throw `TinyHumanError`:
+Non-2xx responses throw `TinyHumansError`:
 
 ```ts
-import { TinyHumanError } from '@tinyhumansai/neocortex';
+import { TinyHumansError } from '@tinyhumansai/neocortex';
 
 try {
   await client.queryMemory({ query: 'hello' });
 } catch (err) {
-  if (err instanceof TinyHumanError) {
+  if (err instanceof TinyHumansError) {
     console.error(err.status, err.message, err.body);
   }
 }

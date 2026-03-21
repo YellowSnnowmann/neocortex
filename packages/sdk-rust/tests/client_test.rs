@@ -1,16 +1,16 @@
-//! Integration tests for TinyHumanMemoryClient using mockito.
+//! Integration tests for TinyHumansMemoryClient using mockito.
 
 use mockito::Server;
 use tinyhumansai::{
     ChatMessage, DeleteMemoryParams, InsertMemoryParams, MemoryChatParams, QueryMemoryParams,
-    RecallMemoriesParams, RecallMemoryParams, TinyHumanConfig, TinyHumanError,
-    TinyHumanMemoryClient,
+    RecallMemoriesParams, RecallMemoryParams, TinyHumanConfig, TinyHumansError,
+    TinyHumansMemoryClient,
 };
 
 #[tokio::test]
 async fn client_requires_token() {
-    assert!(TinyHumanMemoryClient::new(TinyHumanConfig::new("")).is_err());
-    assert!(TinyHumanMemoryClient::new(TinyHumanConfig::new("   ")).is_err());
+    assert!(TinyHumansMemoryClient::new(TinyHumanConfig::new("")).is_err());
+    assert!(TinyHumansMemoryClient::new(TinyHumanConfig::new("   ")).is_err());
 }
 
 #[tokio::test]
@@ -18,7 +18,7 @@ async fn insert_memory_validates_required() {
     let server = Server::new_async().await;
     let url = server.url();
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(url)).unwrap();
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(url)).unwrap();
 
     let empty_title = InsertMemoryParams {
         title: String::new(),
@@ -49,7 +49,7 @@ async fn insert_memory_posts_correctly() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("test-token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("test-token").with_base_url(server.url()))
             .unwrap();
 
     let params = InsertMemoryParams {
@@ -68,7 +68,7 @@ async fn insert_memory_posts_correctly() {
 async fn query_memory_validates_query() {
     let server = Server::new_async().await;
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let params = QueryMemoryParams {
         query: String::new(),
@@ -81,7 +81,7 @@ async fn query_memory_validates_query() {
 async fn query_memory_validates_max_chunks() {
     let server = Server::new_async().await;
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let p0 = QueryMemoryParams {
         query: "q".into(),
@@ -109,7 +109,7 @@ async fn delete_memory_posts_correctly() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let res = client
         .delete_memory(DeleteMemoryParams {
@@ -134,7 +134,7 @@ async fn recall_memory_posts_correctly() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let res = client
         .recall_memory(RecallMemoryParams {
@@ -160,7 +160,7 @@ async fn recall_memories_posts_correctly() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let res = client
         .recall_memories(RecallMemoriesParams {
@@ -176,7 +176,7 @@ async fn recall_memories_posts_correctly() {
 }
 
 #[tokio::test]
-async fn api_error_returns_tinyhuman_error() {
+async fn api_error_returns_tinyhumans_error() {
     let mut server = Server::new_async().await;
     server
         .mock("POST", "/memory/insert")
@@ -187,7 +187,7 @@ async fn api_error_returns_tinyhuman_error() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let params = InsertMemoryParams {
         title: "T".into(),
@@ -197,7 +197,7 @@ async fn api_error_returns_tinyhuman_error() {
     };
     let err = client.insert_memory(params).await.unwrap_err();
     match &err {
-        TinyHumanError::Api {
+        TinyHumansError::Api {
             message, status, ..
         } => {
             assert_eq!(*status, 400);
@@ -221,7 +221,7 @@ async fn memory_chat_posts_correctly() {
         .await;
 
     let client =
-        TinyHumanMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
+        TinyHumansMemoryClient::new(TinyHumanConfig::new("token").with_base_url(server.url()))
             .unwrap();
     let res = client
         .memory_chat(MemoryChatParams {

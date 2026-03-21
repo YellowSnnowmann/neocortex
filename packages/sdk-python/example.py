@@ -22,7 +22,7 @@ if os.environ.get("TINYHUMANSAI_LOG_LEVEL") and not logging.getLogger().handlers
 
 import tinyhumansai as api
 
-client = api.TinyHumanMemoryClient(
+client = api.TinyHumansMemoryClient(
     os.environ["TINYHUMANS_TOKEN"],
     model_id=os.environ.get("TINYHUMANS_MODEL_ID", "neocortex-mk1"),
 )

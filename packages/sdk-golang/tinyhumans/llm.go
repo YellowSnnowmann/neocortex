@@ -271,7 +271,7 @@ func llmPost(client *http.Client, url string, headers map[string]string, body ma
 				msg = m
 			}
 		}
-		return nil, &TinyHumanError{
+		return nil, &TinyHumansError{
 			Message: fmt.Sprintf("%s API error: %s", providerName, msg),
 			Status:  resp.StatusCode,
 		}

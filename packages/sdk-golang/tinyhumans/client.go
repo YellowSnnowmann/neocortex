@@ -270,7 +270,7 @@ func (c *Client) parseResponse(resp *http.Response) (map[string]interface{}, err
 
 	var payload map[string]interface{}
 	if err := json.Unmarshal(respBody, &payload); err != nil {
-		return nil, &TinyHumanError{
+		return nil, &TinyHumansError{
 			Message: fmt.Sprintf("HTTP %d: non-JSON response", resp.StatusCode),
 			Status:  resp.StatusCode,
 			Body:    string(respBody),
@@ -282,7 +282,7 @@ func (c *Client) parseResponse(resp *http.Response) (map[string]interface{}, err
 		if errMsg, ok := payload["error"].(string); ok {
 			message = errMsg
 		}
-		return nil, &TinyHumanError{
+		return nil, &TinyHumansError{
 			Message: message,
 			Status:  resp.StatusCode,
 			Body:    payload,

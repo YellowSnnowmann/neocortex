@@ -1,17 +1,17 @@
-# tinyhuman-sdk-java
+# tinyhumans-sdk-java
 
 Java SDK for TinyHumans/TinyHuman Neocortex memory APIs.
 
 ## Requirements
 
 - Java 11+
-- Gradle (wrapper included)
+- Gradle
 
 ## Build
 
 ```bash
 cd packages/sdk-java
-./gradlew build
+gradle build
 ```
 
 ## Get an API key
@@ -39,10 +39,10 @@ Build and run the example:
 
 ```bash
 cd packages/sdk-java
-./gradlew build
+gradle build
 cd example
-javac -cp ../build/libs/tinyhuman-sdk-java-0.1.0.jar ExampleUsage.java
-java -cp .:../build/libs/tinyhuman-sdk-java-0.1.0.jar ExampleUsage
+javac -cp ../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage.java
+java -cp .:../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage
 ```
 
 ## API scope

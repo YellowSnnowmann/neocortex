@@ -39,7 +39,7 @@ export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
 ```python
 import tinyhumansai as api
 
-client = api.TinyHumanMemoryClient(token="YOUR_API_KEY")
+client = api.TinyHumansMemoryClient(token="YOUR_API_KEY")
 
 client.ingest_memory(
     item={
@@ -70,7 +70,7 @@ python example.py
 ## Client config
 
 ```python
-client = api.TinyHumanMemoryClient(
+client = api.TinyHumansMemoryClient(
     token="required",
     model_id="neocortex-mk1",  # optional
     base_url="https://...",    # optional
@@ -118,4 +118,4 @@ Ingestion jobs:
 
 ## Error handling
 
-API errors raise `TinyHumanError` with `message`, `status`, and `body`.
+API errors raise `TinyHumansError` with `message`, `status`, and `body`.

@@ -13,7 +13,7 @@ import httpx
 from .llm import recall_with_llm as _query_llm_func
 from .types import (
     BASE_URL_ENV,
-    TinyHumanError,
+    TinyHumansError,
     DEFAULT_BASE_URL,
     DeleteMemoryResponse,
     GetContextResponse,
@@ -96,7 +96,7 @@ def _validate_timestamps(
             )
 
 
-class TinyHumanMemoryClient:
+class TinyHumansMemoryClient:
     """Synchronous client for the TinyHumans memory API.
 
     Args:
@@ -122,7 +122,7 @@ class TinyHumanMemoryClient:
         self._token = token
         self._model_id = model_id
         logger.debug(
-            "Initializing TinyHumanMemoryClient base_url=%s model_id=%s",
+            "Initializing TinyHumansMemoryClient base_url=%s model_id=%s",
             self._base_url,
             self._model_id,
         )
@@ -137,10 +137,10 @@ class TinyHumanMemoryClient:
 
     def close(self) -> None:
         """Close the underlying HTTP client and release connections."""
-        logger.debug("Closing TinyHumanMemoryClient HTTP session")
+        logger.debug("Closing TinyHumansMemoryClient HTTP session")
         self._http.close()
 
-    def __enter__(self) -> "TinyHumanMemoryClient":
+    def __enter__(self) -> "TinyHumansMemoryClient":
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -165,7 +165,7 @@ class TinyHumanMemoryClient:
             Counts of ingested, updated, and errored items (ingested + updated <= 1).
 
         Raises:
-            TinyHumanError: On API errors.
+            TinyHumansError: On API errors.
         """
         return self.ingest_memories(items=[item])
 
@@ -191,7 +191,7 @@ class TinyHumanMemoryClient:
 
         Raises:
             ValueError: If items list is empty.
-            TinyHumanError: On API errors.
+            TinyHumansError: On API errors.
         """
         if not items:
             raise ValueError("items must be a non-empty list")
@@ -274,7 +274,7 @@ class TinyHumanMemoryClient:
 
         Raises:
             ValueError: If num_chunks is not positive.
-            TinyHumanError: On API errors.
+            TinyHumansError: On API errors.
         """
         if num_chunks < 1:
             raise ValueError("num_chunks must be >= 1")
@@ -322,7 +322,7 @@ class TinyHumanMemoryClient:
 
         Raises:
             ValueError: If no deletion target is specified.
-            TinyHumanError: On API errors.
+            TinyHumansError: On API errors.
         """
         has_key = isinstance(key, str) and len(key) > 0
         has_keys = isinstance(keys, (list, tuple)) and len(keys) > 0
@@ -393,7 +393,7 @@ class TinyHumanMemoryClient:
 
         Raises:
             ValueError: If context is not provided and namespace is not provided; or provider/api_key invalid.
-            TinyHumanError: On provider API errors.
+            TinyHumansError: On provider API errors.
         """
         if not context.strip():
             if not namespace:
@@ -871,7 +871,7 @@ class TinyHumanMemoryClient:
                 if state in completed_states:
                     return job
                 if state in failed_states:
-                    raise TinyHumanError(
+                    raise TinyHumansError(
                         f"Ingestion job {job_id} failed (state={state_raw})",
                         500,
                         job,
@@ -880,7 +880,7 @@ class TinyHumanMemoryClient:
                     return job
             time.sleep(poll_interval_seconds)
 
-        raise TinyHumanError(
+        raise TinyHumansError(
             f"Ingestion job {job_id} timed out after {timeout_seconds}s",
             408,
             last_job,
@@ -1045,12 +1045,12 @@ class TinyHumanMemoryClient:
         try:
             payload = response.json()
         except Exception:
-            raise TinyHumanError(
+            raise TinyHumansError(
                 f"HTTP {response.status_code} {response.request.method} {response.url}: non-JSON response",
                 response.status_code,
                 response_text,
             )
         if not response.is_success:
             message = payload.get("error", f"HTTP {response.status_code}")
-            raise TinyHumanError(message, response.status_code, payload)
+            raise TinyHumansError(message, response.status_code, payload)
         return payload["data"]

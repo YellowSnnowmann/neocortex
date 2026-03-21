@@ -546,9 +546,9 @@ func TestParseResponse_NonJSON(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for non-JSON response")
 	}
-	tErr, ok := err.(*TinyHumanError)
+	tErr, ok := err.(*TinyHumansError)
 	if !ok {
-		t.Fatalf("expected TinyHumanError, got %T", err)
+		t.Fatalf("expected TinyHumansError, got %T", err)
 	}
 	if !strings.Contains(tErr.Message, "non-JSON") {
 		t.Errorf("message should contain 'non-JSON', got %q", tErr.Message)
@@ -566,9 +566,9 @@ func TestParseResponse_Non2xx(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for 403 response")
 	}
-	tErr, ok := err.(*TinyHumanError)
+	tErr, ok := err.(*TinyHumansError)
 	if !ok {
-		t.Fatalf("expected TinyHumanError, got %T", err)
+		t.Fatalf("expected TinyHumansError, got %T", err)
 	}
 	if tErr.Status != 403 {
 		t.Errorf("status = %d, want 403", tErr.Status)

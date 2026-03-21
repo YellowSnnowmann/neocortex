@@ -11,7 +11,7 @@ Optional env vars:
   TINYHUMANS_BASE_URL / NEOCORTEX_BASE_URL
 */
 
-import { TinyHumanMemoryClient } from './dist/index.js';
+import { TinyHumansMemoryClient } from './dist/index.js';
 
 const token = process.env.TINYHUMANS_TOKEN ?? process.env.NEOCORTEX_TOKEN;
 if (!token) {
@@ -20,7 +20,7 @@ if (!token) {
 }
 
 const baseUrl = process.env.TINYHUMANS_BASE_URL ?? process.env.NEOCORTEX_BASE_URL;
-const client = new TinyHumanMemoryClient({ token, baseUrl });
+const client = new TinyHumansMemoryClient({ token, baseUrl });
 
 const ts = Date.now();
 const namespace = `sdk-ts-example-${ts}`;

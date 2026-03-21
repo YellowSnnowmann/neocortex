@@ -1,4 +1,4 @@
-import xyz.tinyhuman.sdk.*;
+import xyz.tinyhumans.sdk.*;
 
 import java.util.Map;
 
@@ -7,8 +7,8 @@ import java.util.Map;
  *
  * Run:
  *   export TINYHUMANS_TOKEN="your-token"
- *   javac -cp ../build/libs/tinyhuman-sdk-java-0.1.0.jar ExampleUsage.java
- *   java -cp .:../build/libs/tinyhuman-sdk-java-0.1.0.jar ExampleUsage
+ *   javac -cp ../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage.java
+ *   java -cp .:../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage
  */
 public class ExampleUsage {
 
@@ -21,7 +21,7 @@ public class ExampleUsage {
 
         String namespace = "example-java-" + System.currentTimeMillis();
 
-        try (TinyHumanMemoryClient client = new TinyHumanMemoryClient(token)) {
+        try (TinyHumansMemoryClient client = new TinyHumansMemoryClient(token)) {
 
             // 1. Insert
             System.out.println("=== Insert ===");

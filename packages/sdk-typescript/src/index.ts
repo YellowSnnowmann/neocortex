@@ -357,13 +357,13 @@ export interface ErrorResponse {
   error: string;
 }
 
-export class TinyHumanError extends Error {
+export class TinyHumansError extends Error {
   public readonly status: number;
   public readonly body: unknown;
 
   constructor(message: string, status: number, body?: unknown) {
     super(message);
-    this.name = "TinyHumanError";
+    this.name = "TinyHumansError";
     this.status = status;
     this.body = body;
   }
@@ -371,7 +371,7 @@ export class TinyHumanError extends Error {
 
 // ---------- Client ----------
 
-export class TinyHumanMemoryClient {
+export class TinyHumansMemoryClient {
   private readonly baseUrl: string;
   private readonly token: string;
 
@@ -712,7 +712,7 @@ export class TinyHumanMemoryClient {
     try {
       json = text ? JSON.parse(text) : {};
     } catch {
-      throw new TinyHumanError(
+      throw new TinyHumansError(
         `HTTP ${res.status}: non-JSON response`,
         res.status,
         text || undefined,
@@ -720,7 +720,7 @@ export class TinyHumanMemoryClient {
     }
     if (!res.ok) {
       const message = (json as ErrorResponse).error ?? `HTTP ${res.status}`;
-      throw new TinyHumanError(message, res.status, json);
+      throw new TinyHumansError(message, res.status, json);
     }
     return json as T;
   }
@@ -730,4 +730,4 @@ export class TinyHumanMemoryClient {
   }
 }
 
-export default TinyHumanMemoryClient;
+export default TinyHumansMemoryClient;

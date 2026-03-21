@@ -36,8 +36,8 @@ if (!token) {
 }
 
 const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.NEOCORTEX_BASE_URL;
-const { TinyHumanMemoryClient } = await import(path.join(pkgRoot, "dist", "index.js"));
-const client = new TinyHumanMemoryClient({ token, baseUrl });
+const { TinyHumansMemoryClient } = await import(path.join(pkgRoot, "dist", "index.js"));
+const client = new TinyHumansMemoryClient({ token, baseUrl });
 
 const ts = Date.now();
 const namespace = `sdk-ts-routes-${ts}`;

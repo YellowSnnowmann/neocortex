@@ -33,13 +33,13 @@ export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
 
 ```rust
 use tinyhumansai::{
-    InsertMemoryParams, QueryMemoryParams, TinyHumanConfig, TinyHumanMemoryClient,
+    InsertMemoryParams, QueryMemoryParams, TinyHumanConfig, TinyHumansMemoryClient,
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let token = std::env::var("TINYHUMANS_TOKEN")?;
-    let client = TinyHumanMemoryClient::new(TinyHumanConfig::new(token))?;
+    let client = TinyHumansMemoryClient::new(TinyHumanConfig::new(token))?;
 
     client.insert_memory(InsertMemoryParams {
         title: "User preference".into(),
