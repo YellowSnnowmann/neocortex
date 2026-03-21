@@ -1,14 +1,28 @@
 # Deleting Memories
 
-Use delete to remove memory by namespace.
+Delete removes memory immediately from a namespace. Use this when you need deterministic cleanup (privacy requests, data reset, bad data rollback).
 
-## API Endpoint
+## When to Use This
 
-`POST /memory/admin/delete`
+- User requests data removal
+- Memory is incorrect or unsafe
+- You are resetting a namespace before re-ingest
 
-Some deployments and SDKs use a `/v1` prefix (`/v1/memory/admin/delete`). If your deployment requires it, prepend `/v1`.
+## Request Fields
 
-## Request Body
+### Required Fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `namespace` | string | Namespace to clear. |
+
+## Step-by-Step
+
+1. Choose namespace to remove.
+2. Call delete endpoint.
+3. Validate deleted count from response.
+
+## Example Request Body
 
 ```json
 {
@@ -21,7 +35,7 @@ Some deployments and SDKs use a `/v1` prefix (`/v1/memory/admin/delete`). If you
 {% tabs %}
 {% tab title="cURL" %}
 ```bash
-# Delete all memory in a namespace.
+# 1) Delete all memory in one namespace.
 curl -X POST "https://api.tinyhumans.ai/memory/admin/delete" \
   -H "Authorization: Bearer $TINYHUMANS_TOKEN" \
   -H "Content-Type: application/json" \
@@ -35,17 +49,17 @@ curl -X POST "https://api.tinyhumans.ai/memory/admin/delete" \
 import { TinyHumanMemoryClient } from "@tinyhumansai/neocortex";
 
 async function main() {
-  // Read API token from env.
+  // 1) Token + client.
   const token = process.env.TINYHUMANS_TOKEN;
   if (!token) throw new Error("Set TINYHUMANS_TOKEN");
-
-  // Create client.
   const client = new TinyHumanMemoryClient({ token });
 
-  // Delete by namespace.
-  const result = await client.deleteMemory({ namespace: "preferences" });
+  // 2) Delete namespace.
+  const result = await client.deleteMemory({
+    namespace: "preferences", // required
+  });
 
-  // Print nodes deleted from API response.
+  // 3) Verify deletion count.
   console.log(result.data.nodesDeleted);
 }
 
@@ -58,18 +72,21 @@ main().catch(console.error);
 import os
 import tinyhumansai as api
 
-# Read API token from env.
+# 1) Token + client.
 token = os.getenv("TINYHUMANS_TOKEN")
 if not token:
     raise RuntimeError("Set TINYHUMANS_TOKEN")
-
-# Create client.
 client = api.TinyHumanMemoryClient(token=token)
 
-# Delete namespace memory.
-response = client.delete_memory(namespace="preferences", delete_all=True)
+# 2) Delete namespace memory (SDK requires delete_all confirmation).
+response = client.delete_memory(
+    namespace="preferences",
+    delete_all=True,
+    # key="k1",             # currently not used by backend delete route
+    # keys=["k1", "k2"],   # currently not used by backend delete route
+)
 
-# Print number of deleted records.
+# 3) Verify count.
 print(response.deleted)
 ```
 {% endtab %}
@@ -87,26 +104,24 @@ import (
 )
 
 func main() {
-	// Read API token from env.
+	// 1) Token + client.
 	token := os.Getenv("TINYHUMANS_TOKEN")
 	if token == "" {
 		log.Fatal("set TINYHUMANS_TOKEN")
 	}
-
-	// Create client.
 	client, err := tinyhumans.NewClient(token)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	// Delete by namespace.
+	// 2) Delete namespace.
 	resp, err := client.DeleteMemory("preferences", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print number deleted.
+	// 3) Verify count.
 	fmt.Println(resp.Deleted)
 }
 ```
@@ -119,20 +134,18 @@ use tinyhumansai::{DeleteMemoryParams, TinyHumanConfig, TinyHumanMemoryClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Read API token from env.
+    // 1) Token + client.
     let token = env::var("TINYHUMANS_TOKEN")?;
-
-    // Create client.
     let client = TinyHumanMemoryClient::new(TinyHumanConfig::new(token))?;
 
-    // Delete by namespace.
+    // 2) Delete namespace.
     let response = client
         .delete_memory(DeleteMemoryParams {
             namespace: Some("preferences".into()),
         })
         .await?;
 
-    // Print number deleted.
+    // 3) Verify count.
     println!("{}", response.data.nodes_deleted);
     Ok(())
 }
@@ -145,17 +158,17 @@ import xyz.tinyhuman.sdk.*;
 
 public class DeleteExample {
     public static void main(String[] args) {
-        // Read API token from env.
+        // 1) Token + client.
         String token = System.getenv("TINYHUMANS_TOKEN");
-        if (token == null || token.isEmpty()) throw new RuntimeException("Set token env var");
+        if (token == null || token.isEmpty()) throw new RuntimeException("Set TINYHUMANS_TOKEN");
 
-        // Create client and delete by namespace.
         try (TinyHumanMemoryClient client = new TinyHumanMemoryClient(token)) {
+            // 2) Delete namespace.
             DeleteMemoryResponse response = client.deleteMemory(
                 new DeleteMemoryParams().setNamespace("preferences")
             );
 
-            // Print number deleted.
+            // 3) Verify count.
             System.out.println(response.getNodesDeleted());
         }
     }
@@ -174,22 +187,25 @@ public class DeleteExample {
 using namespace tinyhuman;
 
 int main() {
-    // Read API token from env.
+    // 1) Token + client.
     const char* token = std::getenv("TINYHUMANS_TOKEN");
     if (!token) throw std::runtime_error("Set TINYHUMANS_TOKEN");
-
-    // Create client.
     TinyHumanMemoryClient client(token);
 
-    // Delete by namespace.
+    // 2) Delete namespace.
     DeleteMemoryParams params;
     params.set_namespace("preferences");
     auto response = client.delete_memory(params);
 
-    // Print number deleted.
+    // 3) Verify count.
     std::cout << response.nodes_deleted << std::endl;
     return 0;
 }
 ```
 {% endtab %}
 {% endtabs %}
+
+## Response Notes
+
+- `nodesDeleted` / `deleted`: number of records removed
+- deletion is immediate and irreversible

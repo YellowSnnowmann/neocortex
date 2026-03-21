@@ -1,14 +1,30 @@
 # Recalling Memories
 
-Use recall to fetch the most relevant context for a namespace.
+Recall retrieves the most relevant memory context for downstream reasoning. Think of this as building a **prompt-ready memory snapshot**.
 
-## API Endpoint
+## When to Use This
 
-`POST /memory/recall`
+- Build system context before an LLM response
+- Fetch tenant/user-specific background quickly
+- Pull compact context instead of scanning all stored memory
 
-Some deployments and SDKs use a `/v1` prefix (`/v1/memory/recall`). If your deployment requires it, prepend `/v1`.
+## Request Fields
 
-## Request Body
+### Optional Fields
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `namespace` | string | Scope retrieval to one namespace. Highly recommended in production. |
+| `maxChunks` | number | Maximum number of chunks to return (default usually 10). |
+
+## Step-by-Step
+
+1. Choose namespace scope.
+2. Set chunk budget (`maxChunks` / `num_chunks`).
+3. Execute recall.
+4. Inject returned context into your LLM flow.
+
+## Example Request Body
 
 ```json
 {
@@ -22,13 +38,13 @@ Some deployments and SDKs use a `/v1` prefix (`/v1/memory/recall`). If your depl
 {% tabs %}
 {% tab title="cURL" %}
 ```bash
-# Recall top chunks from a namespace.
+# 1) Recall top chunks for a namespace.
 curl -X POST "https://api.tinyhumans.ai/memory/recall" \
   -H "Authorization: Bearer $TINYHUMANS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "namespace": "preferences",
-    "maxChunks": 10
+    "namespace": "preferences",  # scope
+    "maxChunks": 10                # chunk budget
   }'
 ```
 {% endtab %}
@@ -39,21 +55,20 @@ curl -X POST "https://api.tinyhumans.ai/memory/recall" \
 import { TinyHumanMemoryClient } from "@tinyhumansai/neocortex";
 
 async function main() {
-  // Read API token from env.
+  // 1) Token + client.
   const token = process.env.TINYHUMANS_TOKEN;
   if (!token) throw new Error("Set TINYHUMANS_TOKEN");
-
-  // Create client.
   const client = new TinyHumanMemoryClient({ token });
 
-  // Recall context from a namespace.
+  // 2) Recall context.
   const result = await client.recallMemory({
-    namespace: "preferences",
-    maxChunks: 10,
+    namespace: "preferences",    // optional but recommended
+    maxChunks: 10,                // optional
   });
 
-  // Print LLM-ready context string.
+  // 3) Use the LLM context message.
   console.log(result.data.llmContextMessage);
+  console.log(result.data.counts);
 }
 
 main().catch(console.error);
@@ -65,23 +80,24 @@ main().catch(console.error);
 import os
 import tinyhumansai as api
 
-# Read API token from env.
+# 1) Token + client.
 token = os.getenv("TINYHUMANS_TOKEN")
 if not token:
     raise RuntimeError("Set TINYHUMANS_TOKEN")
-
-# Create client.
 client = api.TinyHumanMemoryClient(token=token)
 
-# Recall context based on a natural-language prompt.
+# 2) Prompt-driven recall (Python-specific high-level flow).
 ctx = client.recall_memory(
     namespace="preferences",
-    prompt="What does the user prefer?",
-    num_chunks=10,
+    prompt="What are this user's strongest preferences?",  # required in this method
+    num_chunks=10,                                          # optional
+    # key="user-preference-theme",                         # optional exact key
+    # keys=["k1", "k2"],                                 # optional exact keys
 )
 
-# Print formatted context for LLM injection.
+# 3) Context string is ready for LLM system prompts.
 print(ctx.context)
+print(ctx.count)
 ```
 {% endtab %}
 
@@ -98,31 +114,30 @@ import (
 )
 
 func main() {
-	// Read API token from env.
+	// 1) Token + client.
 	token := os.Getenv("TINYHUMANS_TOKEN")
 	if token == "" {
 		log.Fatal("set TINYHUMANS_TOKEN")
 	}
-
-	// Create client.
 	client, err := tinyhumans.NewClient(token)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Close()
 
-	// Recall context.
+	// 2) Recall context.
 	ctx, err := client.RecallMemory(
 		"preferences",
 		"What does the user prefer?",
-		&tinyhumans.RecallMemoryOptions{NumChunks: 10},
+		&tinyhumans.RecallMemoryOptions{NumChunks: 10}, // optional tuning
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print LLM-ready context.
+	// 3) Use LLM-ready context.
 	fmt.Println(ctx.Context)
+	fmt.Println(ctx.Count)
 }
 ```
 {% endtab %}
@@ -134,13 +149,11 @@ use tinyhumansai::{RecallMemoryParams, TinyHumanConfig, TinyHumanMemoryClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Read API token from env.
+    // 1) Token + client.
     let token = env::var("TINYHUMANS_TOKEN")?;
-
-    // Create client.
     let client = TinyHumanMemoryClient::new(TinyHumanConfig::new(token))?;
 
-    // Recall context.
+    // 2) Recall context with optional fields.
     let response = client
         .recall_memory(RecallMemoryParams {
             namespace: Some("preferences".into()),
@@ -148,8 +161,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .await?;
 
-    // Print LLM-ready context.
+    // 3) Access LLM context and counts.
     println!("{:?}", response.data.llm_context_message);
+    println!("{:?}", response.data.counts);
     Ok(())
 }
 ```
@@ -161,20 +175,21 @@ import xyz.tinyhuman.sdk.*;
 
 public class RecallExample {
     public static void main(String[] args) {
-        // Read API token from env.
+        // 1) Token + client.
         String token = System.getenv("TINYHUMANS_TOKEN");
-        if (token == null || token.isEmpty()) throw new RuntimeException("Set token env var");
+        if (token == null || token.isEmpty()) throw new RuntimeException("Set TINYHUMANS_TOKEN");
 
-        // Create client and recall context.
         try (TinyHumanMemoryClient client = new TinyHumanMemoryClient(token)) {
+            // 2) Recall with optional params.
             RecallMemoryResponse response = client.recallMemory(
                 new RecallMemoryParams()
                     .setNamespace("preferences")
                     .setMaxChunks(10)
             );
 
-            // Print LLM-ready context.
+            // 3) Use returned context.
             System.out.println(response.getLlmContextMessage());
+            System.out.println(response.getCounts());
         }
     }
 }
@@ -192,14 +207,12 @@ public class RecallExample {
 using namespace tinyhuman;
 
 int main() {
-    // Read API token from env.
+    // 1) Token + client.
     const char* token = std::getenv("TINYHUMANS_TOKEN");
     if (!token) throw std::runtime_error("Set TINYHUMANS_TOKEN");
-
-    // Create client.
     TinyHumanMemoryClient client(token);
 
-    // Recall context.
+    // 2) Recall with optional params.
     RecallMemoryParams params;
     params
         .set_namespace("preferences")
@@ -207,7 +220,7 @@ int main() {
 
     auto response = client.recall_memory(params);
 
-    // Print LLM-ready context if present.
+    // 3) Use returned context.
     if (response.llm_context_message) {
         std::cout << *response.llm_context_message << std::endl;
     }
@@ -216,3 +229,9 @@ int main() {
 ```
 {% endtab %}
 {% endtabs %}
+
+## Response Notes
+
+- `llmContextMessage`: compact prompt-ready memory context
+- `counts`: retrieval diagnostics (entities/relations/chunks)
+- `cached`: cache hit indicator when available
