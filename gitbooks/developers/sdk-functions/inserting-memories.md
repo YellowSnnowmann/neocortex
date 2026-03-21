@@ -1,29 +1,10 @@
 # Inserting Memories
 
-Use this operation to upsert memory into a namespace.
-
-## API Endpoint
-
-`POST /memory/insert`
-
-Some deployments and SDKs use a `/v1` prefix (`/v1/memory/insert`). If your deployment requires it, prepend `/v1`.
-
-## Request Body
-
-```json
-{
-  "title": "user-preference-theme",
-  "content": "User prefers dark mode",
-  "namespace": "preferences",
-  "sourceType": "doc",
-  "metadata": {"source": "onboarding"}
-}
-```
-
-## Examples by Language
+Use this operation to upsert memory into a namespace. Memories can also be backdated by sending in the time. Backdated memories tend to get forgotten more however they'll get remember if they've either been interacted with or recalled by the user.
 
 {% tabs %}
 {% tab title="cURL" %}
+
 ```bash
 # Insert (upsert) one memory item.
 curl -X POST "https://api.tinyhumans.ai/memory/insert" \
@@ -37,9 +18,11 @@ curl -X POST "https://api.tinyhumans.ai/memory/insert" \
     "metadata": {"source": "onboarding"}
   }'
 ```
+
 {% endtab %}
 
 {% tab title="TypeScript" %}
+
 ```ts
 // npm install @tinyhumansai/neocortex
 import { TinyHumanMemoryClient } from "@tinyhumansai/neocortex";
@@ -67,9 +50,11 @@ async function main() {
 
 main().catch(console.error);
 ```
+
 {% endtab %}
 
 {% tab title="Python" %}
+
 ```python
 import os
 import tinyhumansai as api
@@ -95,9 +80,11 @@ result = client.ingest_memory(
 # Print insert/update counters.
 print(result.ingested, result.updated, result.errors)
 ```
+
 {% endtab %}
 
 {% tab title="Go" %}
+
 ```go
 package main
 
@@ -138,9 +125,11 @@ func main() {
 	fmt.Println(resp.Ingested, resp.Updated, resp.Errors)
 }
 ```
+
 {% endtab %}
 
 {% tab title="Rust" %}
+
 ```rust
 use std::env;
 use tinyhumansai::{InsertMemoryParams, TinyHumanConfig, TinyHumanMemoryClient};
@@ -168,9 +157,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 ```
+
 {% endtab %}
 
 {% tab title="Java" %}
+
 ```java
 import xyz.tinyhuman.sdk.*;
 
@@ -192,9 +183,11 @@ public class InsertExample {
     }
 }
 ```
+
 {% endtab %}
 
 {% tab title="C++" %}
+
 ```cpp
 #include "tinyhuman/tinyhuman.hpp"
 
@@ -226,5 +219,6 @@ int main() {
     return 0;
 }
 ```
+
 {% endtab %}
 {% endtabs %}
