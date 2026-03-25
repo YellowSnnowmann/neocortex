@@ -24,6 +24,45 @@ public class MemoryClientTests
         Assert.NotNull(client);
     }
 
+    // ── Model ID ──
+
+    [Fact]
+    public async Task DefaultModelId_SendsNeocortexMk1Header()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""status"":""ok"",""stats"":{}}}");
+        using var client = CreateClient(handler);
+
+        await client.InsertMemoryAsync(new InsertMemoryParams
+        {
+            Title = "t", Content = "c", Namespace = "ns",
+        });
+
+        Assert.NotNull(handler.CapturedRequest);
+        var modelIdValues = handler.CapturedRequest!.Headers.GetValues("X-Model-Id").ToList();
+        Assert.Single(modelIdValues);
+        Assert.Equal("neocortex-mk1", modelIdValues[0]);
+    }
+
+    [Fact]
+    public async Task CustomModelId_PropagatesCorrectly()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""status"":""ok"",""stats"":{}}}");
+        var httpClient = new HttpClient(handler);
+        using var client = new TinyHumansMemoryClient("test-token", "https://test.example.com", httpClient, "custom-model");
+
+        await client.InsertMemoryAsync(new InsertMemoryParams
+        {
+            Title = "t", Content = "c", Namespace = "ns",
+        });
+
+        Assert.NotNull(handler.CapturedRequest);
+        var modelIdValues = handler.CapturedRequest!.Headers.GetValues("X-Model-Id").ToList();
+        Assert.Single(modelIdValues);
+        Assert.Equal("custom-model", modelIdValues[0]);
+    }
+
     // ── InsertMemory ──
 
     [Fact]
@@ -45,7 +84,7 @@ public class MemoryClientTests
 
         Assert.NotNull(handler.CapturedRequest);
         Assert.Equal(HttpMethod.Post, handler.CapturedRequest!.Method);
-        Assert.EndsWith("/v1/memory/insert", handler.CapturedRequest.RequestUri!.ToString());
+        Assert.EndsWith("/memory/insert", handler.CapturedRequest.RequestUri!.ToString());
         Assert.Equal("Bearer", handler.CapturedRequest.Headers.Authorization!.Scheme);
         Assert.Equal("test-token", handler.CapturedRequest.Headers.Authorization.Parameter);
 
@@ -245,6 +284,352 @@ public class MemoryClientTests
         var ex = await Assert.ThrowsAsync<TinyHumansError>(() =>
             client.RecallMemoryAsync());
         Assert.Equal(500, ex.Status);
+    }
+
+    // ── RecallThoughts ──
+
+    [Fact]
+    public async Task RecallThoughts_SendsCorrectPath()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.RecallThoughtsAsync(new RecallThoughtsParams { Namespace = "ns" });
+
+        Assert.EndsWith("/memory/memories/thoughts", handler.CapturedRequest!.RequestUri!.ToString());
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.Equal("ns", body.GetProperty("namespace").GetString());
+    }
+
+    [Fact]
+    public async Task RecallThoughts_DefaultParams()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.RecallThoughtsAsync();
+
+        Assert.EndsWith("/memory/memories/thoughts", handler.CapturedRequest!.RequestUri!.ToString());
+    }
+
+    // ── QueryMemoryContext ──
+
+    [Fact]
+    public async Task QueryMemoryContext_SendsCorrectRequest()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.QueryMemoryContextAsync(new QueryMemoryContextParams
+        {
+            Query = "test query", Namespace = "ns",
+        });
+
+        Assert.EndsWith("/memory/queries", handler.CapturedRequest!.RequestUri!.ToString());
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.Equal("test query", body.GetProperty("query").GetString());
+    }
+
+    [Fact]
+    public async Task QueryMemoryContext_ThrowsOnMissingQuery()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.QueryMemoryContextAsync(new QueryMemoryContextParams()));
+    }
+
+    // ── ChatMemory ──
+
+    [Fact]
+    public async Task ChatMemory_SendsCorrectRequest()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""message"":""hi""}}");
+        using var client = CreateClient(handler);
+
+        await client.ChatMemoryAsync(new ChatMemoryParams
+        {
+            Messages = new List<Dictionary<string, string>>
+            {
+                new() { ["role"] = "user", ["content"] = "Hello!" }
+            },
+        });
+
+        Assert.NotNull(handler.CapturedRequest);
+        Assert.Equal(HttpMethod.Post, handler.CapturedRequest!.Method);
+        Assert.EndsWith("/memory/chat", handler.CapturedRequest.RequestUri!.ToString());
+
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.True(body.GetProperty("messages").GetArrayLength() > 0);
+    }
+
+    [Fact]
+    public async Task ChatMemory_ThrowsOnEmptyMessages()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.ChatMemoryAsync(new ChatMemoryParams()));
+    }
+
+    // ── ChatMemoryContext ──
+
+    [Fact]
+    public async Task ChatMemoryContext_SendsCorrectPath()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.ChatMemoryContextAsync(new ChatMemoryParams
+        {
+            Messages = new List<Dictionary<string, string>>
+            {
+                new() { ["role"] = "user", ["content"] = "Hello!" }
+            },
+        });
+
+        Assert.EndsWith("/memory/conversations", handler.CapturedRequest!.RequestUri!.ToString());
+    }
+
+    // ── InteractMemory ──
+
+    [Fact]
+    public async Task InteractMemory_SendsCorrectRequest()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.InteractMemoryAsync(new InteractMemoryParams
+        {
+            Namespace = "ns", EntityNames = new List<string> { "ENTITY1" },
+        });
+
+        Assert.EndsWith("/memory/interact", handler.CapturedRequest!.RequestUri!.ToString());
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.Equal("ns", body.GetProperty("namespace").GetString());
+        Assert.True(body.TryGetProperty("entityNames", out _));
+    }
+
+    [Fact]
+    public async Task InteractMemory_ThrowsOnMissingNamespace()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.InteractMemoryAsync(new InteractMemoryParams
+            {
+                EntityNames = new List<string> { "E" },
+            }));
+    }
+
+    [Fact]
+    public async Task InteractMemory_ThrowsOnEmptyEntityNames()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.InteractMemoryAsync(new InteractMemoryParams
+            {
+                Namespace = "ns",
+            }));
+    }
+
+    // ── RecordInteractions ──
+
+    [Fact]
+    public async Task RecordInteractions_SendsCorrectPath()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.RecordInteractionsAsync(new InteractMemoryParams
+        {
+            Namespace = "ns", EntityNames = new List<string> { "E" },
+        });
+
+        Assert.EndsWith("/memory/interactions", handler.CapturedRequest!.RequestUri!.ToString());
+    }
+
+    // ── InsertDocument ──
+
+    [Fact]
+    public async Task InsertDocument_SendsCorrectRequest()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""jobId"":""j1""}}");
+        using var client = CreateClient(handler);
+
+        await client.InsertDocumentAsync(new InsertDocumentParams
+        {
+            Title = "Doc", Content = "Content", Namespace = "ns",
+        });
+
+        Assert.EndsWith("/memory/documents", handler.CapturedRequest!.RequestUri!.ToString());
+        Assert.Equal(HttpMethod.Post, handler.CapturedRequest.Method);
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.Equal("Doc", body.GetProperty("title").GetString());
+    }
+
+    [Fact]
+    public async Task InsertDocument_ThrowsOnMissingTitle()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.InsertDocumentAsync(new InsertDocumentParams { Content = "c", Namespace = "ns" }));
+    }
+
+    // ── InsertDocumentsBatch ──
+
+    [Fact]
+    public async Task InsertDocumentsBatch_SendsItems()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.InsertDocumentsBatchAsync(new InsertDocumentsBatchParams
+        {
+            Documents = new List<InsertDocumentParams>
+            {
+                new() { Title = "D1", Content = "C1", Namespace = "ns" },
+                new() { Title = "D2", Content = "C2", Namespace = "ns" },
+            },
+        });
+
+        Assert.EndsWith("/memory/documents/batch", handler.CapturedRequest!.RequestUri!.ToString());
+        var body = JsonDocument.Parse(handler.CapturedRequestBody!).RootElement;
+        Assert.Equal(2, body.GetProperty("items").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task InsertDocumentsBatch_ThrowsOnEmpty()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.InsertDocumentsBatchAsync(new InsertDocumentsBatchParams()));
+    }
+
+    // ── ListDocuments ──
+
+    [Fact]
+    public async Task ListDocuments_SendsGetWithQueryParams()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""documents"":[]}}");
+        using var client = CreateClient(handler);
+
+        await client.ListDocumentsAsync(new ListDocumentsParams { Namespace = "ns", Limit = 10 });
+
+        Assert.Equal(HttpMethod.Get, handler.CapturedRequest!.Method);
+        var uri = handler.CapturedRequest.RequestUri!.ToString();
+        Assert.Contains("namespace=ns", uri);
+        Assert.Contains("limit=10", uri);
+    }
+
+    // ── GetDocument ──
+
+    [Fact]
+    public async Task GetDocument_SendsGetWithId()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""id"":""d1""}}");
+        using var client = CreateClient(handler);
+
+        await client.GetDocumentAsync(new GetDocumentParams { Id = "d1", Namespace = "ns" });
+
+        Assert.Equal(HttpMethod.Get, handler.CapturedRequest!.Method);
+        var uri = handler.CapturedRequest.RequestUri!.ToString();
+        Assert.Contains("/memory/documents/d1", uri);
+        Assert.Contains("namespace=ns", uri);
+    }
+
+    [Fact]
+    public async Task GetDocument_ThrowsOnMissingId()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.GetDocumentAsync(new GetDocumentParams()));
+    }
+
+    // ── DeleteDocument ──
+
+    [Fact]
+    public async Task DeleteDocument_SendsDeleteMethod()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.DeleteDocumentAsync("d1", "ns");
+
+        Assert.Equal(HttpMethod.Delete, handler.CapturedRequest!.Method);
+        var uri = handler.CapturedRequest.RequestUri!.ToString();
+        Assert.Contains("/memory/documents/d1", uri);
+        Assert.Contains("namespace=ns", uri);
+    }
+
+    [Fact]
+    public async Task DeleteDocument_ThrowsOnEmptyId()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.DeleteDocumentAsync(""));
+    }
+
+    // ── GetGraphSnapshot ──
+
+    [Fact]
+    public async Task GetGraphSnapshot_SendsGet()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{}}");
+        using var client = CreateClient(handler);
+
+        await client.GetGraphSnapshotAsync(new GraphSnapshotParams { Namespace = "ns" });
+
+        Assert.Equal(HttpMethod.Get, handler.CapturedRequest!.Method);
+        Assert.Contains("/memory/admin/graph-snapshot", handler.CapturedRequest.RequestUri!.ToString());
+    }
+
+    // ── GetIngestionJob ──
+
+    [Fact]
+    public async Task GetIngestionJob_SendsGet()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""state"":""completed""}}");
+        using var client = CreateClient(handler);
+
+        await client.GetIngestionJobAsync("job123");
+
+        Assert.Equal(HttpMethod.Get, handler.CapturedRequest!.Method);
+        Assert.Contains("/memory/ingestion/jobs/job123", handler.CapturedRequest.RequestUri!.ToString());
+    }
+
+    [Fact]
+    public async Task GetIngestionJob_ThrowsOnEmptyJobId()
+    {
+        using var client = CreateClient();
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            client.GetIngestionJobAsync(""));
+    }
+
+    // ── WaitForIngestionJob ──
+
+    [Fact]
+    public async Task WaitForIngestionJob_ReturnsOnCompleted()
+    {
+        var handler = new MockHttpMessageHandler(HttpStatusCode.OK,
+            @"{""success"":true,""data"":{""state"":""completed""}}");
+        using var client = CreateClient(handler);
+
+        var result = await client.WaitForIngestionJobAsync("job123",
+            new WaitForIngestionJobOptions { IntervalMs = 10, MaxAttempts = 3 });
+
+        Assert.Equal("completed", result.GetProperty("data").GetProperty("state").GetString());
     }
 
     // ── Helpers ──

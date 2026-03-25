@@ -264,3 +264,249 @@ public class RecallMemoriesResponse
         return resp;
     }
 }
+
+// ── Chat ──
+
+public class ChatMemoryParams
+{
+    public List<Dictionary<string, string>>? Messages { get; set; }
+    public string? Namespace { get; set; }
+    public double? Temperature { get; set; }
+    public int? MaxTokens { get; set; }
+    public string? Model { get; set; }
+
+    public void Validate()
+    {
+        if (Messages == null || Messages.Count == 0)
+            throw new ArgumentException("messages is required and must be a non-empty list");
+    }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var dict = new Dictionary<string, object?>
+        {
+            ["messages"] = Messages,
+        };
+        if (Namespace != null) dict["namespace"] = Namespace;
+        if (Temperature.HasValue) dict["temperature"] = Temperature.Value;
+        if (MaxTokens.HasValue) dict["maxTokens"] = MaxTokens.Value;
+        if (Model != null) dict["model"] = Model;
+        return dict;
+    }
+}
+
+// ── Interactions ──
+
+public class InteractMemoryParams
+{
+    public string? Namespace { get; set; }
+    public List<string>? EntityNames { get; set; }
+    public string? Description { get; set; }
+    public string? InteractionLevel { get; set; }
+    public List<string>? InteractionLevels { get; set; }
+    public double? Timestamp { get; set; }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Namespace))
+            throw new ArgumentException("namespace is required");
+        if (EntityNames == null || EntityNames.Count == 0)
+            throw new ArgumentException("entityNames is required and must be a non-empty list");
+    }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var dict = new Dictionary<string, object?>
+        {
+            ["namespace"] = Namespace,
+            ["entityNames"] = EntityNames,
+        };
+        if (Description != null) dict["description"] = Description;
+        if (InteractionLevel != null) dict["interactionLevel"] = InteractionLevel;
+        if (InteractionLevels != null) dict["interactionLevels"] = InteractionLevels;
+        if (Timestamp.HasValue) dict["timestamp"] = Timestamp.Value;
+        return dict;
+    }
+}
+
+// ── Recall Thoughts ──
+
+public class RecallThoughtsParams
+{
+    public string? Namespace { get; set; }
+    public int? MaxChunks { get; set; }
+    public double? Temperature { get; set; }
+    public int? RandomnessSeed { get; set; }
+    public bool? Persist { get; set; }
+    public bool? EnablePredictionCheck { get; set; }
+    public string? ThoughtPrompt { get; set; }
+
+    public void Validate() { }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var dict = new Dictionary<string, object?>();
+        if (Namespace != null) dict["namespace"] = Namespace;
+        if (MaxChunks.HasValue) dict["maxChunks"] = MaxChunks.Value;
+        if (Temperature.HasValue) dict["temperature"] = Temperature.Value;
+        if (RandomnessSeed.HasValue) dict["randomnessSeed"] = RandomnessSeed.Value;
+        if (Persist.HasValue) dict["persist"] = Persist.Value;
+        if (EnablePredictionCheck.HasValue) dict["enablePredictionCheck"] = EnablePredictionCheck.Value;
+        if (ThoughtPrompt != null) dict["thoughtPrompt"] = ThoughtPrompt;
+        return dict;
+    }
+}
+
+// ── Query Memory Context ──
+
+public class QueryMemoryContextParams
+{
+    public string? Query { get; set; }
+    public string? Namespace { get; set; }
+    public int? MaxChunks { get; set; }
+    public bool? IncludeReferences { get; set; }
+    public List<string>? DocumentIds { get; set; }
+    public bool? RecallOnly { get; set; }
+    public string? LlmQuery { get; set; }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Query))
+            throw new ArgumentException("query is required and must be a string");
+    }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var dict = new Dictionary<string, object?>
+        {
+            ["query"] = Query,
+        };
+        if (Namespace != null) dict["namespace"] = Namespace;
+        if (MaxChunks.HasValue) dict["maxChunks"] = MaxChunks.Value;
+        if (IncludeReferences.HasValue) dict["includeReferences"] = IncludeReferences.Value;
+        if (DocumentIds != null) dict["documentIds"] = DocumentIds;
+        if (RecallOnly.HasValue) dict["recallOnly"] = RecallOnly.Value;
+        if (LlmQuery != null) dict["llmQuery"] = LlmQuery;
+        return dict;
+    }
+}
+
+// ── Documents ──
+
+public class InsertDocumentParams
+{
+    public string? Title { get; set; }
+    public string? Content { get; set; }
+    public string? Namespace { get; set; }
+    public Dictionary<string, object?>? Metadata { get; set; }
+    public string? SourceType { get; set; }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Title))
+            throw new ArgumentException("title is required");
+        if (string.IsNullOrWhiteSpace(Content))
+            throw new ArgumentException("content is required");
+        if (string.IsNullOrWhiteSpace(Namespace))
+            throw new ArgumentException("namespace is required");
+    }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var dict = new Dictionary<string, object?>
+        {
+            ["title"] = Title,
+            ["content"] = Content,
+            ["namespace"] = Namespace,
+        };
+        if (Metadata != null) dict["metadata"] = Metadata;
+        if (SourceType != null) dict["sourceType"] = SourceType;
+        return dict;
+    }
+}
+
+public class InsertDocumentsBatchParams
+{
+    public List<InsertDocumentParams>? Documents { get; set; }
+
+    public void Validate()
+    {
+        if (Documents == null || Documents.Count == 0)
+            throw new ArgumentException("documents is required and must be a non-empty list");
+    }
+
+    public Dictionary<string, object?> ToJsonObject()
+    {
+        var items = new List<Dictionary<string, object?>>();
+        foreach (var doc in Documents!)
+        {
+            doc.Validate();
+            items.Add(doc.ToJsonObject());
+        }
+        return new Dictionary<string, object?>
+        {
+            ["items"] = items,
+        };
+    }
+}
+
+public class ListDocumentsParams
+{
+    public string? Namespace { get; set; }
+    public int? Page { get; set; }
+    public int? Limit { get; set; }
+
+    public Dictionary<string, string> ToQueryParams()
+    {
+        var p = new Dictionary<string, string>();
+        if (Namespace != null) p["namespace"] = Namespace;
+        if (Page.HasValue) p["page"] = Page.Value.ToString();
+        if (Limit.HasValue) p["limit"] = Limit.Value.ToString();
+        return p;
+    }
+}
+
+public class GetDocumentParams
+{
+    public string? Id { get; set; }
+    public string? Namespace { get; set; }
+
+    public void Validate()
+    {
+        if (string.IsNullOrWhiteSpace(Id))
+            throw new ArgumentException("id is required");
+    }
+
+    public Dictionary<string, string> ToQueryParams()
+    {
+        var p = new Dictionary<string, string>();
+        if (Namespace != null) p["namespace"] = Namespace;
+        return p;
+    }
+}
+
+// ── Admin ──
+
+public class GraphSnapshotParams
+{
+    public string? Namespace { get; set; }
+    public string? Mode { get; set; }
+    public int? Limit { get; set; }
+    public int? SeedLimit { get; set; }
+
+    public Dictionary<string, string> ToQueryParams()
+    {
+        var p = new Dictionary<string, string>();
+        if (Namespace != null) p["namespace"] = Namespace;
+        if (Mode != null) p["mode"] = Mode;
+        if (Limit.HasValue) p["limit"] = Limit.Value.ToString();
+        if (SeedLimit.HasValue) p["seedLimit"] = SeedLimit.Value.ToString();
+        return p;
+    }
+}
+
+public class WaitForIngestionJobOptions
+{
+    public int IntervalMs { get; set; } = 2000;
+    public int MaxAttempts { get; set; } = 30;
+}
