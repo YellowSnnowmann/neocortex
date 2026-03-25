@@ -146,12 +146,12 @@ class TinyHumansMemoryClient:
     def __exit__(self, *_: object) -> None:
         self.close()
 
-    def ingest_memory(
+    def insert_memory(
         self,
         *,
         item: Union[MemoryItem, dict[str, Any]],
     ) -> IngestMemoryResponse:
-        """Ingest (upsert) a single memory item.
+        """Insert (upsert) a single memory item.
 
         The item is deduped by (namespace, key). If a matching item already
         exists its content and metadata are updated; otherwise a new item is created.
@@ -167,14 +167,14 @@ class TinyHumansMemoryClient:
         Raises:
             TinyHumansError: On API errors.
         """
-        return self.ingest_memories(items=[item])
+        return self.insert_memories(items=[item])
 
-    def ingest_memories(
+    def insert_memories(
         self,
         *,
         items: Sequence[Union[MemoryItem, dict[str, Any]]],
     ) -> IngestMemoryResponse:
-        """Ingest (upsert) one or more memory items.
+        """Insert (upsert) one or more memory items.
 
         Items are deduped by (namespace, key). If a matching item already
         exists its content and metadata are updated; otherwise a new item
@@ -889,6 +889,48 @@ class TinyHumansMemoryClient:
             408,
             last_job,
         )
+
+    def recall_memories_context(
+        self,
+        *,
+        namespace: Optional[str] = None,
+        max_chunks: Optional[float] = None,
+    ) -> dict[str, Any]:
+        """Recall memory context. POST /memory/memories/context"""
+        body: dict[str, Any] = {}
+        if namespace is not None:
+            body["namespace"] = namespace
+        if max_chunks is not None:
+            body["maxChunks"] = max_chunks
+        return self._send("POST", "/memory/memories/context", body)
+
+    def memory_health(self) -> dict[str, Any]:
+        """Check memory server health. GET /memory/health"""
+        return self._send_get("/memory/health")
+
+    def sync_memory(
+        self,
+        *,
+        workspace_id: str,
+        agent_id: str,
+        files: list[dict[str, str]],
+        source: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """Sync OpenClaw memory files to backend. POST /memory/sync"""
+        if not workspace_id:
+            raise ValueError("workspace_id is required")
+        if not agent_id:
+            raise ValueError("agent_id is required")
+        if not files:
+            raise ValueError("files is required and must be non-empty")
+        body: dict[str, Any] = {
+            "workspaceId": workspace_id,
+            "agentId": agent_id,
+            "files": files,
+        }
+        if source is not None:
+            body["source"] = source
+        return self._send("POST", "/memory/sync", body)
 
     # ------------------------------------------------------------------
     # Internal helpers
