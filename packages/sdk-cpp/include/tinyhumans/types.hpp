@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+#include <map>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -250,6 +251,212 @@ struct RecallMemoriesResponse {
         }
         return r;
     }
+};
+
+// ---- Chat params ----
+
+struct ChatMemoryParams {
+    std::vector<json> messages;
+    std::optional<std::string> namespace_;
+    std::optional<double> temperature;
+    std::optional<int> max_tokens;
+    std::optional<std::string> model;
+
+    ChatMemoryParams& set_messages(const std::vector<json>& v) { messages = v; return *this; }
+    ChatMemoryParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+    ChatMemoryParams& set_temperature(double v) { temperature = v; return *this; }
+    ChatMemoryParams& set_max_tokens(int v) { max_tokens = v; return *this; }
+    ChatMemoryParams& set_model(const std::string& v) { model = v; return *this; }
+
+    void validate() const {
+        if (messages.empty()) throw std::invalid_argument("messages is required");
+    }
+
+    json to_json() const {
+        validate();
+        json j;
+        j["messages"] = messages;
+        if (namespace_) j["namespace"] = *namespace_;
+        if (temperature) j["temperature"] = *temperature;
+        if (max_tokens) j["maxTokens"] = *max_tokens;
+        if (model) j["model"] = *model;
+        return j;
+    }
+};
+
+// ---- Interaction params ----
+
+struct InteractMemoryParams {
+    std::string namespace_;
+    std::vector<std::string> entities;
+
+    InteractMemoryParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+    InteractMemoryParams& set_entities(const std::vector<std::string>& v) { entities = v; return *this; }
+
+    void validate() const {
+        if (namespace_.empty()) throw std::invalid_argument("namespace is required");
+        if (entities.empty()) throw std::invalid_argument("entities is required");
+    }
+
+    json to_json() const {
+        validate();
+        json j;
+        j["namespace"] = namespace_;
+        j["entityNames"] = entities;
+        return j;
+    }
+};
+
+// ---- Advanced recall params ----
+
+struct RecallThoughtsParams {
+    std::optional<std::string> namespace_;
+
+    RecallThoughtsParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+
+    void validate() const {}
+
+    json to_json() const {
+        validate();
+        json j = json::object();
+        if (namespace_) j["namespace"] = *namespace_;
+        return j;
+    }
+};
+
+struct QueryMemoryContextParams {
+    std::string query;
+    std::optional<std::string> namespace_;
+    std::optional<int> max_chunks;
+
+    QueryMemoryContextParams& set_query(const std::string& v) { query = v; return *this; }
+    QueryMemoryContextParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+    QueryMemoryContextParams& set_max_chunks(int v) { max_chunks = v; return *this; }
+
+    void validate() const {
+        if (query.empty()) throw std::invalid_argument("query is required");
+    }
+
+    json to_json() const {
+        validate();
+        json j;
+        j["query"] = query;
+        if (namespace_) j["namespace"] = *namespace_;
+        if (max_chunks) j["maxChunks"] = *max_chunks;
+        return j;
+    }
+};
+
+// ---- Document params ----
+
+struct InsertDocumentParams {
+    std::string title;
+    std::string content;
+    std::string namespace_;
+    std::optional<json> metadata;
+    std::optional<std::string> source_type;
+
+    InsertDocumentParams& set_title(const std::string& v) { title = v; return *this; }
+    InsertDocumentParams& set_content(const std::string& v) { content = v; return *this; }
+    InsertDocumentParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+    InsertDocumentParams& set_metadata(const json& v) { metadata = v; return *this; }
+    InsertDocumentParams& set_source_type(const std::string& v) { source_type = v; return *this; }
+
+    void validate() const {
+        if (title.empty()) throw std::invalid_argument("title is required");
+        if (content.empty()) throw std::invalid_argument("content is required");
+        if (namespace_.empty()) throw std::invalid_argument("namespace is required");
+    }
+
+    json to_json() const {
+        validate();
+        json j;
+        j["title"] = title;
+        j["content"] = content;
+        j["namespace"] = namespace_;
+        if (metadata) j["metadata"] = *metadata;
+        if (source_type) j["sourceType"] = *source_type;
+        return j;
+    }
+};
+
+struct InsertDocumentsBatchParams {
+    std::vector<InsertDocumentParams> documents;
+
+    InsertDocumentsBatchParams& set_documents(const std::vector<InsertDocumentParams>& v) { documents = v; return *this; }
+
+    void validate() const {
+        if (documents.empty()) throw std::invalid_argument("documents is required");
+    }
+
+    json to_json() const {
+        validate();
+        json j;
+        json docs = json::array();
+        for (const auto& doc : documents) {
+            docs.push_back(doc.to_json());
+        }
+        j["items"] = docs;
+        return j;
+    }
+};
+
+struct ListDocumentsParams {
+    std::optional<std::string> namespace_;
+    std::optional<int> page;
+    std::optional<int> limit;
+
+    ListDocumentsParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+    ListDocumentsParams& set_page(int v) { page = v; return *this; }
+    ListDocumentsParams& set_limit(int v) { limit = v; return *this; }
+
+    std::map<std::string, std::string> to_query_params() const {
+        std::map<std::string, std::string> params;
+        if (namespace_) params["namespace"] = *namespace_;
+        if (page) params["page"] = std::to_string(*page);
+        if (limit) params["limit"] = std::to_string(*limit);
+        return params;
+    }
+};
+
+struct GetDocumentParams {
+    std::string id;
+    std::optional<std::string> namespace_;
+
+    GetDocumentParams& set_id(const std::string& v) { id = v; return *this; }
+    GetDocumentParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+
+    void validate() const {
+        if (id.empty()) throw std::invalid_argument("id is required");
+    }
+
+    std::map<std::string, std::string> to_query_params() const {
+        std::map<std::string, std::string> params;
+        if (namespace_) params["namespace"] = *namespace_;
+        return params;
+    }
+};
+
+// ---- Admin params ----
+
+struct GraphSnapshotParams {
+    std::optional<std::string> namespace_;
+
+    GraphSnapshotParams& set_namespace(const std::string& v) { namespace_ = v; return *this; }
+
+    std::map<std::string, std::string> to_query_params() const {
+        std::map<std::string, std::string> params;
+        if (namespace_) params["namespace"] = *namespace_;
+        return params;
+    }
+};
+
+struct WaitForIngestionJobOptions {
+    int interval_ms = 2000;
+    int max_attempts = 30;
+
+    WaitForIngestionJobOptions& set_interval_ms(int v) { interval_ms = v; return *this; }
+    WaitForIngestionJobOptions& set_max_attempts(int v) { max_attempts = v; return *this; }
 };
 
 } // namespace tinyhumans
