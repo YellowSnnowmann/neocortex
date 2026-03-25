@@ -67,6 +67,7 @@ def main() -> None:
     print_tool_result("recall_memory", recall_with_retries(toolkit, namespace))
 
     doc_id = f"camel-doc-{int(time.time())}"
+    batch_doc_id = f"{doc_id}-batch-1"
     print_tool_result(
         "insert_document",
         toolkit.insert_document(
@@ -88,6 +89,7 @@ def main() -> None:
                         "content": "I enjoy science fiction.",
                         "namespace": namespace,
                         "sourceType": "doc",
+                        "document_id": batch_doc_id,
                     }
                 ]
             )

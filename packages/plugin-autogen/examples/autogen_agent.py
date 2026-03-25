@@ -44,7 +44,8 @@ def main() -> None:
             "You are a helpful assistant with Neocortex memory tools. "
             "Use tools whenever the user asks to remember, retrieve, or manage memory. "
             f"Always use namespace '{namespace}' unless the user explicitly provides another one. "
-            "Do not invent IDs. If list_documents returns no documents, skip get_document. "
+            "Do not invent IDs; for insert_document, use document_id matching the provided key. "
+            "If list_documents returns no documents, skip get_document. "
             "For chat_memory_context and chat_memory, always pass non-empty messages_json. "
             "For interact_memory, always include a non-empty description string. "
             "When calling recall_memories, include min_retention=0 and as_of as current unix seconds. "
@@ -71,7 +72,7 @@ def main() -> None:
             f"Use save_memory with namespace='{namespace}', key='favorite_author', "
             "content='My favorite author is Isaac Asimov.'. "
             f"Then use insert_document with namespace='{namespace}', title='Favorite Author', "
-            "content='My favorite author is Isaac Asimov.', source_type='doc'. "
+            "content='My favorite author is Isaac Asimov.', source_type='doc', document_id='favorite_author'. "
             "Then say TERMINATE."
         ),
     )

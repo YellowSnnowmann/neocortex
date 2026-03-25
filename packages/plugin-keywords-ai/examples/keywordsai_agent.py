@@ -22,6 +22,7 @@ def main():
     tools_list = memory_tools.get_tool_definitions()
     functions_map = memory_tools.get_tool_functions()
     namespace = f"keywords-session-{int(time.time())}"
+    document_id = f"keywordsai-doc-{int(time.time())}"
     print(f"Loaded {len(tools_list)} tools")
     print(f"Using namespace: {namespace}")
 
@@ -31,7 +32,7 @@ def main():
     print("\n--- recall_memory ---")
     print(functions_map["recall_memory"](prompt="favorite author", namespace=namespace, num_chunks=5))
     print("\n--- insert_document ---")
-    print(functions_map["insert_document"](title="Favorite Author", content="My favorite author is Isaac Asimov.", namespace=namespace, source_type="doc"))
+    print(functions_map["insert_document"](title="Favorite Author", content="My favorite author is Isaac Asimov.", namespace=namespace, source_type="doc", document_id=document_id))
     print("\n--- list_documents ---")
     print(functions_map["list_documents"](namespace=namespace, limit=10, offset=0))
     print("\n--- query_memory_context ---")

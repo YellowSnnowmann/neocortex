@@ -65,6 +65,7 @@ def main() -> None:
     print(recall_with_retries(tools_by_name, namespace))
 
     doc_id = f"crew-doc-{int(time.time())}"
+    batch_doc_id = f"{doc_id}-batch-1"
     insert_doc_res = run_tool(
         tools_by_name,
         "insert_document",
@@ -85,6 +86,7 @@ def main() -> None:
                     "content": "I enjoy science fiction.",
                     "namespace": namespace,
                     "sourceType": "doc",
+                    "document_id": batch_doc_id,
                 }
             ]
         ),
