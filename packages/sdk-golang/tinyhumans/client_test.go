@@ -72,6 +72,49 @@ func TestNewClient_ParamOverridesEnv(t *testing.T) {
 	}
 }
 
+func TestNewClient_DefaultModelID(t *testing.T) {
+	c, err := NewClient("tok")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if c.modelID != DefaultModelID {
+		t.Errorf("modelID = %q, want %q", c.modelID, DefaultModelID)
+	}
+}
+
+func TestNewClientWithModelID(t *testing.T) {
+	c, err := NewClientWithModelID("tok", "custom-model")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if c.modelID != "custom-model" {
+		t.Errorf("modelID = %q, want custom-model", c.modelID)
+	}
+}
+
+func TestNewClientWithModelID_EmptyDefaultsToNeocortex(t *testing.T) {
+	c, err := NewClientWithModelID("tok", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if c.modelID != DefaultModelID {
+		t.Errorf("modelID = %q, want %q", c.modelID, DefaultModelID)
+	}
+}
+
+func TestSend_XModelIdHeader(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("X-Model-Id"); got != DefaultModelID {
+			t.Errorf("X-Model-Id = %q, want %q", got, DefaultModelID)
+		}
+		w.Write([]byte(`{"data":{}}`))
+	}))
+	defer server.Close()
+
+	c := testClient(t, server)
+	c.send("POST", "/test", map[string]interface{}{})
+}
+
 // --- Helper to create a client pointing at a test server ---
 
 func testClient(t *testing.T, server *httptest.Server) *Client {
@@ -88,11 +131,88 @@ func jsonResponse(data interface{}) string {
 	return string(b)
 }
 
+// --- sendGet / sendDelete ---
+
+func TestSendGet_QueryParams(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			t.Errorf("method = %s, want GET", r.Method)
+		}
+		if r.URL.Query().Get("namespace") != "ns1" {
+			t.Errorf("namespace = %q, want ns1", r.URL.Query().Get("namespace"))
+		}
+		if r.URL.Query().Get("limit") != "10" {
+			t.Errorf("limit = %q, want 10", r.URL.Query().Get("limit"))
+		}
+		if r.Header.Get("Authorization") != "Bearer test-token" {
+			t.Error("missing Authorization header")
+		}
+		if r.Header.Get("X-Model-Id") != DefaultModelID {
+			t.Errorf("X-Model-Id = %q", r.Header.Get("X-Model-Id"))
+		}
+		w.Write([]byte(`{"data":{"items":[]}}`))
+	}))
+	defer server.Close()
+
+	c := testClient(t, server)
+	data, err := c.sendGet("/test", map[string]string{"namespace": "ns1", "limit": "10"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if data["items"] == nil {
+		t.Error("expected items in response")
+	}
+}
+
+func TestSendGet_NilParams(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.RawQuery != "" {
+			t.Errorf("expected no query params, got %q", r.URL.RawQuery)
+		}
+		w.Write([]byte(`{"data":{}}`))
+	}))
+	defer server.Close()
+
+	c := testClient(t, server)
+	_, err := c.sendGet("/test", nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestSendDelete_QueryParams(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "DELETE" {
+			t.Errorf("method = %s, want DELETE", r.Method)
+		}
+		if r.URL.Query().Get("namespace") != "ns1" {
+			t.Errorf("namespace = %q, want ns1", r.URL.Query().Get("namespace"))
+		}
+		if r.Header.Get("Authorization") != "Bearer test-token" {
+			t.Error("missing Authorization header")
+		}
+		if r.Header.Get("X-Model-Id") != DefaultModelID {
+			t.Errorf("X-Model-Id = %q", r.Header.Get("X-Model-Id"))
+		}
+		w.Write([]byte(`{"data":{"deleted":true}}`))
+	}))
+	defer server.Close()
+
+	c := testClient(t, server)
+	data, err := c.sendDelete("/test", map[string]string{"namespace": "ns1"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if data["deleted"] != true {
+		t.Error("expected deleted=true in response")
+	}
+}
+
 // --- IngestMemory / IngestMemories ---
 
 func TestIngestMemory_Completed(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/memory/insert" {
+		if r.URL.Path != "/memory/insert" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
 		if r.Header.Get("Authorization") != "Bearer test-token" {
@@ -383,7 +503,7 @@ func TestRecallMemory_DefaultNumChunks(t *testing.T) {
 
 func TestDeleteMemory_WithNodesDeleted(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/memory/admin/delete" {
+		if r.URL.Path != "/memory/admin/delete" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
 		}
 		w.Write([]byte(jsonResponse(map[string]interface{}{"nodesDeleted": 5})))

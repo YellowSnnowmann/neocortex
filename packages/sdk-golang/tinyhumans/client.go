@@ -16,14 +16,26 @@ import (
 type Client struct {
 	baseURL string
 	token   string
+	modelID string
 	http    *http.Client
 }
 
-// NewClient creates a new TinyHumans client.
+// NewClient creates a new TinyHumans client with the default model ID.
 // token is required. baseURL is optional (uses env var or default).
 func NewClient(token string, baseURL ...string) (*Client, error) {
+	return NewClientWithModelID(token, "", baseURL...)
+}
+
+// NewClientWithModelID creates a new TinyHumans client with a custom model ID.
+// token is required. modelID defaults to "neocortex-mk1" if empty.
+// baseURL is optional (uses env var or default).
+func NewClientWithModelID(token, modelID string, baseURL ...string) (*Client, error) {
 	if strings.TrimSpace(token) == "" {
 		return nil, errors.New("token is required")
+	}
+
+	if modelID == "" {
+		modelID = DefaultModelID
 	}
 
 	resolved := ""
@@ -41,6 +53,7 @@ func NewClient(token string, baseURL ...string) (*Client, error) {
 	return &Client{
 		baseURL: resolved,
 		token:   token,
+		modelID: modelID,
 		http:    &http.Client{Timeout: 30 * time.Second},
 	}, nil
 }
@@ -87,7 +100,7 @@ func (c *Client) IngestMemories(items []MemoryItem) (*IngestMemoryResponse, erro
 			body["updatedAt"] = *item.UpdatedAt
 		}
 
-		data, err := c.send("POST", "/v1/memory/insert", body)
+		data, err := c.send("POST", "/memory/insert", body)
 		if err != nil {
 			errCount++
 			continue
@@ -123,7 +136,7 @@ func (c *Client) RecallMemory(namespace, prompt string, opts *RecallMemoryOption
 		"maxChunks": numChunks,
 	}
 
-	data, err := c.send("POST", "/v1/memory/recall", body)
+	data, err := c.send("POST", "/memory/recall", body)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +205,7 @@ func (c *Client) DeleteMemory(namespace string, opts *DeleteMemoryOptions) (*Del
 		"namespace": namespace,
 	}
 
-	data, err := c.send("POST", "/v1/memory/admin/delete", body)
+	data, err := c.send("POST", "/memory/admin/delete", body)
 	if err != nil {
 		return nil, err
 	}
@@ -237,6 +250,60 @@ func (c *Client) RecallWithLLM(prompt, apiKey string, opts RecallWithLLMOptions)
 	return queryLLM(prompt, provider, model, apiKey, context, opts.MaxTokens, opts.Temperature, opts.URL)
 }
 
+// sendGet performs an HTTP GET request with query parameters and returns the parsed data.
+func (c *Client) sendGet(path string, params map[string]string) (map[string]interface{}, error) {
+	req, err := http.NewRequest("GET", c.baseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if len(params) > 0 {
+		q := req.URL.Query()
+		for k, v := range params {
+			q.Set(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("X-Model-Id", c.modelID)
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
+// sendDelete performs an HTTP DELETE request with query parameters and returns the parsed data.
+func (c *Client) sendDelete(path string, params map[string]string) (map[string]interface{}, error) {
+	req, err := http.NewRequest("DELETE", c.baseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	if len(params) > 0 {
+		q := req.URL.Query()
+		for k, v := range params {
+			q.Set(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("X-Model-Id", c.modelID)
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 // send performs an HTTP request with JSON body and returns the parsed data.
 func (c *Client) send(method, path string, body map[string]interface{}) (map[string]interface{}, error) {
 	jsonBody, err := json.Marshal(body)
@@ -251,6 +318,7 @@ func (c *Client) send(method, path string, body map[string]interface{}) (map[str
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.token)
+	req.Header.Set("X-Model-Id", c.modelID)
 
 	resp, err := c.http.Do(req)
 	if err != nil {
