@@ -1,3 +1,15 @@
+/**
+ * E2E for plugin-claude-code using real Neocortex memory.
+ *
+ * Required env:
+ *   TINYHUMANS_API_KEY
+ *
+ * Optional env:
+ *   TINYHUMANS_BASE_URL
+ *
+ * Run from this package directory:
+ *   npx tsx e2e.ts
+ */
 import { ClaudeCodeNeocortexMemory } from "./src/index";
 
 function getEnv(name: string): string {
@@ -14,11 +26,11 @@ function getEnv(name: string): string {
   }
 }
 
-const ALPHAHUMAN_API_KEY = getEnv("ALPHAHUMAN_API_KEY");
-const ALPHAHUMAN_BASE_URL = getEnv("ALPHAHUMAN_BASE_URL");
+const TINYHUMANS_API_KEY = getEnv("TINYHUMANS_API_KEY");
+const TINYHUMANS_BASE_URL = getEnv("TINYHUMANS_BASE_URL");
 
-if (!ALPHAHUMAN_API_KEY) {
-  throw new Error("Missing ALPHAHUMAN_API_KEY");
+if (!TINYHUMANS_API_KEY) {
+  throw new Error("Missing TINYHUMANS_API_KEY");
 }
 
 const namespace = `claude-code-e2e-${Date.now()}`;
@@ -35,12 +47,12 @@ function parseJobId(text: string): string | null {
 async function run() {
   console.log("Claude Code plugin E2E");
   console.log("  namespace:", namespace);
-  console.log("  ALPHAHUMAN_BASE_URL:", ALPHAHUMAN_BASE_URL || "(default)");
+  console.log("  TINYHUMANS_BASE_URL:", TINYHUMANS_BASE_URL || "(default)");
   console.log("---");
 
   const memory = new ClaudeCodeNeocortexMemory({
-    token: ALPHAHUMAN_API_KEY,
-    baseUrl: ALPHAHUMAN_BASE_URL || undefined,
+    token: TINYHUMANS_API_KEY,
+    baseUrl: TINYHUMANS_BASE_URL || undefined,
     defaultNamespace: namespace,
   });
 
@@ -309,7 +321,7 @@ async function run() {
 
   console.log("\n---");
   console.log(
-    "If results look wrong, verify ALPHAHUMAN_API_KEY / ALPHAHUMAN_BASE_URL and try again."
+    "If results look wrong, verify TINYHUMANS_API_KEY / TINYHUMANS_BASE_URL and try again."
   );
 }
 

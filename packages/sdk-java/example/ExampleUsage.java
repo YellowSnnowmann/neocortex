@@ -1,27 +1,27 @@
-import xyz.alphahuman.sdk.*;
+import xyz.tinyhumans.sdk.*;
 
 import java.util.Map;
 
 /**
- * Standalone example showing all 5 Alphahuman Memory API operations.
+ * Standalone example showing all 5 TinyHuman Memory API operations.
  *
  * Run:
- *   export ALPHAHUMAN_TOKEN="your-token"
- *   javac -cp ../build/libs/alphahuman-sdk-java-0.1.0.jar ExampleUsage.java
- *   java -cp .:../build/libs/alphahuman-sdk-java-0.1.0.jar ExampleUsage
+ *   export TINYHUMANS_TOKEN="your-token"
+ *   javac -cp ../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage.java
+ *   java -cp .:../build/libs/tinyhumans-sdk-java-0.1.0.jar ExampleUsage
  */
 public class ExampleUsage {
 
     public static void main(String[] args) throws InterruptedException {
-        String token = System.getenv("ALPHAHUMAN_TOKEN");
+        String token = System.getenv("TINYHUMANS_TOKEN");
         if (token == null || token.isEmpty()) {
-            System.err.println("Set ALPHAHUMAN_TOKEN environment variable");
+            System.err.println("Set TINYHUMANS_TOKEN environment variable");
             System.exit(1);
         }
 
         String namespace = "example-java-" + System.currentTimeMillis();
 
-        try (AlphahumanMemoryClient client = new AlphahumanMemoryClient(token)) {
+        try (TinyHumansMemoryClient client = new TinyHumansMemoryClient(token)) {
 
             // 1. Insert
             System.out.println("=== Insert ===");

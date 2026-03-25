@@ -1,6 +1,6 @@
 # plugin-llamaindex
 
-Neocortex (Alphahuman) memory integration for LlamaIndex.
+Neocortex (TinyHuman) memory integration for LlamaIndex.
 
 ## Features
 
@@ -17,7 +17,7 @@ pip install neocortex-llamaindex
 
 Set your API key:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 ```
 
 ### Chat Store Pattern
@@ -32,7 +32,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.agent import ReActAgent
 from llama_index.llms.openai import OpenAI
 
-client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 chat_store = NeocortexChatStore(client=client, namespace_prefix="llamaindex_chat")
 
 memory = ChatMemoryBuffer.from_defaults(
@@ -56,7 +56,7 @@ from neocortex_llamaindex import NeocortexToolSpec
 from llama_index.core.agent import ReActAgent
 from llama_index.llms.openai import OpenAI
 
-client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 memory_tools = NeocortexToolSpec(client=client).to_tool_list()
 
 agent = ReActAgent.from_tools(memory_tools, llm=OpenAI())

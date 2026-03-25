@@ -6,7 +6,7 @@ LiveKit plugin for **Neocortex-powered memories** in voice/video agents. It stor
 
 - Python 3.9+
 - [livekit-agents](https://pypi.org/project/livekit-agents/) >= 1.0
-- [httpx](https://www.python-httpx.org/) for talking to the Alphahuman backend
+- [httpx](https://www.python-httpx.org/) for talking to the TinyHuman backend
 
 ## Install
 
@@ -28,14 +28,14 @@ Create `packages/plugin-livekit/.env`:
 LIVEKIT_URL=wss://<your-project>.livekit.cloud
 LIVEKIT_API_KEY=<livekit-api-key>
 LIVEKIT_API_SECRET=<livekit-api-secret>
-ALPHAHUMAN_API_KEY=<full-alphahuman-key>
-ALPHAHUMAN_BASE_URL=http://localhost:5000
+TINYHUMANS_API_KEY=<full-tinyhuman-key>
+TINYHUMANS_BASE_URL=http://localhost:5000
 LIVEKIT_MEMORY_NAMESPACE=livekit:shared
 ```
 
 Notes:
 
-- `ALPHAHUMAN_API_KEY` must be the **full key**, not key prefix.
+- `TINYHUMANS_API_KEY` must be the **full key**, not key prefix.
 - Use a stable `LIVEKIT_MEMORY_NAMESPACE` for cross-room memory recall.
 
 ## Plugin integration pattern
@@ -53,8 +53,8 @@ server = AgentServer()
 @server.rtc_session(agent_name="neocortex-memory-agent")
 async def my_agent(ctx: agents.JobContext):
     memory = NeocortexLiveKitTools(
-        token=os.environ["ALPHAHUMAN_API_KEY"],
-        base_url=os.getenv("ALPHAHUMAN_BASE_URL"),
+        token=os.environ["TINYHUMANS_API_KEY"],
+        base_url=os.getenv("TINYHUMANS_BASE_URL"),
         namespace=os.getenv("LIVEKIT_MEMORY_NAMESPACE", "livekit:shared"),
     )
 

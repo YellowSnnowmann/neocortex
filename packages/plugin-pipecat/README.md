@@ -19,13 +19,13 @@ pip install neocortex-pipecat
 You will also need to set your Neocortex API key as an environment variable:
 
 ```bash
-export ALPHAHUMAN_API_KEY=your_neocortex_api_key
+export TINYHUMANS_API_KEY=your_neocortex_api_key
 ```
 
 Optionally, configure a custom Neocortex base URL:
 
 ```bash
-export ALPHAHUMAN_BASE_URL=https://api.your-backend.com
+export TINYHUMANS_BASE_URL=https://api.your-backend.com
 ```
 
 ## Configuration
@@ -36,7 +36,7 @@ Neocortex integration is provided through the `NeocortexMemoryService` class.
 from neocortex_pipecat import NeocortexMemoryService, NeocortexParams
 
 memory = NeocortexMemoryService(
-    api_key=os.getenv("ALPHAHUMAN_API_KEY"),  # Your Neocortex token/JWT
+    api_key=os.getenv("TINYHUMANS_API_KEY"),  # Your Neocortex token/JWT
     user_id="unique_user_id",                 # Unique identifier for the end user
     agent_id="my_agent",                      # Identifier for the agent using the memory
     run_id="session_123",                     # Optional: specific conversation session ID
@@ -112,4 +112,14 @@ pipeline = Pipeline([
 - `record_interactions`
 - `recall_thoughts`
 - `get_ingestion_job`
+ 
+Run it with:
+
+```bash
+export TINYHUMANS_API_KEY=your_neocortex_api_key
+export OPENAI_API_KEY=your_openai_key
+uvicorn examples.voice_demo:app --reload --host 0.0.0.0 --port 8000
+```
+
+Then connect to `/chat` from your Pipecat-compatible client UI and speak; the agent will remember and reuse past conversation details via Neocortex.
 

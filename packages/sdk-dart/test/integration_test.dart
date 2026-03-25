@@ -2,19 +2,19 @@ import 'dart:io' show Platform;
 
 import 'package:test/test.dart';
 
-import 'package:alphahuman_sdk/alphahuman_sdk.dart';
+import 'package:tinyhumans_sdk/tinyhumans_sdk.dart';
 
 void main() {
   test('insert-recall-query-delete lifecycle', () async {
-    final token = Platform.environment['ALPHAHUMAN_TOKEN'];
+    final token = Platform.environment['TINYHUMANS_TOKEN'];
     if (token == null || token.isEmpty) {
-      print('ALPHAHUMAN_TOKEN not set — skipping integration test');
+      print('TINYHUMANS_TOKEN not set — skipping integration test');
       return;
     }
 
     final ns =
         'integration-test-dart-${DateTime.now().millisecondsSinceEpoch}';
-    final client = AlphahumanMemoryClient(token);
+    final client = TinyHumansMemoryClient(token);
 
     try {
       // ── Insert ──

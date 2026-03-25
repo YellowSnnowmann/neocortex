@@ -1,4 +1,4 @@
-"""Neocortex (Alphahuman) memory tools for LiveKit agents."""
+"""Neocortex (TinyHuman) memory tools for LiveKit agents."""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ from typing import Any, Optional
 
 import httpx
 
-__all__ = ["NeocortexLiveKitTools", "AlphahumanError"]
+__all__ = ["NeocortexLiveKitTools", "TinyHumanError"]
 
 
-DEFAULT_BASE_URL = "https://staging-api.alphahuman.xyz"
-TINYHUMANS_BASE_URL = "ALPHAHUMAN_BASE_URL"
+DEFAULT_BASE_URL = "https://api.tinyhumans.ai"
+TINYHUMANS_BASE_URL = "TINYHUMANS_BASE_URL"
 
 
-class AlphahumanError(Exception):
-    """Error raised for Alphahuman memory API failures."""
+class TinyHumanError(Exception):
+    """Error raised for TinyHuman memory API failures."""
 
     def __init__(self, message: str, status: int, body: Any | None = None) -> None:
         super().__init__(message)
@@ -23,8 +23,8 @@ class AlphahumanError(Exception):
         self.body = body
 
 
-class AlphahumanMemoryClient:
-    """Minimal Alphahuman memory client aligned with the TypeScript SDK."""
+class TinyHumanMemoryClient:
+    """Minimal TinyHuman memory client aligned with the TypeScript SDK."""
 
     def __init__(self, token: str, base_url: Optional[str] = None) -> None:
         if not token or not token.strip():
@@ -145,7 +145,7 @@ class AlphahumanMemoryClient:
         try:
             payload = res.json()
         except Exception:
-            raise AlphahumanError(
+            raise TinyHumanError(
                 f"HTTP {res.status_code}: non-JSON response",
                 res.status_code,
                 res.text,
@@ -153,7 +153,7 @@ class AlphahumanMemoryClient:
         success = bool(payload.get("success"))
         if not res.is_success or not success:
             message = payload.get("error") or f"HTTP {res.status_code}"
-            raise AlphahumanError(message, res.status_code, payload)
+            raise TinyHumanError(message, res.status_code, payload)
         data = payload.get("data")
         return data if isinstance(data, dict) else payload
 
@@ -167,7 +167,7 @@ class NeocortexLiveKitTools:
         base_url: Optional[str] = None,
         namespace: Optional[str] = None,
     ) -> None:
-        self._client = AlphahumanMemoryClient(token=token, base_url=base_url)
+        self._client = TinyHumanMemoryClient(token=token, base_url=base_url)
         self._namespace = namespace
 
     def close(self) -> None:

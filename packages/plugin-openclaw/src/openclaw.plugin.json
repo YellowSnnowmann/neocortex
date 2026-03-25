@@ -1,7 +1,7 @@
 {
     "id": "openclaw-model-provider",
     "providers": [
-        "alphahuman"
+        "tinyhumans"
     ],
     "configSchema": {
         "type": "object",
@@ -82,7 +82,7 @@
         },
         "apiKeyEnvVar": {
             "label": "API Key Environment Variable",
-            "placeholder": "ALPHAHUMAN_API_KEY"
+            "placeholder": "TINYHUMANS_API_KEY"
         },
         "apiKey": {
             "label": "Inline API Key",

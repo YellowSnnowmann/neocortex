@@ -307,7 +307,7 @@ export class OpenCodeNeocortexMemory {
  */
 export const NeocortexOpenCodePlugin: Plugin = async (ctx) => {
   const token =
-    process.env.ALPHAHUMAN_API_KEY ||
+    process.env.TINYHUMANS_API_KEY ||
     process.env.NEOCORTEX_API_KEY ||
     process.env.NEOCORTEX_TOKEN;
 
@@ -317,14 +317,14 @@ export const NeocortexOpenCodePlugin: Plugin = async (ctx) => {
         service: "@neocortex/plugin-opencode",
         level: "error",
         message:
-          "Neocortex token is missing. Set ALPHAHUMAN_API_KEY, NEOCORTEX_API_KEY, or NEOCORTEX_TOKEN.",
+          "Neocortex token is missing. Set TINYHUMANS_API_KEY, NEOCORTEX_API_KEY, or NEOCORTEX_TOKEN.",
       },
     });
     // Return no hooks so plugin loads safely but does nothing.
     return {};
   }
 
-  const baseUrl = process.env.ALPHAHUMAN_BASE_URL || process.env.NEOCORTEX_BASE_URL;
+  const baseUrl = process.env.TINYHUMANS_BASE_URL || process.env.NEOCORTEX_BASE_URL;
 
   const memory = new OpenCodeNeocortexMemory({
     token,

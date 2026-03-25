@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-  AlphahumanMemoryClient,
-  AlphahumanError,
+  TinyHumansMemoryClient,
+  TinyHumansError,
   InsertMemoryParams,
   QueryMemoryParams,
   DeleteMemoryParams,
@@ -9,7 +9,7 @@ import {
   RecallMemoriesParams,
 } from '../src/index';
 
-describe('AlphahumanMemoryClient', () => {
+describe('TinyHumansMemoryClient', () => {
   const baseUrl = 'https://api.test.example';
   const token = 'test-token';
 
@@ -22,19 +22,19 @@ describe('AlphahumanMemoryClient', () => {
 
   describe('constructor', () => {
     it('throws when token is missing', () => {
-      expect(() => new AlphahumanMemoryClient({ token: '' })).toThrow('token is required');
-      expect(() => new AlphahumanMemoryClient({ token: '   ' })).toThrow('token is required');
+      expect(() => new TinyHumansMemoryClient({ token: '' })).toThrow('token is required');
+      expect(() => new TinyHumansMemoryClient({ token: '   ' })).toThrow('token is required');
     });
 
     it('uses provided baseUrl and token', () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       expect(client).toBeDefined();
     });
   });
 
   describe('insertMemory', () => {
     it('validates required fields', async () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await expect(client.insertMemory({ title: '', content: 'x', namespace: 'ns' })).rejects.toThrow(
         'title is required'
       );
@@ -46,7 +46,7 @@ describe('AlphahumanMemoryClient', () => {
       );
     });
 
-    it('POSTs to /v1/memory/insert with correct body and headers', async () => {
+    it('POSTs to /memory/insert with correct body and headers', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         text: () =>
@@ -57,7 +57,7 @@ describe('AlphahumanMemoryClient', () => {
             })
           ),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       const params: InsertMemoryParams = {
         title: 'My Doc',
         content: 'Some content',
@@ -68,7 +68,7 @@ describe('AlphahumanMemoryClient', () => {
       await client.insertMemory(params);
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/v1/memory/insert`,
+        `${baseUrl}/memory/insert`,
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -96,7 +96,7 @@ describe('AlphahumanMemoryClient', () => {
         ok: true,
         text: () => Promise.resolve(JSON.stringify({ success: true, data })),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       const result = await client.insertMemory({
         title: 'T',
         content: 'C',
@@ -109,20 +109,20 @@ describe('AlphahumanMemoryClient', () => {
 
   describe('queryMemory', () => {
     it('validates query is required', async () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await expect(
         client.queryMemory({ query: '' } as QueryMemoryParams)
       ).rejects.toThrow('query is required');
     });
 
     it('validates maxChunks range', async () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       fetchMock.mockResolvedValue({ ok: true, text: () => Promise.resolve('{"success":true,"data":{}}') });
       await expect(client.queryMemory({ query: 'q', maxChunks: 0 })).rejects.toThrow('maxChunks');
       await expect(client.queryMemory({ query: 'q', maxChunks: 201 })).rejects.toThrow('maxChunks');
     });
 
-    it('POSTs to /v1/memory/query', async () => {
+    it('POSTs to /memory/query', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         text: () =>
@@ -133,10 +133,10 @@ describe('AlphahumanMemoryClient', () => {
             })
           ),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await client.queryMemory({ query: 'hello', namespace: 'ns', maxChunks: 10 });
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/v1/memory/query`,
+        `${baseUrl}/memory/query`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
@@ -153,7 +153,7 @@ describe('AlphahumanMemoryClient', () => {
   });
 
   describe('deleteMemory', () => {
-    it('POSTs to /v1/memory/admin/delete', async () => {
+    it('POSTs to /memory/admin/delete', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         text: () =>
@@ -169,11 +169,11 @@ describe('AlphahumanMemoryClient', () => {
             })
           ),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       const params: DeleteMemoryParams = { namespace: 'my-ns' };
       await client.deleteMemory(params);
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/v1/memory/admin/delete`,
+        `${baseUrl}/memory/admin/delete`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ namespace: 'my-ns' }),
@@ -184,7 +184,7 @@ describe('AlphahumanMemoryClient', () => {
 
   describe('recallMemory', () => {
     it('validates maxChunks when provided', async () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await expect(recallMemory({ maxChunks: 0 })).rejects.toThrow('maxChunks');
       await expect(recallMemory({ maxChunks: 1.5 })).rejects.toThrow('maxChunks');
       async function recallMemory(p: RecallMemoryParams) {
@@ -192,7 +192,7 @@ describe('AlphahumanMemoryClient', () => {
       }
     });
 
-    it('POSTs to /v1/memory/recall', async () => {
+    it('POSTs to /memory/recall', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         text: () =>
@@ -203,10 +203,10 @@ describe('AlphahumanMemoryClient', () => {
             })
           ),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await client.recallMemory({ namespace: 'ns', maxChunks: 10 });
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/v1/memory/recall`,
+        `${baseUrl}/memory/recall`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ namespace: 'ns', maxChunks: 10 }),
@@ -217,7 +217,7 @@ describe('AlphahumanMemoryClient', () => {
 
   describe('recallMemories', () => {
     it('validates topK and minRetention when provided', async () => {
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await expect(recallMemories({ topK: 0 })).rejects.toThrow('topK');
       await expect(recallMemories({ minRetention: -1 })).rejects.toThrow('minRetention');
       async function recallMemories(p: RecallMemoriesParams) {
@@ -225,7 +225,7 @@ describe('AlphahumanMemoryClient', () => {
       }
     });
 
-    it('POSTs to /v1/memory/memories/recall', async () => {
+    it('POSTs to /memory/memories/recall', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: true,
         text: () =>
@@ -236,10 +236,10 @@ describe('AlphahumanMemoryClient', () => {
             })
           ),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await client.recallMemories({ namespace: 'ns', topK: 5 });
       expect(fetchMock).toHaveBeenCalledWith(
-        `${baseUrl}/v1/memory/memories/recall`,
+        `${baseUrl}/memory/memories/recall`,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ namespace: 'ns', topK: 5, minRetention: undefined, asOf: undefined }),
@@ -249,30 +249,64 @@ describe('AlphahumanMemoryClient', () => {
   });
 
   describe('error handling', () => {
-    it('throws AlphahumanError on non-ok response with error message', async () => {
+    it('throws TinyHumansError on non-ok response with error message', async () => {
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 400,
         text: () => Promise.resolve(JSON.stringify({ success: false, error: 'Bad request' })),
       });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       try {
         await client.insertMemory({ title: 'T', content: 'C', namespace: 'ns' });
         expect.fail('should throw');
       } catch (e) {
-        expect(e).toBeInstanceOf(AlphahumanError);
-        expect((e as AlphahumanError).message).toBe('Bad request');
-        expect((e as AlphahumanError).status).toBe(400);
-        expect((e as AlphahumanError).body).toEqual({ success: false, error: 'Bad request' });
+        expect(e).toBeInstanceOf(TinyHumansError);
+        expect((e as TinyHumansError).message).toBe('Bad request');
+        expect((e as TinyHumansError).status).toBe(400);
+        expect((e as TinyHumansError).body).toEqual({ success: false, error: 'Bad request' });
       }
     });
 
     it('throws on non-JSON response', async () => {
       fetchMock.mockResolvedValueOnce({ ok: false, status: 500, text: () => Promise.resolve('not json') });
-      const client = new AlphahumanMemoryClient({ token, baseUrl });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
       await expect(client.insertMemory({ title: 'T', content: 'C', namespace: 'ns' })).rejects.toThrow(
         'non-JSON response'
       );
     });
   });
+
+  describe('chatMemory', () => {
+    it('POSTs to /memory/chat', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: { content: 'hello' } })),
+      });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
+      await client.chatMemory({ messages: [{ role: 'user', content: 'hi' }] });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${baseUrl}/memory/chat`,
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }] }),
+        })
+      );
+    });
+  });
+
+  describe('listDocuments', () => {
+    it('GETs from /memory/documents with query params', async () => {
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(JSON.stringify({ success: true, data: {} })),
+      });
+      const client = new TinyHumansMemoryClient({ token, baseUrl });
+      await client.listDocuments({ namespace: 'ns', limit: 10 });
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${baseUrl}/memory/documents?namespace=ns&limit=10`,
+        expect.objectContaining({ method: 'GET' })
+      );
+    });
+  });
 });
+

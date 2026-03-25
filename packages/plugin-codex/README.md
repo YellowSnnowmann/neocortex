@@ -58,8 +58,8 @@ enabled_tools = [
 
 Then set environment variables for the MCP process:
 
-- `ALPHAHUMAN_API_KEY` (required): Neocortex/Alphahuman API key or JWT.
-- `ALPHAHUMAN_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
+- `TINYHUMANS_API_KEY` (required): Neocortex/TinyHuman API key or JWT.
+- `TINYHUMANS_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
 
 3. When Codex starts, it will launch the MCP server via `node dist/index.js` and discover all registered Neocortex tools. Enable only the tools you need in `enabled_tools`.
 
@@ -96,8 +96,8 @@ You can also use the `CodexNeocortexMemory` class directly from TypeScript/Node 
 import { CodexNeocortexMemory } from "@neocortex/plugin-codex";
 
 const memory = new CodexNeocortexMemory({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   defaultNamespace: "my-workspace",
 });
 

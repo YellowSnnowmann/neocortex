@@ -1,6 +1,6 @@
 # plugin-vercelai
 
-Neocortex (Alphahuman) memory integrations for the Python Vercel AI SDK (`ai_sdk`).
+Neocortex (TinyHuman) memory integrations for the Python Vercel AI SDK (`ai_sdk`).
 
 ## Features
 
@@ -34,7 +34,7 @@ pip install neocortex-vercelai
 
 Set your API keys:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 export OPENAI_API_KEY="your_openai_token"
 ```
 
@@ -53,7 +53,7 @@ from tinyhumansai import TinyHumanMemoryClient
 from neocortex_vercelai import NeocortexMemoryTools
 
 async def main():
-    memory_client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+    memory_client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
     wrapper = NeocortexMemoryTools(client=memory_client, default_namespace="vercelai_session")
     
     tools = wrapper.get_tools()

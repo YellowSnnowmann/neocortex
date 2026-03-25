@@ -1,6 +1,6 @@
 # Neocortex Dify Plugin
 
-Neocortex (Alphahuman) memory tools for **Dify Apps and Workflows**.
+Neocortex (TinyHuman) memory tool extension for Dify AI.
 
 This plugin exposes a set of tools that let a Dify agent:
 - store facts/preferences persistently
@@ -11,18 +11,18 @@ This plugin exposes a set of tools that let a Dify agent:
 ## Requirements
 
 - Python **3.12+**
-- A valid **Alphahuman API key** (configured as a Dify plugin credential)
+- A valid **TinyHumans API key** (configured as a Dify plugin credential)
 
 ## Configuration (Dify credentials)
 
 When enabling the plugin in Dify, configure:
 
-- **`alphahuman_api_key`** (required): token used for all `/v1/memory/...` calls
+- **`tinyhumans_api_key`** (required): token used for all `/v1/memory/...` calls
 - **`default_namespace`** (optional): fallback namespace when a tool call does not provide `namespace`
 
 Base URL:
-- By default the tools call `https://staging-api.alphahuman.xyz`
-- Override with environment variable **`ALPHAHUMAN_BASE_URL`** in the runtime environment
+- By default the tools call `https://api.tinyhumans.ai`
+- Override with environment variable **`TINYHUMANS_BASE_URL`** in the runtime environment
 
 ## Tools
 
@@ -70,7 +70,7 @@ dify plugin package neocortex_dify
 
 3. Upload the resulting `.difypkg` file to your Dify instance via the **Plugins** page.
 4. Configure plugin credentials:
-   - `alphahuman_api_key` (required)
+   - `tinyhumans_api_key` (required)
    - `default_namespace` (optional)
 
 ## Recommended agent prompt guidance (Dify)

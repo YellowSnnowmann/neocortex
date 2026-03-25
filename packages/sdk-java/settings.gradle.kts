@@ -1,1 +1,1 @@
-rootProject.name = "alphahuman-sdk-java"
+rootProject.name = "tinyhumans-sdk-java"

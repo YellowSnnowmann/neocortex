@@ -1,6 +1,6 @@
 import type { MastraTool } from "./types";
 
-const DEFAULT_BASE_URL = "https://staging-api.alphahuman.xyz";
+const DEFAULT_BASE_URL = "https://api.tinyhumans.ai";
 
 export function getEnv(key: string): string | undefined {
   try {
@@ -13,7 +13,7 @@ export function getEnv(key: string): string | undefined {
 }
 
 export function resolveBaseUrl(explicit?: string): string {
-  const baseUrl = explicit ?? getEnv("ALPHAHUMAN_BASE_URL") ?? DEFAULT_BASE_URL;
+  const baseUrl = explicit ?? getEnv("TINYHUMANS_BASE_URL") ?? DEFAULT_BASE_URL;
   return baseUrl.replace(/\/+$/, "");
 }
 

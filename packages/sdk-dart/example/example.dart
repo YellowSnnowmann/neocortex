@@ -1,15 +1,15 @@
 import 'dart:io' show Platform;
 
-import 'package:alphahuman_sdk/alphahuman_sdk.dart';
+import 'package:tinyhumans_sdk/tinyhumans_sdk.dart';
 
 Future<void> main() async {
-  final token = Platform.environment['ALPHAHUMAN_TOKEN'];
+  final token = Platform.environment['TINYHUMANS_TOKEN'];
   if (token == null || token.isEmpty) {
-    print('Set ALPHAHUMAN_TOKEN environment variable to run this example.');
+    print('Set TINYHUMANS_TOKEN environment variable to run this example.');
     return;
   }
 
-  final client = AlphahumanMemoryClient(token);
+  final client = TinyHumansMemoryClient(token);
 
   try {
     // Insert a memory

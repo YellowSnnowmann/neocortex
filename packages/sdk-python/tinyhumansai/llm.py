@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 import httpx
 
-from .types import LLMQueryResponse, TinyHumanError
+from .types import LLMQueryResponse, TinyHumansError
 
 SUPPORTED_LLM_PROVIDERS = ("openai", "anthropic", "google")
 
@@ -51,7 +51,7 @@ def recall_with_llm(
 
     Raises:
         ValueError: If provider is unsupported (when url not provided) or api_key missing.
-        TinyHumanError: On provider API errors.
+        TinyHumansError: On provider API errors.
     """
     if not api_key or not api_key.strip():
         raise ValueError("api_key is required for recall_with_llm")
@@ -307,4 +307,4 @@ def _raise_llm_error(response: httpx.Response, provider: str) -> None:
         msg = err.get("message", payload.get("message", response.text))
     except Exception:
         msg = response.text
-    raise TinyHumanError(f"{provider} API error: {msg}", response.status_code, None)
+    raise TinyHumansError(f"{provider} API error: {msg}", response.status_code, None)

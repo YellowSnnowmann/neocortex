@@ -1,26 +1,28 @@
-//! TinyHumans Neocortex SDK for Rust.
-//! Aligned with TinyHumans API: insert, query, admin/delete, recall, memories/recall.
+//! TinyHuman Neocortex SDK for Rust.
+//! Aligned with TinyHuman memory API routes.
 
 pub mod error;
 pub mod types;
 
-pub use error::TinyHumanError;
+pub use error::TinyHumansError;
 pub use types::*;
 
-use reqwest::Client;
+use reqwest::{Client, Method};
 use serde::de::DeserializeOwned;
 
 /// Default base URL when none is provided and env is unset.
-pub const DEFAULT_BASE_URL: &str = "https://staging-api.tinyhumans.ai";
-/// Environment variable for base URL override.
+pub const DEFAULT_BASE_URL: &str = "https://api.tinyhumans.ai";
+/// Preferred environment variable for base URL override.
 pub const TINYHUMANS_BASE_URL: &str = "TINYHUMANS_BASE_URL";
+/// Alias environment variable for base URL override.
+pub const NEOCORTEX_BASE_URL: &str = "NEOCORTEX_BASE_URL";
 
-/// Configuration for the TinyHumans Neocortex client.
+/// Configuration for the TinyHuman client.
 #[derive(Clone, Debug)]
 pub struct TinyHumanConfig {
     /// Bearer token (API key or JWT).
     pub token: String,
-    /// Base URL of the TinyHumans backend. If None, uses TINYHUMANS_BASE_URL or DEFAULT_BASE_URL.
+    /// Base URL of the TinyHuman backend. If None, uses TINYHUMANS_BASE_URL, then NEOCORTEX_BASE_URL, then default.
     pub base_url: Option<String>,
 }
 
@@ -41,26 +43,28 @@ impl TinyHumanConfig {
         self.base_url
             .clone()
             .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
+            .or_else(|| std::env::var(NEOCORTEX_BASE_URL).ok())
+            .or_else(|| std::env::var(TINYHUMANS_BASE_URL).ok())
             .unwrap_or_else(|| DEFAULT_BASE_URL.to_string())
             .trim_end_matches('/')
             .to_string()
     }
 }
 
-/// Async client for the TinyHumans Neocortex API.
+/// Async client for the TinyHuman memory API.
 #[derive(Clone)]
-pub struct TinyHumanMemoryClient {
+pub struct TinyHumansMemoryClient {
     client: Client,
     base_url: String,
     token: String,
 }
 
-impl TinyHumanMemoryClient {
+impl TinyHumansMemoryClient {
     /// Create a new client. Token must be non-empty.
-    pub fn new(config: TinyHumanConfig) -> Result<Self, TinyHumanError> {
+    pub fn new(config: TinyHumanConfig) -> Result<Self, TinyHumansError> {
         let token = config.token.trim().to_string();
         if token.is_empty() {
-            return Err(TinyHumanError::Validation("token is required".into()));
+            return Err(TinyHumansError::Validation("token is required".into()));
         }
         let base_url = TinyHumanConfig {
             token: token.clone(),
@@ -70,7 +74,7 @@ impl TinyHumanMemoryClient {
         let client = Client::builder()
             .timeout(std::time::Duration::from_secs(30))
             .build()
-            .map_err(|e| TinyHumanError::Http(e.to_string()))?;
+            .map_err(|e| TinyHumansError::Http(e.to_string()))?;
         Ok(Self {
             client,
             base_url,
@@ -78,23 +82,23 @@ impl TinyHumanMemoryClient {
         })
     }
 
-    /// Insert (ingest) a document into memory. POST /v1/memory/insert
+    /// Insert (ingest) a document into memory. POST /memory/insert
     pub async fn insert_memory(
         &self,
         params: InsertMemoryParams,
-    ) -> Result<InsertMemoryResponse, TinyHumanError> {
+    ) -> Result<InsertMemoryResponse, TinyHumansError> {
         if params.title.is_empty() {
-            return Err(TinyHumanError::Validation(
+            return Err(TinyHumansError::Validation(
                 "title is required and must be a string".into(),
             ));
         }
         if params.content.is_empty() {
-            return Err(TinyHumanError::Validation(
+            return Err(TinyHumansError::Validation(
                 "content is required and must be a string".into(),
             ));
         }
         if params.namespace.is_empty() {
-            return Err(TinyHumanError::Validation(
+            return Err(TinyHumansError::Validation(
                 "namespace is required and must be a string".into(),
             ));
         }
@@ -109,106 +113,335 @@ impl TinyHumanMemoryClient {
             updated_at: params.updated_at,
             document_id: params.document_id,
         };
-        self.post("/v1/memory/insert", &body).await
+        self.post("/memory/insert", &body).await
     }
 
-    /// Query memory via RAG. POST /v1/memory/query
+    /// Query memory via RAG. POST /memory/query
     pub async fn query_memory(
         &self,
         params: QueryMemoryParams,
-    ) -> Result<QueryMemoryResponse, TinyHumanError> {
+    ) -> Result<QueryMemoryResponse, TinyHumansError> {
         if params.query.is_empty() {
-            return Err(TinyHumanError::Validation(
+            return Err(TinyHumansError::Validation(
                 "query is required and must be a string".into(),
             ));
         }
         if let Some(mc) = params.max_chunks {
-            if !(1..=200).contains(&mc) {
-                return Err(TinyHumanError::Validation(
-                    "maxChunks must be between 1 and 200".into(),
+            if mc <= 0.0 {
+                return Err(TinyHumansError::Validation(
+                    "maxChunks must be a positive number".into(),
                 ));
             }
         }
-        self.post("/v1/memory/query", &params).await
+        self.post("/memory/query", &params).await
     }
 
-    /// Delete memory (admin). POST /v1/memory/admin/delete
+    /// Delete memory (admin). POST /memory/admin/delete
     pub async fn delete_memory(
         &self,
         params: DeleteMemoryParams,
-    ) -> Result<DeleteMemoryResponse, TinyHumanError> {
-        self.post("/v1/memory/admin/delete", &params).await
+    ) -> Result<DeleteMemoryResponse, TinyHumansError> {
+        self.post("/memory/admin/delete", &params).await
     }
 
-    /// Recall context from Master node. POST /v1/memory/recall
+    /// Recall context from Master node. POST /memory/recall
     pub async fn recall_memory(
         &self,
         params: RecallMemoryParams,
-    ) -> Result<RecallMemoryResponse, TinyHumanError> {
+    ) -> Result<RecallMemoryResponse, TinyHumansError> {
         if let Some(mc) = params.max_chunks {
-            if mc == 0 {
-                return Err(TinyHumanError::Validation(
-                    "maxChunks must be a positive integer".into(),
+            if mc <= 0.0 {
+                return Err(TinyHumansError::Validation(
+                    "maxChunks must be a positive number".into(),
                 ));
             }
         }
-        self.post("/v1/memory/recall", &params).await
+        self.post("/memory/recall", &params).await
     }
 
-    /// Recall memories from Ebbinghaus bank. POST /v1/memory/memories/recall
+    /// Recall memories from Ebbinghaus bank. POST /memory/memories/recall
     pub async fn recall_memories(
         &self,
         params: RecallMemoriesParams,
-    ) -> Result<RecallMemoriesResponse, TinyHumanError> {
+    ) -> Result<RecallMemoriesResponse, TinyHumansError> {
         if let Some(tk) = params.top_k {
             if tk <= 0.0 {
-                return Err(TinyHumanError::Validation(
+                return Err(TinyHumansError::Validation(
                     "topK must be a positive number".into(),
                 ));
             }
         }
         if let Some(mr) = params.min_retention {
             if mr < 0.0 {
-                return Err(TinyHumanError::Validation(
+                return Err(TinyHumansError::Validation(
                     "minRetention must be a non-negative number".into(),
                 ));
             }
         }
-        self.post("/v1/memory/memories/recall", &params).await
+        self.post("/memory/memories/recall", &params).await
+    }
+
+    /// Recall memory context. POST /memory/memories/context
+    pub async fn recall_memories_context(
+        &self,
+        params: RecallMemoriesContextParams,
+    ) -> Result<RecallMemoriesContextResponse, TinyHumansError> {
+        self.post("/memory/memories/context", &params).await
+    }
+
+    /// Generate reflective thoughts from recalled memory context. POST /memory/memories/thoughts
+    pub async fn memory_thoughts(
+        &self,
+        params: MemoryThoughtsParams,
+    ) -> Result<MemoryThoughtsResponse, TinyHumansError> {
+        self.post("/memory/memories/thoughts", &params).await
+    }
+
+    /// Record entity interactions. POST /memory/interact
+    pub async fn interact_memory(
+        &self,
+        params: MemoryInteractionsParams,
+    ) -> Result<MemoryInteractionsResponse, TinyHumansError> {
+        self.validate_interactions(&params)?;
+        self.post("/memory/interact", &params).await
+    }
+
+    /// Record interaction signals for entities. POST /memory/interactions
+    pub async fn record_interactions(
+        &self,
+        params: MemoryInteractionsParams,
+    ) -> Result<MemoryInteractionsResponse, TinyHumansError> {
+        self.validate_interactions(&params)?;
+        self.post("/memory/interactions", &params).await
+    }
+
+    /// Query memory context (alias route). POST /memory/queries
+    pub async fn query_memories(
+        &self,
+        params: QueryMemoriesParams,
+    ) -> Result<QueryMemoriesResponse, TinyHumansError> {
+        if params.query.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "query is required and must be a string".into(),
+            ));
+        }
+        self.post("/memory/queries", &params).await
+    }
+
+    /// Chat with memory context. POST /memory/conversations
+    pub async fn memory_conversation(
+        &self,
+        params: MemoryConversationParams,
+    ) -> Result<MemoryConversationResponse, TinyHumansError> {
+        if params.messages.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "messages is required and must be non-empty".into(),
+            ));
+        }
+        self.post("/memory/conversations", &params).await
+    }
+
+    /// Chat with DeltaNet memory cache. POST /memory/chat
+    pub async fn memory_chat(
+        &self,
+        params: MemoryChatParams,
+    ) -> Result<MemoryChatResponse, TinyHumansError> {
+        if params.messages.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "messages is required and must be non-empty".into(),
+            ));
+        }
+        self.post("/memory/chat", &params).await
+    }
+
+    /// Ingest a single memory document. POST /memory/documents
+    pub async fn ingest_document(
+        &self,
+        params: IngestDocumentParams,
+    ) -> Result<IngestDocumentResponse, TinyHumansError> {
+        if params.title.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "title is required and must be a string".into(),
+            ));
+        }
+        if params.content.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "content is required and must be a string".into(),
+            ));
+        }
+        if params.namespace.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "namespace is required and must be a string".into(),
+            ));
+        }
+        self.post("/memory/documents", &params).await
+    }
+
+    /// Ingest multiple memory documents in batch. POST /memory/documents/batch
+    pub async fn ingest_documents_batch(
+        &self,
+        params: BatchIngestDocumentsParams,
+    ) -> Result<BatchIngestDocumentsResponse, TinyHumansError> {
+        if params.items.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "items must be a non-empty list".into(),
+            ));
+        }
+        self.post("/memory/documents/batch", &params).await
+    }
+
+    /// List ingested memory documents. GET /memory/documents
+    pub async fn list_documents(&self) -> Result<ListDocumentsResponse, TinyHumansError> {
+        self.get("/memory/documents").await
+    }
+
+    /// Get details for a memory document. GET /memory/documents/{documentId}
+    pub async fn get_document(
+        &self,
+        document_id: &str,
+        namespace: Option<&str>,
+    ) -> Result<GetDocumentResponse, TinyHumansError> {
+        if document_id.trim().is_empty() {
+            return Err(TinyHumansError::Validation("document_id is required".into()));
+        }
+        let mut path = format!("/memory/documents/{document_id}");
+        if let Some(ns) = namespace {
+            if !ns.trim().is_empty() {
+                path = format!("{path}?namespace={ns}");
+            }
+        }
+        self.get(&path).await
+    }
+
+    /// Delete a memory document. DELETE /memory/documents/{documentId}
+    pub async fn delete_document(
+        &self,
+        document_id: &str,
+        namespace: &str,
+    ) -> Result<DeleteDocumentResponse, TinyHumansError> {
+        if document_id.trim().is_empty() {
+            return Err(TinyHumansError::Validation("document_id is required".into()));
+        }
+        if namespace.trim().is_empty() {
+            return Err(TinyHumansError::Validation("namespace is required".into()));
+        }
+        self.delete(&format!(
+            "/memory/documents/{document_id}?namespace={namespace}"
+        ))
+        .await
+    }
+
+    /// Sync OpenClaw memory files to backend. POST /memory/sync
+    pub async fn sync_memory(
+        &self,
+        params: SyncMemoryParams,
+    ) -> Result<SyncMemoryResponse, TinyHumansError> {
+        if params.workspace_id.is_empty() {
+            return Err(TinyHumansError::Validation("workspaceId is required".into()));
+        }
+        if params.agent_id.is_empty() {
+            return Err(TinyHumansError::Validation("agentId is required".into()));
+        }
+        if params.files.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "files is required and must be non-empty".into(),
+            ));
+        }
+        self.post("/memory/sync", &params).await
+    }
+
+    /// Check memory server health status. GET /memory/health
+    pub async fn memory_health(&self) -> Result<MemoryHealthResponse, TinyHumansError> {
+        self.get("/memory/health").await
+    }
+
+    /// Get memory ingestion job status. GET /memory/ingestion/jobs/{jobId}
+    pub async fn ingestion_job_status(
+        &self,
+        job_id: &str,
+    ) -> Result<IngestionJobStatusResponse, TinyHumansError> {
+        if job_id.trim().is_empty() {
+            return Err(TinyHumansError::Validation("job_id is required".into()));
+        }
+        self.get(&format!("/memory/ingestion/jobs/{job_id}")).await
+    }
+
+    fn validate_interactions(
+        &self,
+        params: &MemoryInteractionsParams,
+    ) -> Result<(), TinyHumansError> {
+        if params.namespace.trim().is_empty() {
+            return Err(TinyHumansError::Validation("namespace is required".into()));
+        }
+        if params.entity_names.is_empty() {
+            return Err(TinyHumansError::Validation(
+                "entityNames is required and must be non-empty".into(),
+            ));
+        }
+        Ok(())
     }
 
     async fn post<T: DeserializeOwned, B: serde::Serialize>(
         &self,
         path: &str,
         body: &B,
-    ) -> Result<T, TinyHumanError> {
+    ) -> Result<T, TinyHumansError> {
+        self.request(Method::POST, path, Some(body)).await
+    }
+
+    async fn get<T: DeserializeOwned>(&self, path: &str) -> Result<T, TinyHumansError> {
+        self.request::<T, serde_json::Value>(Method::GET, path, None)
+            .await
+    }
+
+    async fn delete<T: DeserializeOwned>(&self, path: &str) -> Result<T, TinyHumansError> {
+        self.request::<T, serde_json::Value>(Method::DELETE, path, None)
+            .await
+    }
+
+    async fn request<T: DeserializeOwned, B: serde::Serialize>(
+        &self,
+        method: Method,
+        path: &str,
+        body: Option<&B>,
+    ) -> Result<T, TinyHumansError> {
         let url = format!("{}{}", self.base_url, path);
-        let res = self
+        let mut req = self
             .client
-            .post(&url)
+            .request(method, &url)
             .header("Content-Type", "application/json")
-            .header("Authorization", format!("Bearer {}", self.token))
-            .json(body)
+            .header("Authorization", format!("Bearer {}", self.token));
+
+        if let Some(body) = body {
+            req = req.json(body);
+        }
+
+        let res = req
             .send()
             .await
-            .map_err(|e| TinyHumanError::Http(e.to_string()))?;
+            .map_err(|e| TinyHumansError::Http(e.to_string()))?;
+
         let status = res.status();
         let text = res
             .text()
             .await
-            .map_err(|e| TinyHumanError::Http(e.to_string()))?;
+            .map_err(|e| TinyHumansError::Http(e.to_string()))?;
+
         if !status.is_success() {
-            let err_msg: ErrorPayload = serde_json::from_str(&text).unwrap_or(ErrorPayload {
-                success: false,
-                error: format!("HTTP {}", status),
-            });
-            return Err(TinyHumanError::Api {
-                message: err_msg.error,
+            let err_payload: ErrorPayload =
+                serde_json::from_str(&text).unwrap_or_else(|_| ErrorPayload::default());
+            let message = err_payload
+                .error
+                .or(err_payload.message)
+                .unwrap_or_else(|| format!("HTTP {status}"));
+            return Err(TinyHumansError::Api {
+                message,
                 status: status.as_u16(),
                 body: Some(text),
             });
         }
-        serde_json::from_str(&text).map_err(|e| TinyHumanError::Decode(e.to_string()))
+
+        serde_json::from_str(&text).map_err(|e| TinyHumansError::Decode(e.to_string()))
     }
 }
 
@@ -231,9 +464,8 @@ struct InsertMemoryBody {
     document_id: Option<String>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Default)]
 struct ErrorPayload {
-    #[allow(dead_code)]
-    success: bool,
-    error: String,
+    error: Option<String>,
+    message: Option<String>,
 }

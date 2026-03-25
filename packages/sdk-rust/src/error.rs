@@ -2,7 +2,7 @@
 
 /// Errors returned by the SDK.
 #[derive(Debug, thiserror::Error)]
-pub enum TinyHumanError {
+pub enum TinyHumansError {
     #[error("validation error: {0}")]
     Validation(String),
 

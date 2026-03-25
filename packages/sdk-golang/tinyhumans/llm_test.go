@@ -360,9 +360,9 @@ func TestLLMPost_Non2xx(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for 429")
 	}
-	tErr, ok := err.(*TinyHumanError)
+	tErr, ok := err.(*TinyHumansError)
 	if !ok {
-		t.Fatalf("expected TinyHumanError, got %T", err)
+		t.Fatalf("expected TinyHumansError, got %T", err)
 	}
 	if tErr.Status != 429 {
 		t.Errorf("status = %d, want 429", tErr.Status)

@@ -54,13 +54,13 @@ class NeocortexMemoryService(FrameProcessor):
   ) -> None:
     super().__init__()
 
-    token = (api_key or os.getenv("ALPHAHUMAN_API_KEY") or "").strip()
+    token = (api_key or os.getenv("TINYHUMANS_API_KEY") or "").strip()
     if not token:
-      logger.error("NeocortexMemoryService: missing Neocortex API key (ALPHAHUMAN_API_KEY).")
+      logger.error("NeocortexMemoryService: missing Neocortex API key (TINYHUMANS_API_KEY).")
       raise ValueError("Neocortex API key is required.")
 
     self._token = token
-    self._base_url = (base_url or os.getenv("ALPHAHUMAN_BASE_URL") or "https://staging-api.alphahuman.xyz").rstrip("/")
+    self._base_url = (base_url or os.getenv("TINYHUMANS_BASE_URL") or "https://api.tinyhumans.ai").rstrip("/")
 
     if not any([user_id, agent_id, run_id]):
       raise ValueError("At least one of user_id, agent_id, or run_id must be provided")

@@ -40,8 +40,8 @@ bun install
 
 Set these in your shell or in the environment that launches OpenCode:
 
-- `ALPHAHUMAN_API_KEY` (required): Neocortex/Alphahuman API key or JWT.
-- `ALPHAHUMAN_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
+- `TINYHUMANS_API_KEY` (required): Neocortex/TinyHuman API key or JWT.
+- `TINYHUMANS_BASE_URL` (optional): Override Neocortex base URL; defaults to the same staging URL used by other Neocortex plugins.
 
 The plugin also respects `NEOCORTEX_API_KEY` / `NEOCORTEX_TOKEN` and `NEOCORTEX_BASE_URL` for flexibility.
 
@@ -97,8 +97,8 @@ You can also use the adapter directly from TypeScript/Node (outside of OpenCode)
 import { OpenCodeNeocortexMemory } from "@neocortex/plugin-opencode";
 
 const memory = new OpenCodeNeocortexMemory({
-  token: process.env.ALPHAHUMAN_API_KEY!,
-  baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  token: process.env.TINYHUMANS_API_KEY!,
+  baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   defaultNamespace: "my-opencode-workspace",
 });
 

@@ -140,7 +140,7 @@ export class NeocortexMemoryClient {
       priority: (params as any).priority,
       createdAt: (params as any).createdAt,
       updatedAt: (params as any).updatedAt,
-      documentId: (params as any).documentId,
+      documentId: params.documentId,
     };
     return this.post("/v1/memory/documents", body);
   }

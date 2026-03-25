@@ -1,4 +1,4 @@
-"""Neocortex (Alphahuman) memory tools for Agno agents."""
+"""Neocortex (TinyHuman) memory tools for Agno agents."""
 
 from __future__ import annotations
 
@@ -11,15 +11,15 @@ from urllib.parse import quote
 import httpx
 from agno.tools import Toolkit
 
-__all__ = ["NeocortexTools", "AlphahumanError"]
+__all__ = ["NeocortexTools", "TinyHumanError"]
 
 
-DEFAULT_BASE_URL = "https://staging-api.alphahuman.xyz"
-TINYHUMANS_BASE_URL = "ALPHAHUMAN_BASE_URL"
+DEFAULT_BASE_URL = "https://api.tinyhumans.ai"
+TINYHUMANS_BASE_URL = "TINYHUMANS_BASE_URL"
 
 
-class AlphahumanError(Exception):
-    """Error raised for Alphahuman memory API failures."""
+class TinyHumanError(Exception):
+    """Error raised for TinyHuman memory API failures."""
 
     def __init__(self, message: str, status: int, body: Any | None = None) -> None:
         super().__init__(message)
@@ -27,8 +27,8 @@ class AlphahumanError(Exception):
         self.body = body
 
 
-class AlphahumanMemoryClient:
-    """Minimal Alphahuman memory client aligned with the TypeScript SDK.
+class TinyHumanMemoryClient:
+    """Minimal TinyHuman memory client aligned with the TypeScript SDK.
 
     Endpoints:
       - POST /v1/memory/insert
@@ -135,7 +135,7 @@ class AlphahumanMemoryClient:
             body["createdAt"] = created_at
         if updated_at is not None:
             body["updatedAt"] = updated_at
-        body["document_id"] = document_id
+        body["documentId"] = document_id
         result = self._post("/v1/memory/documents", body)
         return self._wait_for_document_ingestion(result)
 
@@ -201,7 +201,7 @@ class AlphahumanMemoryClient:
                 if s in completed_states:
                     return last_job
                 if s in failed_states:
-                    raise AlphahumanError(
+                    raise TinyHumanError(
                         f"Ingestion job {job_id} failed (state={job_state})",
                         500,
                         last_job,
@@ -262,7 +262,7 @@ class AlphahumanMemoryClient:
                     if s in completed_states:
                         remaining.remove(job_id)
                     elif s in failed_states:
-                        raise AlphahumanError(
+                        raise TinyHumanError(
                             f"Ingestion job {job_id} failed (state={job_state})",
                             500,
                             job,
@@ -510,25 +510,25 @@ class AlphahumanMemoryClient:
         try:
             payload = res.json()
         except Exception:
-            raise AlphahumanError(
+            raise TinyHumanError(
                 f"HTTP {res.status_code}: non-JSON response",
                 res.status_code,
                 res.text,
             )
-        # Alphahuman responses are shaped as { success: bool, data?: ..., error?: str }
+        # TinyHuman responses are shaped as { success: bool, data?: ..., error?: str }
         success = bool(payload.get("success"))
         if not res.is_success or not success:
             message = payload.get("error") or f"HTTP {res.status_code}"
-            raise AlphahumanError(message, res.status_code, payload)
+            raise TinyHumanError(message, res.status_code, payload)
         data = payload.get("data")
         return data if isinstance(data, dict) else payload
 
 
 class NeocortexTools(Toolkit):
-    """Agno toolkit that exposes Neocortex (Alphahuman) memory as agent tools.
+    """Agno toolkit that exposes Neocortex (TinyHuman) memory as agent tools.
 
     Gives agents the ability to save, recall, and delete persistent memory
-    via the Alphahuman backend. Credentials are set at construction and are
+    via the TinyHuman backend. Credentials are set at construction and are
     never exposed to the LLM as tool parameters.
     """
 
@@ -538,14 +538,14 @@ class NeocortexTools(Toolkit):
         base_url: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        """Create the toolkit with Neocortex (Alphahuman) API credentials.
+        """Create the toolkit with Neocortex (TinyHuman) API credentials.
 
         Args:
             token: API token (Bearer). Not exposed to the agent.
-            base_url: Optional API base URL. Uses ALPHAHUMAN_BASE_URL env or default if omitted.
+            base_url: Optional API base URL. Uses TINYHUMANS_BASE_URL env or default if omitted.
             **kwargs: Passed through to Toolkit (e.g. name).
         """
-        self._client = AlphahumanMemoryClient(token=token, base_url=base_url)
+        self._client = TinyHumanMemoryClient(token=token, base_url=base_url)
         tools = [
             self.save_memory,
             self.recall_memory,
@@ -615,7 +615,7 @@ class NeocortexTools(Toolkit):
         Returns:
             A short confirmation message (e.g. "Saved 1 memory" or "Updated 1 memory").
         """
-        # Map our logical key/content/namespace into Alphahuman's insert API.
+        # Map our logical key/content/namespace into TinyHuman's insert API.
         result = self._client.insert_memory(
             title=key,
             content=content,
@@ -689,11 +689,11 @@ class NeocortexTools(Toolkit):
         Returns:
             A short confirmation of how many memories were deleted.
         """
-        # Alphahuman delete API only supports namespace-scoped admin delete.
+        # TinyHuman delete API only supports namespace-scoped admin delete.
         # We ignore key/keys and require either delete_all or explicit call.
         if (key or keys) and not delete_all:
             raise ValueError(
-                "Alphahuman delete only supports namespace-wide delete. "
+                "TinyHuman delete only supports namespace-wide delete. "
                 "Set delete_all=True when calling delete_memory."
             )
         result = self._client.delete_memory(namespace=namespace)

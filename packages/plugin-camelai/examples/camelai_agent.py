@@ -43,9 +43,9 @@ def recall_with_retries(toolkit: NeocortexToolkit, namespace: str, attempts: int
 
 def main() -> None:
     load_dotenv()
-    token = os.getenv("ALPHAHUMAN_API_KEY")
+    token = os.getenv("TINYHUMANS_API_KEY")
     if not token:
-        print("Please set ALPHAHUMAN_API_KEY")
+        print("Please set TINYHUMANS_API_KEY")
         return
 
     namespace = f"camel-session-{int(time.time())}"

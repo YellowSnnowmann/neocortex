@@ -1,144 +1,117 @@
-# @alphahuman/memory-sdk
+# @tinyhumansai/neocortex
 
-TypeScript / JavaScript SDK for the [Alphahuman Memory API](https://alphahuman.xyz), aligned with the backend API: insert, query, admin/delete, recall, and memories/recall.
+TypeScript / JavaScript SDK for the TinyHumans Neocortex memory API.
 
 ## Requirements
 
-- Node.js ≥ 18 (uses native `fetch`)
+- Node.js 18+
+- Native `fetch` runtime (Node 18+ already includes it)
 
 ## Install
 
 ```bash
-npm install @alphahuman/memory-sdk
+npm install @tinyhumansai/neocortex
 ```
+
+## Get an API key
+
+1. Sign in to your TinyHumans account.
+2. Create a server API key in the TinyHumans dashboard.
+3. Export it before running examples:
+
+```bash
+export TINYHUMANS_TOKEN="your_api_key"
+# optional custom API base URL
+export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
+```
+
+`TINYHUMANS_TOKEN` is also accepted in examples as an alias.
 
 ## Quick start
 
-```typescript
-import { AlphahumanMemoryClient } from '@alphahuman/memory-sdk';
+```ts
+import { TinyHumansMemoryClient } from '@tinyhumansai/neocortex';
 
-const client = new AlphahumanMemoryClient({ token: 'your-api-key' });
+const client = new TinyHumansMemoryClient({
+  token: process.env.TINYHUMANS_TOKEN!,
+});
 
-// Insert (ingest) a document into memory
-const insertResult = await client.insertMemory({
+await client.insertMemory({
   title: 'User preference',
   content: 'User prefers dark mode',
   namespace: 'preferences',
 });
-console.log(insertResult.data); // { status, stats, usage? }
 
-// Query memory via RAG
-const queryResult = await client.queryMemory({
+const query = await client.queryMemory({
   query: 'What does the user prefer?',
   namespace: 'preferences',
   maxChunks: 10,
 });
-console.log(queryResult.data.context, queryResult.data.response);
 
-// Recall context from Master node
-const recallResult = await client.recallMemory({ namespace: 'preferences', maxChunks: 10 });
-
-// Recall memories from Ebbinghaus bank
-const memoriesResult = await client.recallMemories({ namespace: 'preferences', topK: 5 });
-
-// Delete memory (admin)
-await client.deleteMemory({ namespace: 'preferences' });
+console.log(query.data.response);
 ```
 
-## API reference
+## Full route example
 
-### `new AlphahumanMemoryClient(config)`
+A comprehensive example that exercises all SDK methods is available at `example.mjs`.
 
-| Param | Type | Required | Description |
-|-------|------|----------|-------------|
-| `config.token` | `string` | ✓ | API key or JWT |
-| `config.baseUrl` | `string` | | Override API URL. If not set, uses `ALPHAHUMAN_BASE_URL` env or default `https://staging-api.alphahuman.xyz` |
+```bash
+cd packages/sdk-typescript
+npm install
+npm run build
+TINYHUMANS_TOKEN=your_api_key node example.mjs
+```
 
-### `client.insertMemory(params)`
+## Client config
 
-Insert a document into memory. **POST /v1/memory/insert**
+```ts
+new TinyHumansMemoryClient({
+  token: 'required',
+  baseUrl: 'optional',
+});
+```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | `string` | ✓ | Document title |
-| `content` | `string` | ✓ | Document content |
-| `namespace` | `string` | ✓ | Namespace |
-| `sourceType` | `'doc' \| 'chat' \| 'email'` | | Default `'doc'` |
-| `metadata` | `object` | | Optional metadata |
-| `priority` | `'high' \| 'medium' \| 'low'` | | Optional priority |
-| `createdAt` | `number` | | Unix timestamp (seconds) |
-| `updatedAt` | `number` | | Unix timestamp (seconds) |
-| `documentId` | `string` | | Optional document ID |
+`baseUrl` resolution order: explicit config -> `TINYHUMANS_BASE_URL`/`NEOCORTEX_BASE_URL` env -> `https://api.tinyhumans.ai`.
 
-Returns `InsertMemoryResponse` with `data: { status, stats, usage? }`.
+## Methods
 
-### `client.queryMemory(params)`
+Core:
+- `insertMemory`
+- `queryMemory`
+- `chatMemory`
+- `deleteMemory`
+- `interactMemory`
+- `recallMemory`
+- `recallMemories`
+- `recallThoughts`
 
-Query memory via RAG. **POST /v1/memory/query**
+Ingestion jobs:
+- `getIngestionJob`
+- `waitForIngestionJob`
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `query` | `string` | ✓ | Query string |
-| `includeReferences` | `boolean` | | Include references in response |
-| `namespace` | `string` | | Scope to namespace |
-| `maxChunks` | `number` | | 1–200 |
-| `documentIds` | `string[]` | | Filter by document IDs |
-| `llmQuery` | `string` | | Optional LLM query |
-
-Returns `QueryMemoryResponse` with `data: { context?, usage?, cached, llmContextMessage?, response? }`.
-
-### `client.deleteMemory(params?)`
-
-Delete memory (admin). **POST /v1/memory/admin/delete**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `namespace` | `string` | Optional namespace to scope deletion |
-
-Returns `DeleteMemoryResponse` with `data: { status, userId, namespace?, nodesDeleted, message }`.
-
-### `client.recallMemory(params?)`
-
-Recall context from Master node. **POST /v1/memory/recall**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `namespace` | `string` | Optional namespace |
-| `maxChunks` | `number` | Positive integer |
-
-Returns `RecallMemoryResponse` with `data: { context?, usage?, cached, response?, latencySeconds?, counts? }`.
-
-### `client.recallMemories(params?)`
-
-Recall memories from Ebbinghaus bank. **POST /v1/memory/memories/recall**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `namespace` | `string` | Optional namespace |
-| `topK` | `number` | Positive number |
-| `minRetention` | `number` | Non-negative number |
-| `asOf` | `number` | Timestamp |
-
-Returns `RecallMemoriesResponse` with `data: { memories }`.
+Documents and mirrored routes:
+- `insertDocument`
+- `insertDocumentsBatch`
+- `listDocuments`
+- `getDocument`
+- `deleteDocument`
+- `getGraphSnapshot`
+- `queryMemoryContext`
+- `chatMemoryContext`
+- `recordInteractions`
 
 ## Error handling
 
-All API errors throw `AlphahumanError` (extends `Error`) with `status` (HTTP status code) and `body` (parsed response when available).
+Non-2xx responses throw `TinyHumansError`:
 
-```typescript
-import { AlphahumanError } from '@alphahuman/memory-sdk';
+```ts
+import { TinyHumansError } from '@tinyhumansai/neocortex';
 
 try {
   await client.queryMemory({ query: 'hello' });
 } catch (err) {
-  if (err instanceof AlphahumanError) {
-    console.error(err.status, err.message);
+  if (err instanceof TinyHumansError) {
+    console.error(err.status, err.message, err.body);
   }
 }
-```
-
-## Tests
-
-```bash
-npm test
 ```

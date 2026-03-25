@@ -1,6 +1,6 @@
 # Neocortex ElevenLabs Plugin
 
-ElevenLabs plugin for **memory-aware voice experiences** backed by Neocortex (Alphahuman) memory.
+ElevenLabs plugin for **memory-aware voice experiences** backed by Neocortex (TinyHuman) memory.
 
 This package provides TypeScript helpers that integrate with the [ElevenLabs Conversational AI](https://elevenlabs.io/docs/conversational-ai/overview) platform, enabling agents to **save** and **recall** persistent memory across conversations — similar to [Mem0's ElevenLabs integration](https://docs.mem0.ai/integrations/elevenlabs).
 
@@ -47,9 +47,9 @@ import { Conversation } from "@elevenlabs/client";
 import { ElevenLabsNeocortexMemory } from "@neocortex/plugin-elevenlabs";
 
 const memory = new ElevenLabsNeocortexMemory({
-  alphahuman: {
-    token: process.env.ALPHAHUMAN_API_KEY!,
-    baseUrl: process.env.ALPHAHUMAN_BASE_URL, // optional
+  tinyhuman: {
+    token: process.env.TINYHUMANS_API_KEY!,
+    baseUrl: process.env.TINYHUMANS_BASE_URL, // optional
   },
 });
 
@@ -133,9 +133,9 @@ const app = express();
 app.use(express.json());
 
 const memory = new ElevenLabsNeocortexMemory({
-  alphahuman: {
-    token: process.env.ALPHAHUMAN_API_KEY!,
-    baseUrl: process.env.ALPHAHUMAN_BASE_URL,
+  tinyhuman: {
+    token: process.env.TINYHUMANS_API_KEY!,
+    baseUrl: process.env.TINYHUMANS_BASE_URL,
   },
 });
 
@@ -169,11 +169,44 @@ Override this by passing a custom `namespaceStrategy`:
 
 ```ts
 const memory = new ElevenLabsNeocortexMemory({
-  alphahuman: { token: "..." },
+  tinyhuman: { token: "..." },
   namespaceStrategy: ({ userId }) => userId ? `customer-${userId}` : "anonymous",
 });
 ```
 
+## E2E Tests
+
+The `e2e.ts` script validates the full data store → recall lifecycle:
+
+- **Phase 1** — Client tools: `addMemories` → `retrieveMemories` round-trip
+- **Phase 2** — Server tools: `handleSaveTool` → `handleRecallTool` round-trip
+- **Phase 3** — ElevenLabs agent simulation (optional, requires `ELEVENLABS_API_KEY`)
+
+```bash
+# Phases 1 & 2 only
+TINYHUMANS_API_KEY=xxx npx tsx e2e.ts
+
+# All phases including ElevenLabs simulation
+TINYHUMANS_API_KEY=xxx ELEVENLABS_API_KEY=sk_xxx npx tsx e2e.ts
+```
+
+## Voice Demo (Interactive)
+
+To test with **real voice** in the browser:
+
+1. Create an ElevenLabs agent at https://elevenlabs.io/app/agents
+2. Add two **Client** tools (`addMemories` and `retrieveMemories`) with schemas shown above — enable "Wait for response" on both
+3. Run the demo server:
+
+```bash
+TINYHUMANS_API_KEY=xxx AGENT_ID=your-agent-id npx tsx example/voice-demo.ts
+```
+
+4. Open http://localhost:3737 in your browser
+5. Click "🎙️ Start Conversation" and allow microphone access
+6. Say: *"Remember that my favorite color is blue"*
+7. End the conversation, start a new one, and ask: *"What's my favorite color?"*
+8. The agent should recall "blue" from Neocortex memory! 🎉
 
 ## Example Conversation Flow
 

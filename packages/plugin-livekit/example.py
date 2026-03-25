@@ -1,8 +1,8 @@
 """Example: LiveKit-oriented workflow with Neocortex memory tools.
 
 Run with:
-  export ALPHAHUMAN_API_KEY=""
-  export ALPHAHUMAN_BASE_URL=""
+  export TINYHUMANS_API_KEY=""
+  export TINYHUMANS_BASE_URL=""
   python example.py
 """
 
@@ -12,14 +12,14 @@ from neocortex_livekit import NeocortexLiveKitTools
 
 
 def main() -> None:
-    token = os.environ.get("ALPHAHUMAN_API_KEY")
+    token = os.environ.get("TINYHUMANS_API_KEY")
     if not token:
-        print("Set ALPHAHUMAN_API_KEY to run this example.")
+        print("Set TINYHUMANS_API_KEY to run this example.")
         return
 
     tools = NeocortexLiveKitTools(
         token=token,
-        base_url=os.environ.get("ALPHAHUMAN_BASE_URL"),
+        base_url=os.environ.get("TINYHUMANS_BASE_URL"),
         namespace="livekit-demo-room",
     )
 

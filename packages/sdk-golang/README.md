@@ -1,133 +1,95 @@
-# TinyHumans Neocortex Go SDK
+# tinyhumans Go SDK
 
-Go client for the [TinyHumans](https://tinyhumans.ai) Neocortex memory API.
+Go client for TinyHumans Neocortex memory APIs.
 
-## Installation
+## Requirements
+
+- Go 1.21+
+
+## Install
 
 ```bash
 go get github.com/tinyhumansai/neocortex-sdk-go
 ```
 
-## Quick Start
+## Get an API key
+
+1. Sign in to your TinyHumans account.
+2. Create a server API key in the TinyHumans dashboard.
+3. Export it before running examples:
+
+```bash
+export TINYHUMANS_TOKEN="your_api_key"
+# optional custom API URL
+export TINYHUMANS_BASE_URL="https://api.tinyhumans.ai"
+```
+
+## Quick start
 
 ```go
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-	"time"
+  "fmt"
+  "log"
+  "os"
 
-	"github.com/tinyhumansai/neocortex-sdk-go/tinyhumans"
+  "github.com/tinyhumansai/neocortex-sdk-go/tinyhumans"
 )
 
 func main() {
-	client, err := tinyhumans.NewClient(
-		os.Getenv("TINYHUMANS_TOKEN"),
-		os.Getenv("TINYHUMANS_MODEL_ID"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer client.Close()
+  client, err := tinyhumans.NewClient(os.Getenv("TINYHUMANS_TOKEN"))
+  if err != nil {
+    log.Fatal(err)
+  }
+  defer client.Close()
 
-	// Ingest a memory
-	now := float64(time.Now().Unix())
-	result, err := client.IngestMemory(tinyhumans.MemoryItem{
-		Key:       "user-preference-theme",
-		Content:   "User prefers dark mode",
-		Namespace: "preferences",
-		Metadata:  map[string]interface{}{"source": "onboarding"},
-		CreatedAt: &now,
-		UpdatedAt: &now,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("Ingested: %d, Updated: %d, Errors: %d\n",
-		result.Ingested, result.Updated, result.Errors)
+  _, err = client.IngestMemory(tinyhumans.MemoryItem{
+    Key:       "user-preference-theme",
+    Content:   "User prefers dark mode",
+    Namespace: "preferences",
+  })
+  if err != nil {
+    log.Fatal(err)
+  }
 
-	// Recall memory (get LLM-friendly context)
-	ctx, err := client.RecallMemory(
-		"preferences",
-		"What theme does the user prefer?",
-		nil, // uses default options (10 chunks)
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(ctx.Context)
+  ctx, err := client.RecallMemory("preferences", "What does the user prefer?", nil)
+  if err != nil {
+    log.Fatal(err)
+  }
 
-	// Query LLM with context (optional)
-	resp, err := client.RecallWithLLM(
-		"What theme does the user prefer?",
-		os.Getenv("OPENAI_API_KEY"),
-		tinyhumans.RecallWithLLMOptions{
-			Provider: "openai",
-			Model:    "gpt-4o-mini",
-			Context:  ctx.Context,
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(resp.Text)
-
-	// Delete memory
-	client.DeleteMemory("preferences", nil)
+  fmt.Println(ctx.Context)
 }
 ```
 
-## API Reference
+## Full route example
 
-### `NewClient(token, modelID string, baseURL ...string) (*Client, error)`
+`example/main.go` exercises all exported client methods:
+- `IngestMemory`
+- `IngestMemories`
+- `RecallMemory`
+- `DeleteMemory`
+- `RecallWithLLM`
+- `Close`
 
-Creates a new client. Base URL resolution: parameter > `TINYHUMANS_BASE_URL` env var > `https://api.tinyhumans.ai`.
+Run it with:
 
-### `Client.IngestMemory(item MemoryItem) (*IngestMemoryResponse, error)`
+```bash
+cd packages/sdk-golang
+go run ./example/main.go
+```
 
-Ingest a single memory item.
+## API surface
 
-### `Client.IngestMemories(items []MemoryItem) (*IngestMemoryResponse, error)`
+`NewClient(token string, baseURL ...string)`
+- Base URL resolution: argument -> `TINYHUMANS_BASE_URL` env -> `https://api.tinyhumans.ai`.
 
-Ingest multiple memory items.
+`RecallWithLLM` supports:
+- OpenAI (`provider: "openai"`)
+- Anthropic (`"anthropic"`)
+- Google (`"google"`)
+- Custom OpenAI-compatible URL (`URL` option)
 
-### `Client.RecallMemory(namespace, prompt string, opts *RecallMemoryOptions) (*GetContextResponse, error)`
+## Current SDK scope
 
-Retrieve relevant memory chunks as an LLM-friendly context string.
-
-Options: `NumChunks` (default 10), `Key`, `Keys`.
-
-### `Client.DeleteMemory(namespace string, opts *DeleteMemoryOptions) (*DeleteMemoryResponse, error)`
-
-Delete memory items by namespace.
-
-Options: `Key`, `Keys`, `DeleteAll`.
-
-### `Client.RecallWithLLM(prompt, apiKey string, opts RecallWithLLMOptions) (*LLMQueryResponse, error)`
-
-Query an LLM with optional memory context. Supported providers: `openai`, `anthropic`, `google`, or custom (via `URL`).
-
-### `Client.Close()`
-
-Release resources held by the client.
-
-## LLM Providers
-
-| Provider | Model Examples |
-|----------|---------------|
-| `openai` | `gpt-4o-mini`, `gpt-4o` |
-| `anthropic` | `claude-3-5-sonnet-20241022` |
-| `google` | `gemini-1.5-flash` |
-| Custom | Any OpenAI-compatible endpoint via `URL` |
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `TINYHUMANS_BASE_URL` | Override default API base URL |
-
-## License
-
-See repository root.
+This Go SDK currently implements the core memory routes plus LLM helper only. It does not yet expose the newer document/mirrored routes that exist in the TypeScript/Python/Rust SDKs.

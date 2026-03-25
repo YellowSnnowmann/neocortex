@@ -2,10 +2,10 @@
  * E2E for plugin-mastra using real Mastra Agent + Neocortex tools.
  *
  * Required env:
- *   ALPHAHUMAN_API_KEY
+ *   TINYHUMANS_API_KEY
  *
  * Optional env:
- *   ALPHAHUMAN_BASE_URL
+ *   TINYHUMANS_BASE_URL
  *   OPENAI_API_KEY (recommended so Mastra can run the LLM + call tools)
  *
  * Run from this package directory:
@@ -29,12 +29,12 @@ function getEnv(name: string): string {
   }
 }
 
-const ALPHAHUMAN_API_KEY = getEnv("ALPHAHUMAN_API_KEY");
-const ALPHAHUMAN_BASE_URL = getEnv("ALPHAHUMAN_BASE_URL");
+const TINYHUMANS_API_KEY = getEnv("TINYHUMANS_API_KEY");
+const TINYHUMANS_BASE_URL = getEnv("TINYHUMANS_BASE_URL");
 const OPENAI_API_KEY = getEnv("OPENAI_API_KEY");
 
-if (!ALPHAHUMAN_API_KEY) {
-  throw new Error("Missing ALPHAHUMAN_API_KEY");
+if (!TINYHUMANS_API_KEY) {
+  throw new Error("Missing TINYHUMANS_API_KEY");
 }
 
 const namespace = `mastra-e2e-${Date.now()}`;
@@ -42,7 +42,7 @@ const namespace = `mastra-e2e-${Date.now()}`;
 async function run() {
   console.log("Mastra plugin E2E");
   console.log("  namespace:", namespace);
-  console.log("  ALPHAHUMAN_BASE_URL:", ALPHAHUMAN_BASE_URL || "(default)");
+  console.log("  TINYHUMANS_BASE_URL:", TINYHUMANS_BASE_URL || "(default)");
   console.log("  OPENAI_API_KEY:", OPENAI_API_KEY ? "set" : "not set");
   console.log("---");
 
@@ -67,8 +67,8 @@ async function run() {
     neocortexGetIngestionJob,
   } =
     createNeocortexMastraTools({
-      token: ALPHAHUMAN_API_KEY,
-      baseUrl: ALPHAHUMAN_BASE_URL || undefined,
+      token: TINYHUMANS_API_KEY,
+      baseUrl: TINYHUMANS_BASE_URL || undefined,
       defaultNamespace: namespace,
     });
 

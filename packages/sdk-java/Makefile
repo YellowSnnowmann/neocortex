@@ -1,13 +1,13 @@
 .PHONY: build test integration-test clean
 
 build:
-	./gradlew build
+	gradle build
 
 test:
-	./gradlew test
+	gradle test
 
 integration-test:
-	ALPHAHUMAN_TOKEN=$(ALPHAHUMAN_TOKEN) ./gradlew test
+	TINYHUMANS_TOKEN=$(TINYHUMANS_TOKEN) gradle test
 
 clean:
-	./gradlew clean
+	gradle clean

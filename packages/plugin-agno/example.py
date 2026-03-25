@@ -1,8 +1,8 @@
-"""Example: Agno agent with Neocortex (Alphahuman) memory tools.
+"""Example: Agno agent with Neocortex (TinyHuman) memory tools.
 
 Run with:
-  export ALPHAHUMAN_API_KEY=""
-  export ALPHAHUMAN_BASE_URL=""
+  export TINYHUMANS_API_KEY=""
+  export TINYHUMANS_BASE_URL=""
   export OPENAI_API_KEY=""
   python example.py
 
@@ -20,9 +20,9 @@ from neocortex_agno import NeocortexTools
 
 
 def main() -> None:
-    token = os.environ.get("ALPHAHUMAN_API_KEY")
+    token = os.environ.get("TINYHUMANS_API_KEY")
     if not token:
-        print("Set ALPHAHUMAN_API_KEY to run this example.")
+        print("Set TINYHUMANS_API_KEY to run this example.")
         return
 
     agent = Agent(
@@ -30,7 +30,7 @@ def main() -> None:
         tools=[
             NeocortexTools(
                 token=token,
-                base_url=os.environ.get("ALPHAHUMAN_BASE_URL"),
+                base_url=os.environ.get("TINYHUMANS_BASE_URL"),
             )
         ],
         instructions=(

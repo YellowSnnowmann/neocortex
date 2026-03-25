@@ -1,6 +1,6 @@
 # plugin-autogen
 
-Neocortex (Alphahuman) memory tools for Microsoft AutoGen.
+Neocortex (TinyHuman) memory tools for Microsoft AutoGen.
 
 ## Features
 
@@ -34,7 +34,7 @@ pip install neocortex-autogen
 
 Set your API key:
 ```bash
-export ALPHAHUMAN_API_KEY="your_token_here"
+export TINYHUMANS_API_KEY="your_token_here"
 ```
 
 ### Expose tools to your AutoGen agent
@@ -56,7 +56,7 @@ import autogen
 from tinyhumansai import TinyHumanMemoryClient
 from neocortex_autogen import NeocortexMemoryTools, register_neocortex_tools
 
-client = TinyHumanMemoryClient(token=os.getenv("ALPHAHUMAN_API_KEY"))
+client = TinyHumanMemoryClient(token=os.getenv("TINYHUMANS_API_KEY"))
 memory_tools = NeocortexMemoryTools(client=client, default_namespace="autogen_memory")
 
 assistant = autogen.AssistantAgent("assistant", llm_config={"config_list": [...]})

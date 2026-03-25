@@ -5,23 +5,23 @@ import (
 	"testing"
 )
 
-func TestTinyHumanError_Error(t *testing.T) {
-	e := &TinyHumanError{Message: "bad request", Status: 400}
+func TestTinyHumansError_Error(t *testing.T) {
+	e := &TinyHumansError{Message: "bad request", Status: 400}
 	got := e.Error()
-	want := "TinyHumanError (status 400): bad request"
+	want := "TinyHumansError (status 400): bad request"
 	if got != want {
 		t.Errorf("Error() = %q, want %q", got, want)
 	}
 }
 
-func TestTinyHumanError_ImplementsError(t *testing.T) {
-	var err error = &TinyHumanError{Message: "test", Status: 500}
-	if !strings.Contains(err.Error(), "TinyHumanError") {
-		t.Error("TinyHumanError does not implement error interface correctly")
+func TestTinyHumansError_ImplementsError(t *testing.T) {
+	var err error = &TinyHumansError{Message: "test", Status: 500}
+	if !strings.Contains(err.Error(), "TinyHumansError") {
+		t.Error("TinyHumansError does not implement error interface correctly")
 	}
 }
 
-func TestTinyHumanError_DifferentStatuses(t *testing.T) {
+func TestTinyHumansError_DifferentStatuses(t *testing.T) {
 	tests := []struct {
 		status  int
 		message string
@@ -31,7 +31,7 @@ func TestTinyHumanError_DifferentStatuses(t *testing.T) {
 		{500, "internal server error"},
 	}
 	for _, tt := range tests {
-		e := &TinyHumanError{Message: tt.message, Status: tt.status}
+		e := &TinyHumansError{Message: tt.message, Status: tt.status}
 		got := e.Error()
 		if !strings.Contains(got, tt.message) {
 			t.Errorf("Error() missing message %q in %q", tt.message, got)

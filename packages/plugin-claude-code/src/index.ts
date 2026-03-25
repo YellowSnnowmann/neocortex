@@ -656,8 +656,8 @@ export class ClaudeCodeNeocortexMemory {
  *         "command": "node",
  *         "args": ["./node_modules/@neocortex/plugin-claude-code/dist/index.js"],
  *         "env": {
- *           "ALPHAHUMAN_API_KEY": "...",
- *           "ALPHAHUMAN_BASE_URL": "https://api.yourbackend.com"
+ *           "TINYHUMANS_API_KEY": "...",
+ *           "TINYHUMANS_BASE_URL": "https://api.yourbackend.com"
  *         }
  *       }
  *     }
@@ -665,19 +665,19 @@ export class ClaudeCodeNeocortexMemory {
  */
 export async function runNeocortexMcpServerFromEnv() {
   const token =
-    process.env.ALPHAHUMAN_API_KEY ||
+    process.env.TINYHUMANS_API_KEY ||
     process.env.NEOCORTEX_API_KEY ||
     process.env.NEOCORTEX_TOKEN;
 
   if (!token || !token.trim()) {
     throw new Error(
-      "Neocortex token is required. Set ALPHAHUMAN_API_KEY, NEOCORTEX_API_KEY, or NEOCORTEX_TOKEN."
+      "Neocortex token is required. Set TINYHUMANS_API_KEY, NEOCORTEX_API_KEY, or NEOCORTEX_TOKEN."
     );
   }
 
   const memory = new ClaudeCodeNeocortexMemory({
     token,
-    baseUrl: process.env.ALPHAHUMAN_BASE_URL || process.env.NEOCORTEX_BASE_URL,
+    baseUrl: process.env.TINYHUMANS_BASE_URL || process.env.NEOCORTEX_BASE_URL,
   });
 
   const server = new McpServer({

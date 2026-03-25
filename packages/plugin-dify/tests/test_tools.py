@@ -31,7 +31,7 @@ from neocortex_dify.tools.get_ingestion_job import GetIngestionJobTool
 
 class MockRuntime:
     def __init__(self, token):
-        self.credentials = {"alphahuman_api_key": token, "default_namespace": "test_space"}
+        self.credentials = {"tinyhuman_api_key": token, "default_namespace": "test_space"}
 
 
 class MockSession:
