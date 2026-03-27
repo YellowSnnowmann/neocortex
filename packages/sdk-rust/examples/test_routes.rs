@@ -4,10 +4,10 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use tinyhumansai::{
     BatchDocumentItem, BatchInsertDocumentsParams, ChatMessage, DeleteMemoryParams,
-    InsertDocumentParams, InsertMemoryParams, InteractionLevel, MemoryChatParams,
-    MemoryConversationParams, MemoryInteractionsParams, MemoryThoughtsParams, QueryMemoriesParams,
-    QueryMemoryParams, RecallMemoriesContextParams, RecallMemoriesParams, RecallMemoryParams,
-    SourceType, TinyHumanConfig, TinyHumansError, TinyHumansMemoryClient,
+    InsertDocumentParams, InsertMemoryParams, InteractionLevel, ListDocumentsParams,
+    MemoryChatParams, MemoryConversationParams, MemoryInteractionsParams, MemoryThoughtsParams,
+    QueryMemoriesParams, QueryMemoryParams, RecallMemoriesContextParams, RecallMemoriesParams,
+    RecallMemoryParams, SourceType, TinyHumanConfig, TinyHumansError, TinyHumansMemoryClient,
 };
 
 type CheckResults = Vec<(String, bool, String)>;
@@ -294,7 +294,13 @@ async fn main() {
     push_result(
         &mut results,
         "list_documents",
-        client.list_documents().await,
+        client
+            .list_documents(ListDocumentsParams {
+                namespace: Some(namespace.clone()),
+                limit: Some(50.0),
+                offset: Some(0.0),
+            })
+            .await,
         false,
     );
 
