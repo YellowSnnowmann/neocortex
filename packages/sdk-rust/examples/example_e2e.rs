@@ -178,13 +178,13 @@ async fn main() {
         .map(|d| d.as_millis())
         .unwrap_or(0);
     let namespace = "sdk-rust-e2e".to_string();
-    let single_doc_id = format!("sdk-rust-e2e-doc-single-{ts}");
+    let _single_doc_id = format!("sdk-rust-e2e-doc-single-{ts}");
 
     let result = async {
-        // let insert_job_id = step1_insert_memory(&client, &namespace, &single_doc_id).await?;
-        // step2_check_ingestion_job(&client, &insert_job_id).await?;
+        let insert_job_id = step1_insert_memory(&client, &namespace, &single_doc_id).await?;
+        step2_check_ingestion_job(&client, &insert_job_id).await?;
         step3_list_documents(&client, &namespace).await?;
-        // step4_get_document(&client, &namespace, &single_doc_id).await?;
+        step4_get_document(&client, &namespace, &single_doc_id).await?;
 
         if let Err(err) = step5_query_memory(&client, &namespace).await {
             eprintln!("[warn] step5 queryMemory skipped: {err}");
