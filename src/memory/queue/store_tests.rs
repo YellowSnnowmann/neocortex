@@ -1,7 +1,10 @@
 use super::*;
 use crate::memory::chunks::with_connection;
 use crate::memory::config::MemoryConfig;
-use crate::memory::queue::types::ExtractChunkPayload;
+use crate::memory::queue::types::{
+    AppendBufferPayload, AppendTarget, ExtractChunkPayload, FlushStalePayload, NodeRef,
+    ReembedBackfillPayload, SealDocumentPayload, SealPayload,
+};
 use tempfile::TempDir;
 
 fn test_config() -> (TempDir, MemoryConfig) {
@@ -163,4 +166,125 @@ fn is_retired_kind_recognises_legacy_strings() {
     assert!(is_retired_kind("digest_daily"));
     assert!(!is_retired_kind("extract_chunk"));
     assert!(!is_retired_kind("seal"));
+}
+
+/// tinyhumansai/tinycortex#168: the deduped `reembed_backfill` row is the only
+/// writer of chunk vectors and shares the LLM gate with every `extract_chunk`.
+/// It must be claimed ahead of an *older* due `extract_chunk`, otherwise the
+/// gate-busy defer round-robins it behind the whole extraction backlog.
+#[test]
+fn claim_next_prefers_reembed_backfill_over_older_extract_chunk() {
+    let (_tmp, cfg) = test_config();
+    let now_ms = Utc::now().timestamp_millis();
+
+    let mut extract = NewJob::extract_chunk(&ExtractChunkPayload {
+        chunk_id: "c-older".into(),
+    })
+    .unwrap();
+    // Due well before the backfill row, so an age-ordered claim would pick it.
+    extract.available_at_ms = Some(now_ms - 5_000);
+    let extract_id = enqueue(&cfg, &extract).unwrap().expect("inserted");
+
+    let backfill = NewJob::reembed_backfill(&ReembedBackfillPayload {
+        signature: "provider=test;model=x;dims=3".into(),
+    })
+    .unwrap();
+    let backfill_id = enqueue(&cfg, &backfill).unwrap().expect("inserted");
+
+    let first = claim_next(&cfg, DEFAULT_LOCK_DURATION_MS).unwrap().unwrap();
+    assert_eq!(first.id, backfill_id);
+    assert_eq!(first.kind, JobKind::ReembedBackfill);
+
+    let second = claim_next(&cfg, DEFAULT_LOCK_DURATION_MS).unwrap().unwrap();
+    assert_eq!(second.id, extract_id);
+    assert_eq!(second.kind, JobKind::ExtractChunk);
+
+    assert!(claim_next(&cfg, DEFAULT_LOCK_DURATION_MS)
+        .unwrap()
+        .is_none());
+}
+
+/// Pins the whole claim ladder: `seal` > `reembed_backfill` > `flush_stale` >
+/// `append_buffer` > everything else, and `available_at_ms` (oldest first)
+/// only inside a rank. Rows are enqueued in the reverse of the expected claim
+/// order with strictly *older* due times, so a FIFO / age-ordered claim would
+/// return them in enqueue order and fail.
+#[test]
+fn claim_next_ranks_seal_then_backfill_then_flush_then_append_then_age() {
+    let (_tmp, cfg) = test_config();
+    let now_ms = Utc::now().timestamp_millis();
+
+    // (job, age_ms): a larger age is an older, earlier-due row.
+    let mut jobs = [
+        (
+            NewJob::extract_chunk(&ExtractChunkPayload {
+                chunk_id: "c1".into(),
+            })
+            .unwrap(),
+            60_000,
+        ),
+        (
+            NewJob::seal_document(&SealDocumentPayload {
+                tree_scope: "gmail:acct".into(),
+                doc_id: "doc-1".into(),
+                version_ms: None,
+                chunk_ids: vec!["c1".into()],
+            })
+            .unwrap(),
+            50_000,
+        ),
+        (
+            NewJob::append_buffer(&AppendBufferPayload {
+                node: NodeRef::Leaf {
+                    chunk_id: "c1".into(),
+                },
+                target: AppendTarget::Source {
+                    source_id: "src-1".into(),
+                },
+            })
+            .unwrap(),
+            40_000,
+        ),
+        (
+            NewJob::flush_stale(&FlushStalePayload::default(), "2026-09-07", 4).unwrap(),
+            30_000,
+        ),
+        (
+            NewJob::reembed_backfill(&ReembedBackfillPayload {
+                signature: "provider=test;model=x;dims=3".into(),
+            })
+            .unwrap(),
+            20_000,
+        ),
+        (
+            NewJob::seal(&SealPayload {
+                tree_id: "tree:1".into(),
+                level: 0,
+                force_now_ms: None,
+            })
+            .unwrap(),
+            10_000,
+        ),
+    ];
+    for (job, age_ms) in jobs.iter_mut() {
+        job.available_at_ms = Some(now_ms - *age_ms);
+        enqueue(&cfg, job).unwrap().expect("inserted");
+    }
+
+    let mut claimed = Vec::new();
+    while let Some(job) = claim_next(&cfg, DEFAULT_LOCK_DURATION_MS).unwrap() {
+        claimed.push(job.kind);
+    }
+    assert_eq!(
+        claimed,
+        [
+            JobKind::Seal,
+            JobKind::ReembedBackfill,
+            JobKind::FlushStale,
+            JobKind::AppendBuffer,
+            // ELSE bucket: oldest `available_at_ms` first.
+            JobKind::ExtractChunk,
+            JobKind::SealDocument,
+        ]
+    );
 }

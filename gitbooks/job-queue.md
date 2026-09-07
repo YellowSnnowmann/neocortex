@@ -146,13 +146,16 @@ Eligibility is `status='ready' AND available_at_ms <= now AND kind NOT IN (retir
 
 ```text
 ORDER BY CASE kind
-           WHEN 'seal'          THEN 1
-           WHEN 'flush_stale'   THEN 2
-           WHEN 'append_buffer' THEN 3
-           ELSE 4                 -- extract_chunk, reembed_backfill, seal_document
+           WHEN 'seal'             THEN 1
+           WHEN 'reembed_backfill' THEN 2
+           WHEN 'flush_stale'      THEN 3
+           WHEN 'append_buffer'    THEN 4
+           ELSE 5                    -- extract_chunk, seal_document
          END ASC,
          available_at_ms ASC
 ```
+
+`reembed_backfill` sits right behind `seal` because it is the only path that writes chunk vectors (`extract_chunk` no longer embeds inline) and it holds the same single LLM permit as every `extract_chunk`. Ranked with the extraction backlog, the gate-busy defer would round-robin it behind that whole backlog and vectors would trail extraction by the backlog's length. Each backfill step embeds one bounded batch, defers `REEMBED_BACKFILL_REVISIT_MS` (750 ms), and settles `Done` once the space is covered, so extraction is never starved in return.
 
 `DEFAULT_LOCK_DURATION_MS = 5 * 60 * 1000` (5 min) — comfortably larger than any expected single-job runtime, so a crashed worker's row is recovered after the window without leaving real failures stuck for hours. Retry backoff is exponential: `backoff_ms(attempts)` = `min(60s * 2^(attempts-1), 1h)` (`RETRY_BASE_MS = 60s`, `RETRY_CAP_MS = 1h`), so the first retry waits 60s, then 120s, 240s, … capped at one hour.
 
