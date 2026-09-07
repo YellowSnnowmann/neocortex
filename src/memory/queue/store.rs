@@ -107,6 +107,10 @@ pub(crate) fn enqueue_conn(
 /// Sets `status=running`, bumps `attempts`, stamps `started_at_ms` and
 /// `locked_until_ms`. Returns `None` when the queue is empty / not yet due.
 ///
+/// Due rows are ranked by kind — `seal`, then `reembed_backfill`, then
+/// `flush_stale`, then `append_buffer`, then everything else — and by
+/// `available_at_ms` within a rank (the query below explains why).
+///
 /// Retired kinds (`topic_route`, `digest_daily`) are excluded from the claim so
 /// a leftover old-queue row never reaches `row_to_job` (which would fail to
 /// parse it). [`purge_retired_jobs`] removes such rows.
@@ -120,6 +124,18 @@ pub fn claim_next(config: &MemoryConfig, lock_duration_ms: i64) -> Result<Option
                 // Drain forward, don't widen. Most-downstream kinds run first so
                 // a slow LLM-bound `extract_chunk` can't starve the seal pipeline
                 // behind it.
+                //
+                // `reembed_backfill` ranks right after `seal`: it is the only
+                // path that writes chunk vectors (extract no longer embeds
+                // inline) and it shares the single-permit LLM gate with every
+                // `extract_chunk`. Left in the ELSE bucket, the gate-busy defer
+                // round-robins it behind the whole extraction backlog, so
+                // vectors trail extraction by the length of that backlog
+                // (tinyhumansai/tinycortex#168). Ranked here, each freed permit
+                // goes to the backfill while it has work; one step embeds one
+                // bounded batch, defers `REEMBED_BACKFILL_REVISIT_MS`, and
+                // settles `Done` once covered, so extraction is never starved
+                // in return.
                 "UPDATE mem_tree_jobs
                     SET status = 'running',
                         attempts = attempts + 1,
@@ -133,10 +149,11 @@ pub fn claim_next(config: &MemoryConfig, lock_duration_ms: i64) -> Result<Option
                          AND kind NOT IN ('topic_route', 'digest_daily')
                        ORDER BY
                          CASE kind
-                           WHEN 'seal'          THEN 1
-                           WHEN 'flush_stale'   THEN 2
-                           WHEN 'append_buffer' THEN 3
-                           ELSE 4
+                           WHEN 'seal'             THEN 1
+                           WHEN 'reembed_backfill' THEN 2
+                           WHEN 'flush_stale'      THEN 3
+                           WHEN 'append_buffer'    THEN 4
+                           ELSE 5
                          END ASC,
                          available_at_ms ASC
                        LIMIT 1
